@@ -1,0 +1,48 @@
+# SYNTHETIC. The map this points at is made up by tests/make_synthetic_map.py
+# and is not a measurement of anything. It exists so the tool is exercised on
+# something that is not the paper's laminate.
+#
+# Read it beside examples/paper_shallow.yaml. Everything that differs is a
+# thing the tool had to stop assuming: different column names, three phases
+# rather than four, one zone rather than two, a measured comparison with no
+# curves behind it.
+
+name: synthetic three-phase map
+
+map:
+  path: _generated/synthetic_map.csv
+  kind: single_depth
+  columns:
+    id: point_id
+    modulus: reduced_modulus_GPa
+    position: x_position_mm
+
+zones:
+  # One band, open at both ends, covering the whole specimen. A map with no
+  # architecture to exploit still has to work: here the phase rule is modulus
+  # alone and the zone is only along for the ride.
+  axis: position
+  bands:
+    - {name: gauge}
+
+cuts:
+  # Placed in the empty ground between the planted populations, which is where
+  # 'hybridmap histogram' shows a cut belongs.
+  low: 10.0
+  high: 40.0
+
+phases:
+  - {name: polymer,  below: low,           colour: "#5B8C5A"}
+  - {name: boundary, between: [low, high], colour: "#C7B446"}
+  - {name: ceramic,  above: high,          colour: "#7B4B94"}
+
+sweep:
+  low: [8, 10, 12]
+  high: [35, 40, 45]
+
+macro:
+  # A number with an uncertainty and nothing else, which is the minimum the
+  # tool accepts and the case most users will be in: someone with a datasheet
+  # value or a single tensile test has no curves to hand over.
+  measured:
+    - {label: invented reference value, value: 15.0, sd: 1.0, n: 3}

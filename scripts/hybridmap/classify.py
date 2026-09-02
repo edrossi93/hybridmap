@@ -57,6 +57,12 @@ def assign_zones(df, zones, cols):
     x = df[axis].to_numpy(dtype=float)
     conditions = [x < b.below for b in zones.bands if b.below is not None]
     names = [b.name for b in zones.bands if b.below is not None]
+    if not conditions:
+        # A single open band: everything is in it. Worth handling rather than
+        # forbidding, because one zone is the honest description of a specimen
+        # with no architecture to exploit, and np.select cannot be asked for a
+        # default with nothing to select on.
+        return pd.Series(zones.bands[-1].name, index=df.index)
     return pd.Series(np.select(conditions, names, default=zones.bands[-1].name),
                      index=df.index)
 

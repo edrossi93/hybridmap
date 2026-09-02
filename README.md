@@ -18,6 +18,8 @@ Expected last line: `34 of 34 values reproduce`.
 
 Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
+If you came here to run the method on your own map rather than to check ours, skip to *Running this on your own map*.
+
 ---
 
 ## What is in `data/`
@@ -169,6 +171,117 @@ They correlate at 0.9997. The class medians are identical for flax and matrix an
 | pure-axial basalt | 49.47 | 49.13 |
 
 So a reader recomputing from the slices file will see the two stiff classes land about 2 % low. Both routes are defensible; the difference is a real, if small, sensitivity of the slice extraction on the classes where the modulus is changing fastest with depth, and it is smaller than the class-to-class separation by more than an order of magnitude. Carried through the Voigt sum it is worth 0.02 GPa on a bound of 21.33.
+
+---
+
+## Running this on your own map
+
+Everything above reproduces one laminate. The same chain, classify, aggregate, bound, compare against a macroscopic measurement, runs on someone else's map from a configuration file. You should never have to open a `.py` to analyse your own data.
+
+```
+cd scripts
+python -m hybridmap validate  --config examples/paper_shallow.yaml
+python -m hybridmap histogram --config examples/paper_shallow.yaml --out figs
+python -m hybridmap report    --config examples/paper_shallow.yaml
+```
+
+The commands are `validate`, `classify`, `report`, `sweep`, `histogram` and `macro`. Any of them takes `--set` to change one value without editing the file, for example `--set cuts.lower=12`. A configuration problem exits with a message naming what to fix rather than a traceback.
+
+Configs are YAML, and JSON with the same keys is read too. YAML is the documented form because a threshold should carry its reason on the line above it.
+
+### The two worked examples
+
+| file | what it is |
+|---|---|
+| `examples/paper_shallow.yaml` | This paper's shallow map. Reproduces the published class counts, medians and bounds from the config alone. |
+| `examples/paper_depth_resolved.yaml` | This paper's depth-resolved map. The other input shape, and the other pure-fibre cut. |
+
+Read them side by side before writing your own. What differs between them is exactly what the tool had to stop assuming.
+
+### What a config decides
+
+| section | what it says | optional |
+|---|---|---|
+| `map` | the CSV to read, whether it is single-depth or depth-resolved, and which column holds the identifier, the modulus and the position | no |
+| `zones` | bands cut on a coordinate, or zone names read from a column; a band may be marked `discard` for mounting medium or edge effects | yes |
+| `cuts` | named modulus thresholds | no |
+| `phases` | one per mechanical population: a modulus range between named cuts, optionally restricted to one zone, with a name and a colour | no |
+| `qc` | a stored rejection flag, or a phase-angle criterion | yes |
+| `sweep` | the values to try for each cut | yes |
+| `macro` | a measured modulus with its uncertainty, or bending curves to reduce to one | yes |
+| `clustering` | the feature columns, k, and the seed for the unsupervised cross-check | yes |
+
+Three points about the schema, because they are the ones that surprise people.
+
+**Cuts are named once and phases refer to them by name.** A phase says it sits below the cut called `lower`, not below 15.0. Writing the number into each phase would let the copies drift, and it would leave the sweep with nothing well defined to move.
+
+**Phases are matched in the order you write them and the first match wins.** That is a rule a reader can follow by eye, which matters more here than flexibility. Two, three or five phases all work; ours happens to use four.
+
+**Zones are optional.** A modulus-only classification is legitimate when there is no architecture to exploit. Ours uses two bands along the thickness direction because the laminate has two tow zones; yours might have one, three, or none.
+
+Nothing renames your columns and nothing converts your units. The unit lives in the column name, as it does in `data/`.
+
+### Choosing the cuts
+
+Making a threshold configurable is nearly useless if you have no way to choose it, so the tool ships the two diagnostics that justified ours.
+
+`python -m hybridmap histogram` draws the modulus distribution with your cuts on it and the phases they produce shaded in their own colours. A cut is defended by the shape of the distribution it sits in: if there is no thinning in the histogram where you have put a line, the line is a decision you have not yet earned.
+
+`python -m hybridmap sweep` redoes the whole classification for every combination of cut values you list and prints the bounds for each. It reports the departure from your configured cuts, which is the number to quote. For this paper the fifteen threshold pairs span 20.83 to 21.44 GPa, a largest departure of 0.50 GPa on a bound of 21.33.
+
+### The package
+
+`scripts/hybridmap/` is the reusable part. The analysis scripts above are configurations of it, so there is one implementation of each step rather than one per script.
+
+| file | what it does |
+|---|---|
+| `config.py` | Reads and validates a config. Most of it is error messages. |
+| `io.py` | Reads the map CSV and resolves which column plays which role. |
+| `classify.py` | Zones, the phase rule, and the quality check. |
+| `aggregate.py` | Counts, fractions and per-phase median modulus. |
+| `mixtures.py` | Voigt, Reuss and Hill, input substitution, and the cut sweep. |
+| `macro.py` | The measured comparison, including the chord-modulus route to one. |
+| `cluster.py` | k-means and Gaussian-mixture cross-check on named features. |
+| `plots.py` | The histogram, the sweep and the prediction against the measurement. |
+| `__main__.py` | The command line. |
+| `__init__.py` | What the package exports, and a short example of using it directly. |
+
+To use it from your own code rather than from the command line:
+
+```python
+from hybridmap import config, io, classify, aggregate, mixtures
+cfg = config.load("examples/paper_shallow.yaml")
+frame = io.read_map(cfg.map)
+cols = io.resolve(frame, cfg.map)
+labelled = classify.apply(frame, cfg, cols)
+table = aggregate.class_table(labelled, cfg.phase_names, cols["modulus"])
+voigt, hill, reuss = mixtures.bounds(table.fraction, table["median"])
+```
+
+### What the tool will not do
+
+It will not read an instrument file. It starts from an exported per-indent table, which is the reproduction boundary of this deposit.
+
+It contains no science that is not in the paper. There is no classifier, bound or statistic here beyond the ones reported, and adding one is not a configuration change.
+
+---
+
+## Checking the deposit
+
+```
+python tests/test_deposit.py
+python tests/test_tool.py
+```
+
+| file | what it checks |
+|---|---|
+| `test_deposit.py` | This README and the data dictionary against the actual files: row counts, columns in both directions, the script and data inventories, and that every third-party import is in `requirements.txt`. |
+| `test_tool.py` | That the tool runs end to end on a second dataset, that `examples/paper_shallow.yaml` still reproduces the published bounds, and that the config and the scripts still agree on every threshold. |
+| `make_synthetic_map.py` | Writes the second dataset. It is synthetic and is not a measurement; see below. |
+
+The second dataset is generated, not measured. `make_synthetic_map.py` draws three populations from fixed distributions with a stated seed. `test_tool.py` writes it to a temporary directory that does not outlive the test, so no synthetic file is ever left sitting in the deposit; run the generator by hand and it writes to `tests/_generated/` instead, which is not committed. It has different column names, three phases and one zone, so it fails if anything in the tool has this laminate baked into it. Because the populations are planted, `test_tool.py` can check that the tool recovers what was put in: it labels 99.8 % of the points with the phase they were drawn from, the rest being the tails that genuinely cross a cut.
+
+The first thing this test found, on the first run, was that a single-zone configuration crashed.
 
 ---
 
