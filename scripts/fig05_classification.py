@@ -57,6 +57,10 @@ def draw(ax, arr, extent):
 
 
 def build(outdir):
+    # Created here rather than assumed. Run from a fresh checkout with an
+    # output directory that does not exist yet, these scripts used to fail
+    # on the savefig at the end, after doing all the work.
+    Path(outdir).mkdir(parents=True, exist_ok=True)
     shallow = pd.read_csv(DATA / "classified_shallow.csv")
     depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
 

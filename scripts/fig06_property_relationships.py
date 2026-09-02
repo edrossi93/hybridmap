@@ -33,6 +33,10 @@ LIMS = {"E_150": (0, 100), "H_150": (0, 8), "PA_150": (0, 15)}
 
 
 def build(outdir):
+    # Created here rather than assumed. Run from a fresh checkout with an
+    # output directory that does not exist yet, these scripts used to fail
+    # on the savefig at the end, after doing all the work.
+    Path(outdir).mkdir(parents=True, exist_ok=True)
     lab = pd.read_csv(DATA / "classified_depth_resolved.csv")
     named = lab[lab.constituent.isin(ORDER)]
 

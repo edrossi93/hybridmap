@@ -71,6 +71,10 @@ def zone_table(depth, modulus_col="E_150"):
 
 
 def build(outdir):
+    # Created here rather than assumed. Run from a fresh checkout with an
+    # output directory that does not exist yet, these scripts used to fail
+    # on the savefig at the end, after doing all the work.
+    Path(outdir).mkdir(parents=True, exist_ok=True)
     depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
     shallow = pd.read_csv(DATA / "classified_shallow.csv")
     moduli = pd.read_csv(DATA / "flexural_moduli.csv")

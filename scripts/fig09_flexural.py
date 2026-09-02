@@ -70,6 +70,10 @@ def find_crossover(per_config, lo=0.15, hi=0.55):
 
 
 def build(outdir):
+    # Created here rather than assumed. Run from a fresh checkout with an
+    # output directory that does not exist yet, these scripts used to fail
+    # on the savefig at the end, after doing all the work.
+    Path(outdir).mkdir(parents=True, exist_ok=True)
     curves = pd.read_csv(DATA / "flexural_curves.csv")
     moduli = pd.read_csv(DATA / "flexural_moduli.csv").set_index("specimen_id")
 
