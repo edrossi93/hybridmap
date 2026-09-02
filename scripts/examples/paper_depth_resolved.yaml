@@ -1,0 +1,87 @@
+# The paper's depth-resolved map: the same chain on the other input shape.
+#
+#     cd scripts
+#     python -m hybridmap report --config examples/paper_depth_resolved.yaml
+#
+# Two things differ from examples/paper_shallow.yaml and both are worth seeing
+# side by side. The zones are read from a column rather than cut on a
+# coordinate, because they were marked before this analysis and re-deriving
+# them would be inventing agreement. And the upper cut is 40 GPa rather than
+# 70: at a 300 nm target depth the compliant material around a fibre is inside
+# the probed volume and depresses the apparent fibre modulus, so a 70 GPa cut
+# here would reject almost every genuine basalt contact.
+
+name: paper, depth-resolved map
+
+map:
+  path: ../../data/classified_depth_resolved.csv
+  kind: depth_resolved
+  columns:
+    id: indent_id
+    # Classification is made at 150 nm, the middle of the analysed window.
+    modulus: E_150
+    position: y_um
+    by_depth:
+      modulus:     {100: E_100, 150: E_150, 200: E_200}
+      hardness:    {100: H_100, 150: H_150, 200: H_200}
+      phase_angle: {100: PA_100, 150: PA_150, 200: PA_200}
+
+zones:
+  from_column:
+    column: zone
+    # The strip is banded into three architectural zones along its long axis.
+    # Which constituent dominates a band is what the phase rule needs, so the
+    # three band names reduce to the two-value vocabulary the phases use.
+    map:
+      basalt-centre: basalt
+      flax-top: flax
+      flax-bottom: flax
+
+qc:
+  # The stored flag is trusted when the file carries one: whoever wrote it saw
+  # the whole trace, while the threshold form below sees only these three
+  # slices, and on a handful of indents the two disagree.
+  flag_column: qc_flag_strict
+  phase_angle:
+    columns: [PA_100, PA_150, PA_200]
+    # A phase angle above this means the contact has not settled: the response
+    # is still dominated by the near-surface establishment transient rather
+    # than by the material.
+    max: 15.0
+    # Applied to the shallowest slice alone. A contact can settle by the deeper
+    # slices and still have been unusable where it was measured first.
+    first_max: 20.0
+
+cuts:
+  lower: 15.0
+  upper: 40.0
+
+phases:
+  - {name: matrix,       below: lower,            zone: basalt, colour: "#E0701B"}
+  - {name: flax,         below: lower,            zone: flax,   colour: "#E8B33C"}
+  - {name: mixed-volume, between: [lower, upper],               colour: "#7FC1E4"}
+  - {name: basalt,       above: upper,                          colour: "#2E7EB8"}
+
+clustering:
+  # Three properties at three depths. Depth is in here deliberately: a single
+  # slice cannot separate a genuine fibre contact from one that starts stiff
+  # and softens as the probed volume grows, and that difference is the whole
+  # point of the mixed-volume class.
+  features: [H_100, H_150, H_200, E_100, E_150, E_200, PA_100, PA_150, PA_200]
+  k: 4
+  # Fixed so the partition is identical between runs. The value carries no
+  # meaning; what matters is that it is written down.
+  seed: 42
+  # Twenty restarts, keeping the best inertia. Ten occasionally landed in a
+  # worse local minimum on this data.
+  n_init: 20
+  # k-means splits the compliant family into two by stiffness, and that split
+  # is not the matrix against flax boundary, which the mechanical signal cannot
+  # see. Merging the two most compliant clusters before scoring removes a
+  # distinction the data do not support; that comparison is ARI*.
+  merge_lowest: 2
+
+macro:
+  measured:
+    - {label: basalt face in tension, value: 18.85, sd: 0.54, n: 5}
+    - {label: flax face in tension,   value: 19.66, sd: 0.48, n: 5}

@@ -1,0 +1,95 @@
+# The paper's shallow map: the configuration behind the published bounds.
+#
+# Run it with
+#     cd scripts
+#     python -m hybridmap report --config examples/paper_shallow.yaml
+# and it prints the Voigt, Hill and Reuss bounds the paper reports.
+#
+# Use it as the worked example. Every value below is ours and none of it should
+# be carried over to another section without the same kind of justification.
+
+name: paper, shallow map
+
+map:
+  path: ../../data/shallow_map.csv
+  kind: single_depth
+  columns:
+    id: indent_id
+    modulus: E_GPa
+    # The long axis of this map runs through the laminate thickness, which is
+    # what makes it the axis worth cutting zones on.
+    position: x_um
+
+zones:
+  axis: position
+  bands:
+    # The embedding resin, discarded. Not assumed: the epoxy gives a uniform
+    # indentation modulus near 5.5 GPa out to 300 um and the median rises
+    # steeply between 300 and 330 um on entering the laminate. The cut sits 50
+    # to 80 um beyond that transition, so indents disturbed by the edge are
+    # discarded with the resin rather than counted as laminate.
+    - {name: resin, below: 380.0, discard: true}
+    # Boundary between the two tow zones, the midpoint between the two plateaus
+    # of a 30-indent moving median of modulus along the long axis.
+    - {name: basalt, below: 730.0}
+    - {name: flax}
+
+cuts:
+  # Compliant against stiff. Sits in the bimodal gap of the basalt-zone modulus
+  # histogram, so it separates polymer-dominated contacts from fibre-bearing
+  # ones without cutting through a population. Check it on your own data with
+  # 'hybridmap histogram' before borrowing the number.
+  lower: 15.0
+  # Above this a contact is taken as pure axial basalt. It is high because this
+  # map's small contact volume reaches nearly bare fibre; the depth-resolved
+  # acquisition needs a much lower value for the same physical class.
+  upper: 70.0
+
+phases:
+  # Order is the rule: the first phase whose modulus range and zone both match
+  # takes the indent.
+  #
+  # A compliant indent in the basalt-rich half is polyamide, because that is
+  # the only compliant constituent present there, and a compliant indent in the
+  # flax-rich half is flax for the same reason. This is the step that makes the
+  # fractions indent-class fractions rather than volume fractions: polyamide
+  # sitting in the flax-rich half is counted as flax.
+  - {name: matrix,       below: lower,            zone: basalt, colour: "#E0701B"}
+  - {name: flax,         below: lower,            zone: flax,   colour: "#E8B33C"}
+  # The stressed volume under the tip spanned a fibre and the matrix around it.
+  # A description of the contact, not of a distinct material phase.
+  - {name: mixed-volume, between: [lower, upper],               colour: "#7FC1E4"}
+  - {name: basalt,       above: upper,                          colour: "#2E7EB8"}
+
+# The grid the paper reports as its threshold sensitivity. The spatial cuts are
+# held still while these move: they are set by position rather than stiffness,
+# so sweeping them would confound two different tests.
+sweep:
+  lower: [10, 15, 20]
+  upper: [60, 65, 70, 75, 80]
+
+macro:
+  # Three-point bending on the same plaque, five specimens per configuration,
+  # ASTM D790 chord with the Annex A1.1 toe compensation. These two numbers are
+  # the reduction of the curves named below.
+  measured:
+    - {label: basalt face in tension, value: 18.85, sd: 0.54, n: 5}
+    - {label: flax face in tension,   value: 19.66, sd: 0.48, n: 5}
+
+  from_curves:
+    path: ../../data/flexural_curves.csv
+    columns:
+      specimen: specimen_id
+      group: configuration
+      strain: strain_pct
+      stress: stress_MPa
+    # ASTM D790 chord limits, in per cent strain.
+    chord: [0.05, 0.25]
+    # Width of the sliding window that locates the steepest linear region, in
+    # per cent strain. Wide enough to average out digitisation noise, narrow
+    # enough to sit inside the linear region of the stiffest specimen.
+    toe_window: 0.15
+    # A second chord above the tangent-modulus crossover at 0.28 % strain. Not
+    # an ASTM quantity: it is here because the two configurations rank the
+    # other way round above the crossover.
+    extra_window: [0.28, 0.43]
