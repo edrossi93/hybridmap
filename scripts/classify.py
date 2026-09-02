@@ -1,6 +1,13 @@
 """
 Rule-based assignment of indents to the four mechanical populations.
 
+This is the paper's configuration of the general rule in `hybridmap.classify`:
+the same zone-and-threshold machinery, with our thresholds, our zone boundaries
+and our four class names filled in. The values live here rather than in the
+package because they are ours and would be wrong on anyone else's section. The
+same values are written out as `examples/paper_shallow.yaml`, and
+`tests/test_tool.py` checks that the two agree.
+
 The rule has two ingredients: where the indent sits in the laminate (the
 architectural zone) and how stiff it is. Neither on its own is enough. Modulus
 alone cannot separate flax from PA-11, because their indentation moduli overlap
@@ -30,8 +37,15 @@ Thresholds (GPa):
                  depresses the fibre modulus at a 300 nm target depth
 """
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hybridmap import classify as _hm                          # noqa: E402
+from hybridmap.config import Band, Phase, QC, Zones            # noqa: E402
 
 # Where the embedding resin ends, in the long-axis coordinate of the shallow
 # map. Not assumed: the epoxy gives a uniform indentation modulus near
@@ -66,29 +80,30 @@ E_UPPER_DEPTH = 40.0
 # rejecting near-surface CSM measurements.
 PA_QC = 15.0
 
+# The zone bands and the phase rule in the form the package takes them. Written
+# out here so the paper's rule is legible in one place; the thresholds are
+# substituted at call time, which is what lets the sensitivity sweep move them.
+ZONES = Zones(axis="position",
+              bands=(Band("resin", X_RESIN, discard=True),
+                     Band("basalt", X_ZONE_SPLIT),
+                     Band("flax")))
+
+PHASES = (Phase("matrix", upper="lower", zone="basalt"),
+          Phase("flax", upper="lower", zone="flax"),
+          Phase("mixed-volume", lower="lower", upper="upper"),
+          Phase("basalt", lower="upper"))
+
 
 def assign_zone(x_um):
-    z = np.where(x_um < X_RESIN, "resin",
-                 np.where(x_um < X_ZONE_SPLIT, "basalt", "flax"))
-    return pd.Series(z)
+    frame = pd.DataFrame({"x_um": np.asarray(x_um, dtype=float)})
+    zones = _hm.assign_zones(frame, ZONES, {"position": "x_um"})
+    return pd.Series(zones.values)
 
 
 def classify(E_GPa, zone, e_lower=E_LOWER, e_upper=E_UPPER_SHALLOW):
     """Four-way label from modulus plus zone. Returns a pandas Series."""
-    E = np.asarray(E_GPa, dtype=float)
-    zone = np.asarray(zone)
-    out = np.full(E.shape, "unclassified", dtype=object)
-
-    compliant = E < e_lower
-    mixed = (E >= e_lower) & (E < e_upper)
-    pure = E >= e_upper
-
-    out[compliant & (zone == "basalt")] = "matrix"
-    out[compliant & (zone == "flax")] = "flax"
-    out[mixed] = "mixed-volume"
-    out[pure] = "basalt"
-    out[~np.isfinite(E)] = "QC/invalid"
-    return pd.Series(out)
+    return _hm.classify(E_GPa, zone, PHASES,
+                        {"lower": e_lower, "upper": e_upper})
 
 
 def phase_angle_qc(pa_100, pa_150, pa_200, limit=PA_QC, near_surface_limit=20.0):
@@ -97,11 +112,12 @@ def phase_angle_qc(pa_100, pa_150, pa_200, limit=PA_QC, near_surface_limit=20.0)
     in the analysed depth window, or very high right at the surface, which is
     the signature of a contact that has not settled.
     """
-    pa = np.vstack([np.asarray(pa_100, float),
-                    np.asarray(pa_150, float),
-                    np.asarray(pa_200, float)])
-    bad = (np.nanmax(pa, axis=0) > limit) | (np.asarray(pa_100, float) > near_surface_limit)
-    return ~bad
+    frame = pd.DataFrame({"PA_100": np.asarray(pa_100, float),
+                          "PA_150": np.asarray(pa_150, float),
+                          "PA_200": np.asarray(pa_200, float)})
+    qc = QC(columns=("PA_100", "PA_150", "PA_200"), limit=limit,
+            first_limit=near_surface_limit)
+    return _hm.qc_keep(frame, qc).to_numpy()
 
 
 def classify_shallow(df):
@@ -146,7 +162,6 @@ def classify_depth_resolved(df, zone_col="zone"):
 
 
 if __name__ == "__main__":
-    from pathlib import Path
     data = Path(__file__).resolve().parents[1] / "data"
 
     raw = pd.read_csv(data / "shallow_map.csv")

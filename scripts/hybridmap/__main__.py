@@ -95,6 +95,11 @@ def cmd_classify(args):
     return 0
 
 
+def _sweep(cfg, labelled, cols):
+    return mixtures.sweep(labelled, cfg.phases, cfg.cuts, cfg.sweep,
+                          cols["modulus"], cfg.phase_names)
+
+
 def _table_and_bounds(cfg, labelled, cols):
     table = aggregate.class_table(labelled, cfg.phase_names, cols["modulus"])
     return table, mixtures.bounds(table.fraction, table["median"])
@@ -125,8 +130,8 @@ def cmd_report(args):
         print(f"\nzone-weighted fractions are {agree} to the global counts")
 
     if cfg.sweep:
-        sw = mixtures.sweep(labelled, cfg, cols["modulus"])
-        s = mixtures.sweep_summary(sw, cfg)
+        sw = _sweep(cfg, labelled, cols)
+        s = mixtures.sweep_summary(sw, cfg.cuts)
         if s:
             print(f"\ncut sensitivity over {len(sw)} combinations: "
                   f"{s['min_GPa']:.2f} to {s['max_GPa']:.2f}, "
@@ -153,9 +158,9 @@ def cmd_sweep(args):
         raise ConfigError("this config has no sweep section. Add one naming "
                           "the cuts to move and the values to try, for "
                           "example  sweep: {lower: [10, 15, 20]}")
-    table = mixtures.sweep(labelled, cfg, cols["modulus"])
+    table = _sweep(cfg, labelled, cols)
     print(table.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
-    s = mixtures.sweep_summary(table, cfg)
+    s = mixtures.sweep_summary(table, cfg.cuts)
     if s:
         print(f"\nas configured {s['reference_GPa']:.2f}, "
               f"range {s['min_GPa']:.2f} to {s['max_GPa']:.2f}, "
@@ -176,8 +181,8 @@ def cmd_histogram(args):
     print(f"written to {path}")
 
     if cfg.sweep:
-        sw = mixtures.sweep(labelled, cfg, cols["modulus"])
-        s = mixtures.sweep_summary(sw, cfg)
+        sw = _sweep(cfg, labelled, cols)
+        s = mixtures.sweep_summary(sw, cfg.cuts)
         fig = plots.sweep_plot(sw, list(cfg.sweep),
                                s["reference_GPa"] if s else None)
         print(f"written to {plots.save(fig, f'{cfg.source.stem}_cut_sweep', args.out)}")

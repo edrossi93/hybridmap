@@ -1,6 +1,9 @@
 """
 Unsupervised cross-check of the rule-based classification.
 
+The method is in `hybridmap.cluster`. What is here is our feature set, our k,
+and our seed.
+
 The point of this is not to select the number of populations. The silhouette
 score peaks at k = 2 and the Gaussian-mixture BIC keeps falling, so the
 unsupervised analysis on its own does not pick four. What it does is tell us
@@ -21,13 +24,14 @@ which the mechanical signal cannot see. Merging them removes a distinction the
 data do not support and is the comparison reported as ARI* in the paper.
 """
 
-import numpy as np
+import sys
+from pathlib import Path
+
 import pandas as pd
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import adjusted_rand_score, silhouette_score
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hybridmap import cluster as _hm                           # noqa: E402
+from hybridmap.cluster import order_by_stiffness               # noqa: E402,F401
 
 # Three properties at three depths. Depth is included deliberately: a single
 # slice cannot separate a genuine fibre contact from one that starts stiff and
@@ -37,6 +41,10 @@ from sklearn.metrics import adjusted_rand_score, silhouette_score
 FEATURES = ["H_100", "H_150", "H_200",
             "E_100", "E_150", "E_200",
             "PA_100", "PA_150", "PA_200"]
+
+# The modulus the clusters are ordered by, so the numbering means the same
+# thing in every run and in every method.
+MODULUS = "E_150"
 
 # Fixed so the partition is identical between runs. The value carries no
 # meaning; what matters is that it is stated, and that the seed sweep in
@@ -48,64 +56,22 @@ SEED = 42
 # ten occasionally landed in a worse local minimum.
 N_INIT = 20
 
-
-def order_by_stiffness(labels, E, k):
-    """Relabel clusters 0..k-1 in order of increasing median modulus, so the
-    numbering is stable between runs and between methods."""
-    order = np.argsort([np.nanmedian(E[labels == c]) for c in range(k)])
-    lut = {old: new for new, old in enumerate(order)}
-    return np.array([lut[l] for l in labels])
+# The two most compliant clusters are merged before scoring ARI*.
+MERGE_LOWEST = 2
 
 
 def run(df, k=4, seed=SEED, use_pca=False, model="kmeans"):
-    # QC failures are dropped rather than imputed. An indent whose contact never
-    # settled has no meaningful property vector, and filling one in would let
-    # the clustering agree with the rule for the wrong reason.
-    d = df[(df.constituent != "QC/invalid") & df[FEATURES].notna().all(axis=1)]
-
-    # Standardised because the three properties differ by two orders of
-    # magnitude: unscaled, modulus in GPa would dominate the distance and the
-    # phase angle would contribute almost nothing.
-    X = StandardScaler().fit_transform(d[FEATURES].to_numpy())
-    if use_pca:
-        # Three components, which hold about 94 % of the variance here. The
-        # nine features are three correlated triplets, so this tests whether
-        # the agreement with the rule survives removing that redundancy.
-        X = PCA(n_components=3, random_state=seed).fit_transform(X)
-
-    if model == "kmeans":
-        lab = KMeans(n_clusters=k, n_init=N_INIT, random_state=seed).fit(X).labels_
-    elif model == "gmm":
-        lab = GaussianMixture(n_components=k, covariance_type="full",
-                              n_init=10, random_state=seed).fit(X).predict(X)
-    else:
-        raise ValueError(model)
-
-    lab = order_by_stiffness(lab, d.E_150.to_numpy(), k)
-    rule = d.constituent.to_numpy()
-
-    ari = adjusted_rand_score(rule, lab)
-    ari_star = adjusted_rand_score(rule, np.where(lab <= 1, 0, lab))
-    return {"n": len(d), "ARI": ari, "ARI_star": ari_star,
-            "silhouette": silhouette_score(X, lab), "labels": lab, "rule": rule}
+    return _hm.run(df, FEATURES, MODULUS, k=k, seed=seed, n_init=N_INIT,
+                   model=model, use_pca=use_pca, merge_lowest=MERGE_LOWEST)
 
 
 def bootstrap_stability(df, k=4, n_rep=20, frac=0.9, seed=SEED):
     """Refit on random 90 % subsamples and compare each to the full fit."""
-    rng = np.random.default_rng(seed)
-    d = df[(df.constituent != "QC/invalid") & df[FEATURES].notna().all(axis=1)]
-    X = StandardScaler().fit_transform(d[FEATURES].to_numpy())
-    base = KMeans(n_clusters=k, n_init=N_INIT, random_state=seed).fit(X).labels_
-    scores = []
-    for _ in range(n_rep):
-        idx = rng.choice(len(X), int(frac * len(X)), replace=False)
-        sub = KMeans(n_clusters=k, n_init=N_INIT, random_state=seed).fit(X[idx]).labels_
-        scores.append(adjusted_rand_score(base[idx], sub))
-    return float(np.mean(scores)), float(np.std(scores))
+    return _hm.bootstrap_stability(df, FEATURES, k=k, n_rep=n_rep, frac=frac,
+                                   seed=seed, n_init=N_INIT)
 
 
 if __name__ == "__main__":
-    from pathlib import Path
     data = Path(__file__).resolve().parents[1] / "data"
     df = pd.read_csv(data / "classified_depth_resolved.csv")
 

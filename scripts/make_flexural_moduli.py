@@ -1,6 +1,10 @@
 """
 Build flexural_moduli.csv from flexural_curves.csv.
 
+The fitting is in `hybridmap.macro`. What is here is our bending standard's
+chord interval, our toe-correction convention and the column names of the
+deposited file.
+
 ASTM D790 gives the flexural modulus as the chord between 0.05 % and 0.25 %
 strain. Every specimen here carries a seating preload, so the raw curve starts
 with a toe: the crosshead takes up slack before the specimen begins to carry
@@ -26,10 +30,14 @@ Usage
 """
 
 import argparse
+import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hybridmap import macro as _macro                          # noqa: E402
+from hybridmap.config import Curves                            # noqa: E402
 
 # ASTM D790 chord limits, in per cent strain.
 CHORD_LO, CHORD_HI = 0.05, 0.25
@@ -44,6 +52,9 @@ TOE_WINDOW = 0.15
 # other way round above the crossover, and the paper says so.
 WINDOW_LO, WINDOW_HI = 0.28, 0.43
 
+# Stress in MPa against strain in per cent gives a slope in MPa per per-cent.
+MPA_PER_PCT_TO_GPA = 10.0
+
 
 def chord_modulus(strain_pct, stress_MPa, lo=CHORD_LO, hi=CHORD_HI):
     """
@@ -55,9 +66,7 @@ def chord_modulus(strain_pct, stress_MPa, lo=CHORD_LO, hi=CHORD_HI):
     0.05 GPa on a typical specimen and 0.39 GPa on the one with the largest
     toe. Regression also stops one noisy endpoint from setting the answer.
     """
-    inside = (strain_pct >= lo) & (strain_pct <= hi)
-    slope = np.polyfit(strain_pct[inside], stress_MPa[inside], 1)[0]
-    return slope / 10.0          # MPa per % strain -> GPa
+    return _macro.chord_modulus(strain_pct, stress_MPa, lo, hi) / MPA_PER_PCT_TO_GPA
 
 
 def toe_intercept(strain_pct, stress_MPa, width=TOE_WINDOW):
@@ -66,48 +75,46 @@ def toe_intercept(strain_pct, stress_MPa, width=TOE_WINDOW):
 
     Returns a strain in per cent, to be subtracted from the whole curve.
     """
-    steepest, intercept = -np.inf, 0.0
-    for start in strain_pct:
-        inside = (strain_pct >= start) & (strain_pct <= start + width)
-        if inside.sum() < 3:
-            continue
-        slope, offset = np.polyfit(strain_pct[inside], stress_MPa[inside], 1)
-        if slope > steepest:
-            steepest, intercept = slope, -offset / slope
-    return intercept
+    return _macro.toe_intercept(strain_pct, stress_MPa, width)
 
 
 def main(data, out):
     curves = pd.read_csv(Path(data) / "flexural_curves.csv")
 
-    rows = []
-    for specimen, group in curves.groupby("specimen_id"):
-        group = group.sort_values("strain_pct")
-        strain = group.strain_pct.to_numpy(float)
-        stress = group.stress_MPa.to_numpy(float)
+    spec = Curves(path=Path(data) / "flexural_curves.csv",
+                  columns={"specimen": "specimen_id",
+                           "group": "configuration",
+                           "strain": "strain_pct",
+                           "stress": "stress_MPa"},
+                  chord=(CHORD_LO, CHORD_HI),
+                  toe_window=TOE_WINDOW,
+                  # Measured on the raw strain axis, deliberately, unlike the
+                  # two chords above. The 0.28 % crossover was located on the
+                  # raw axis, so the window that reports the ranking above it
+                  # is placed on the same axis. Applying the toe correction
+                  # here would shift the window relative to the crossover that
+                  # defines it, and would change this column by up to 0.88 GPa.
+                  extra_window=(WINDOW_LO, WINDOW_HI))
+    fitted = _macro.moduli_from_curves(curves, spec)
 
-        toe = toe_intercept(strain, stress)
-        rows.append({
-            "specimen_id": specimen,
-            "configuration": group.configuration.iloc[0],
-            "toe_intercept_pct": round(toe, 4),
-            "E_D790_raw_GPa": round(chord_modulus(strain, stress), 2),
-            "E_D790_toe_compensated_GPa":
-                round(chord_modulus(strain - toe, stress), 2),
-            # Measured on the raw strain axis, deliberately, unlike the two
-            # columns above. The 0.28 % crossover was located on the raw axis,
-            # so the window that reports the ranking above it is placed on the
-            # same axis. Applying the toe correction here would shift the
-            # window relative to the crossover that defines it, and would
-            # change this column by up to 0.88 GPa.
-            "E_window_0p28_0p43_GPa":
-                round(chord_modulus(strain, stress,
-                                    WINDOW_LO, WINDOW_HI), 2),
-        })
+    table = pd.DataFrame({
+        "specimen_id": fitted.specimen,
+        "configuration": fitted.group,
+        "toe_intercept_pct": fitted.toe_intercept.round(4),
+        "E_D790_raw_GPa": (fitted.chord_raw / MPA_PER_PCT_TO_GPA).round(2),
+        "E_D790_toe_compensated_GPa":
+            (fitted.chord_toe_compensated / MPA_PER_PCT_TO_GPA).round(2),
+        "E_window_0p28_0p43_GPa":
+            (fitted.chord_extra_window / MPA_PER_PCT_TO_GPA).round(2),
+    }).sort_values("specimen_id")
 
-    table = pd.DataFrame(rows).sort_values("specimen_id")
     target = Path(out) / "flexural_moduli.csv"
-    table.to_csv(target, index=False)
+    # Line endings pinned to LF. Pandas otherwise writes whatever the platform
+    # uses, so regenerating the deposited file on Windows produced a file that
+    # differed from it in every line while agreeing in every value. The point
+    # of this script is that its output can be compared against the deposited
+    # copy, and that comparison should not depend on who runs it.
+    table.to_csv(target, index=False, lineterminator="\n")
     print(f"{len(table)} specimens -> {target.name}")
     print(table.to_string(index=False))
     return table

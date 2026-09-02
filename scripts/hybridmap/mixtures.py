@@ -38,8 +38,8 @@ def substitute(table, cls, new_modulus, median_col="median"):
     return bounds(t.fraction, t[median_col])
 
 
-def sweep(frame, cfg, modulus_col, grids=None, label_col="constituent",
-          zone_col="zone", median_col="median"):
+def sweep(frame, phases, cuts, grids, modulus_col, classes=None,
+          label_col="constituent", zone_col="zone", median_col="median"):
     """
     Redo the classification and the bounds across a grid of cut values.
 
@@ -48,21 +48,21 @@ def sweep(frame, cfg, modulus_col, grids=None, label_col="constituent",
     they are set by position rather than by stiffness, so sweeping them would
     be a different sensitivity test and would confound this one.
     """
-    grids = grids or cfg.sweep
     if not grids:
         raise ValueError("nothing to sweep: add a sweep section naming cuts "
                          "and the values to try for each")
 
     names = list(grids)
+    classes = list(classes) if classes else [p.name for p in phases]
     E = frame[modulus_col].to_numpy()
     zone = frame[zone_col].to_numpy() if zone_col in frame else None
 
     rows = []
     for combo in itertools.product(*(grids[n] for n in names)):
-        cuts = dict(cfg.cuts)
-        cuts.update(zip(names, combo))
-        labels = classify(E, zone, cfg.phases, cuts).values
-        t = class_table(frame.assign(**{label_col: labels}), cfg.phase_names,
+        moved = dict(cuts)
+        moved.update(zip(names, combo))
+        labels = classify(E, zone, phases, moved).values
+        t = class_table(frame.assign(**{label_col: labels}), classes,
                         modulus_col, label_col, median_col)
         v, h, r = bounds(t.fraction, t[median_col])
         row = {f"{n}_GPa": value for n, value in zip(names, combo)}
@@ -71,7 +71,7 @@ def sweep(frame, cfg, modulus_col, grids=None, label_col="constituent",
     return pd.DataFrame(rows)
 
 
-def sweep_summary(table, cfg):
+def sweep_summary(table, cuts):
     """
     The reference construction and how far the grid moves it.
 
@@ -81,7 +81,7 @@ def sweep_summary(table, cfg):
     the answer.
     """
     mask = pd.Series(True, index=table.index)
-    for name, value in cfg.cuts.items():
+    for name, value in cuts.items():
         col = f"{name}_GPa"
         if col in table:
             mask &= np.isclose(table[col], value)

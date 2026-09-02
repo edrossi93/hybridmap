@@ -3,6 +3,10 @@ Voigt, Reuss and Hill bounds from the per-class medians and indent-class
 fractions, plus the sensitivity checks reported in the Supplementary
 Information.
 
+The arithmetic lives in `hybridmap.aggregate` and `hybridmap.mixtures`. What is
+here is the paper's four classes, in the paper's order, and the threshold grid
+the Supplementary Information reports.
+
 Two things worth stating plainly, because they are easy to misread:
 
   * The fractions are indent-class fractions. They are the number of indents
@@ -15,41 +19,32 @@ Two things worth stating plainly, because they are easy to misread:
     function below checks that rather than asserting it.
 """
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from hybridmap import aggregate as _agg                        # noqa: E402
+from hybridmap import mixtures as _mix                         # noqa: E402
+from hybridmap.mixtures import bounds                          # noqa: E402,F401
+
 CLASSES = ["flax", "matrix", "mixed-volume", "basalt"]
 
-
-def bounds(fractions, moduli):
-    """Voigt, Reuss and Hill for a set of parallel phases."""
-    f = np.asarray(fractions, float)
-    E = np.asarray(moduli, float)
-    # Renormalise rather than fail. The caller usually passes fractions over
-    # the four labelled classes, which already sum to one; but a threshold
-    # sweep can drop a class entirely, and a silent 0.98 there would bias the
-    # bound low without anything saying so.
-    if not np.isclose(f.sum(), 1.0, atol=1e-6):
-        f = f / f.sum()
-    voigt = float((f * E).sum())
-    reuss = float(1.0 / (f / E).sum())
-    return voigt, 0.5 * (voigt + reuss), reuss
+# The column the paper's tables and figures read the class medians from. The
+# package calls it "median", because it does not know what property or unit it
+# is being handed.
+MEDIAN_COL = "E_median_GPa"
 
 
 def class_table(df, modulus_col="E_GPa", classes=CLASSES):
     """Counts, fractions and median modulus per class, ignoring QC failures."""
-    # QC/invalid and unclassified are excluded here rather than earlier, so the
+    # QC/invalid and unclassified are excluded rather than imputed, so the
     # fractions are over classified indents only. That is why they are
     # indent-class fractions and not constituent volume fractions: an indent
     # that failed the phase-angle check simply does not vote.
-    d = df[df.constituent.isin(classes)]
-    n = np.array([(d.constituent == c).sum() for c in classes], float)
-    # Median, not mean. Each class has a long tail from contacts that partly
-    # sample a neighbouring phase, and a mean would let those tails set the
-    # input to the rule of mixtures.
-    E = np.array([d.loc[d.constituent == c, modulus_col].median() for c in classes])
-    return pd.DataFrame({"class": classes, "n": n.astype(int),
-                         "fraction": n / n.sum(), "E_median_GPa": E})
+    return _agg.class_table(df, classes, modulus_col, median_col=MEDIAN_COL)
 
 
 def check_zone_weighting(df, classes=CLASSES):
@@ -57,13 +52,7 @@ def check_zone_weighting(df, classes=CLASSES):
     Confirm that zone weighting and global counting agree. Returns the two
     fraction vectors so the caller can print them side by side.
     """
-    d = df[df.constituent.isin(classes)]
-    glob = np.array([(d.constituent == c).mean() for c in classes])
-    zoned = np.zeros(len(classes))
-    for z, sub in d.groupby("zone"):
-        w = len(sub) / len(d)
-        zoned += w * np.array([(sub.constituent == c).mean() for c in classes])
-    return glob, zoned
+    return _agg.check_zone_weighting(df, classes)
 
 
 def threshold_sweep(raw_shallow, lowers=(10, 15, 20), uppers=(60, 65, 70, 75, 80)):
@@ -73,39 +62,26 @@ def threshold_sweep(raw_shallow, lowers=(10, 15, 20), uppers=(60, 65, 70, 75, 80
     generated from an earlier classification pass and did not match the main
     text; this function regenerates it from the deposited data.
     """
-    from classify import classify_shallow, classify
+    from classify import PHASES, X_RESIN, E_LOWER, E_UPPER_SHALLOW, assign_zone
 
     # The resin cut and the zone boundaries are held fixed while the modulus
     # thresholds move. They are set by position, not by stiffness, so sweeping
     # them would be a different sensitivity test and would confound this one.
-    d = raw_shallow[raw_shallow.x_um >= 380.0].copy()
-    from classify import assign_zone
+    d = raw_shallow[raw_shallow.x_um >= X_RESIN].copy()
     d["zone"] = assign_zone(d.x_um.values).values
 
-    out = []
-    for lo in lowers:
-        for hi in uppers:
-            d["constituent"] = classify(d.E_GPa.values, d.zone.values,
-                                        e_lower=lo, e_upper=hi).values
-            t = class_table(d)
-            v, h, r = bounds(t.fraction, t.E_median_GPa)
-            out.append({"lower_GPa": lo, "upper_GPa": hi, "Voigt_GPa": v,
-                        "Hill_GPa": h, "Reuss_GPa": r})
-    return pd.DataFrame(out)
+    return _mix.sweep(d, PHASES, {"lower": E_LOWER, "upper": E_UPPER_SHALLOW},
+                      {"lower": lowers, "upper": uppers}, "E_GPa", CLASSES,
+                      median_col=MEDIAN_COL)
 
 
 def substitute(table, cls, new_modulus):
     """Swap one class modulus and return the new bounds. Used for the basalt
     input sensitivity and for the bulk PA-11 comparison."""
-    t = table.copy()
-    t.loc[t["class"] == cls, "E_median_GPa"] = new_modulus
-    return bounds(t.fraction, t.E_median_GPa)
+    return _mix.substitute(table, cls, new_modulus, median_col=MEDIAN_COL)
 
 
 if __name__ == "__main__":
-    from pathlib import Path
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
     data = Path(__file__).resolve().parents[1] / "data"
 
     sh = pd.read_csv(data / "classified_shallow.csv")
