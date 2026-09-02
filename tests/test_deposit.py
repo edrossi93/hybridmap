@@ -85,6 +85,25 @@ class Deposit:
         return sorted(list(self.scripts.rglob("*.py")) +
                       list(self.tests.rglob("*.py")))
 
+    # Directories that can appear inside the deposit but are not part of it.
+    # A reader following the README makes a virtualenv here, and a sweep that
+    # walks the whole root then reads site-packages: slow, and it reports other
+    # people's files as though they were ours.
+    NOT_OURS = {".git", ".venv", "venv", "env", "__pycache__", "node_modules",
+                ".ipynb_checkpoints", ".pytest_cache"}
+
+    def shipped_files(self, suffixes=None):
+        """Every file the deposit itself owns, filtered by extension."""
+        for path in sorted(self.root.rglob("*")):
+            if not path.is_file():
+                continue
+            parts = path.relative_to(self.root).parts[:-1]
+            if any(p in self.NOT_OURS for p in parts):
+                continue
+            if suffixes and path.suffix.lower() not in suffixes:
+                continue
+            yield path
+
     # ---------------------------------------------------------------- checks
 
     def check_row_counts(self):
@@ -284,10 +303,8 @@ class Deposit:
         accumulated in the data dictionary before anything looked. A comma, a
         colon or a full stop says the same thing.
         """
-        for path in sorted(self.root.rglob("*")):
-            if not path.is_file() or path.suffix.lower() not in {
-                    ".py", ".md", ".txt", ".yaml", ".yml", ".json"}:
-                continue
+        for path in self.shipped_files({".py", ".md", ".txt", ".yaml", ".yml",
+                                        ".json"}):
             self.checks += 1
             for i, line in enumerate(self.text(path).splitlines(), 1):
                 # The one legitimate use is a pattern that has to match an
