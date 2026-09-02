@@ -275,6 +275,27 @@ class Deposit:
             self.fail(f"the README quotes more than one count of reproduced "
                       f"values: {', '.join(sorted(quoted))}")
 
+    def check_house_style(self):
+        """
+        No em-dashes, anywhere that ships.
+
+        A house rule rather than a matter of correctness, which is exactly why
+        it needs a check: nobody notices one arriving, and twenty of them had
+        accumulated in the data dictionary before anything looked. A comma, a
+        colon or a full stop says the same thing.
+        """
+        for path in sorted(self.root.rglob("*")):
+            if not path.is_file() or path.suffix.lower() not in {
+                    ".py", ".md", ".txt", ".yaml", ".yml", ".json"}:
+                continue
+            self.checks += 1
+            for i, line in enumerate(self.text(path).splitlines(), 1):
+                # The one legitimate use is a pattern that has to match an
+                # em-dash in order to reject it.
+                if "—" in line and "re." not in line:
+                    self.fail(f"{path.relative_to(self.root)}:{i} uses an "
+                              f"em-dash; use a comma, a colon or a full stop")
+
     def check_imports_declared(self):
         """
         Every third-party module the deposit imports must be in
@@ -325,6 +346,7 @@ class Deposit:
         self.check_modules()
         self.check_data_files()
         self.check_reproduce_count()
+        self.check_house_style()
         self.check_imports_declared()
         return self
 

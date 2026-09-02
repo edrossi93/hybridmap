@@ -20,6 +20,10 @@ import pandas as pd
 def class_table(df, classes, modulus_col, label_col="constituent",
                 median_col="median"):
     """Counts, fractions and median modulus per phase, in the config's order."""
+    # Anything not carrying one of the configured phase names is dropped here
+    # rather than earlier, so the fractions are over classified indents only.
+    # A quality failure does not vote, and neither does an indent that fell in
+    # a modulus range no phase claimed.
     d = df[df[label_col].isin(classes)]
     n = np.array([(d[label_col] == c).sum() for c in classes], float)
     if n.sum() == 0:

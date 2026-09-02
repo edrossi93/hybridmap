@@ -21,10 +21,11 @@ a CSV and never an instrument file.
 a module that does that as a side effect of an unrelated import is a nuisance.
 """
 
+# plots is missing from this list on purpose: importing it selects a
+# matplotlib backend, and a module that does that as a side effect of an
+# unrelated import is a nuisance to anyone who wanted only the arithmetic.
 from . import aggregate, classify, cluster, config, io, macro, mixtures
 from .config import Config, ConfigError, load
 
 __all__ = ["aggregate", "classify", "cluster", "config", "io", "macro",
            "mixtures", "Config", "ConfigError", "load"]
-
-__version__ = "1.0.0"

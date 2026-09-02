@@ -85,7 +85,7 @@ One caveat on the flax standard deviation: recomputing it from `flexural_moduli.
 
 ## What is in `scripts/`
 
-Fourteen files, in three groups. They depend on numpy, pandas, scipy, scikit-learn and matplotlib, and on nothing else.
+Fourteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
 
 **Start here.**
 
@@ -135,7 +135,7 @@ python uncertainty_budget.py  # the +/- on the bound, by component
 
 `shallow_map.csv`, `depth_resolved_curves.csv` and `depth_resolved_slices.csv` are **primary inputs to this deposit**. They are the per-indent arrays exported from the two nanoindentation acquisitions, and everything else here is computed from them by the scripts in `scripts/`.
 
-The instrument files they were exported from are not part of this deposit and are not distributed. The acquisition and the proprietary export that produces these arrays are the instrument's, not the analysis's, and nothing in the paper depends on them: every reported number is recomputed from the tables above by `reproduce_paper_values.py`. The three files are complete, in the sense that no indent has been removed from them — `shallow_map.csv` still carries the ~3000 indents that landed on the embedding resin, and `depth_resolved_curves.csv` is unfiltered, artefacts and all.
+The instrument files they were exported from are not part of this deposit and are not distributed. The acquisition and the proprietary export that produces these arrays are the instrument's, not the analysis's, and nothing in the paper depends on them: every reported number is recomputed from the tables above by `reproduce_paper_values.py`. The three files are complete, in the sense that no indent has been removed from them: `shallow_map.csv` still carries the ~3000 indents that landed on the embedding resin, and `depth_resolved_curves.csv` is unfiltered, artefacts and all.
 
 So the reproduction boundary of this deposit is the exported per-indent table. Below that line is the instrument. Above it, everything is here.
 
