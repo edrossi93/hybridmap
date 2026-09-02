@@ -1,0 +1,16 @@
+# Build artefacts only. The CSVs and JSONs under data/ are the data and are
+# committed.
+
+__pycache__/
+*.pyc
+
+# Figures are rebuilt from the deposited tables by the scripts that are named
+# after them, so the rendered files are outputs rather than sources.
+Fig*.pdf
+Fig*.png
+Reply_*.pdf
+Reply_*.png
+
+# The synthetic map the tool tests itself on. The generator ships; the file it
+# writes never does, so that nothing in here can be mistaken for a measurement.
+tests/_generated/

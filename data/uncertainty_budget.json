@@ -1,0 +1,16 @@
+{
+  "voigt_point_estimate": 21.333039614483877,
+  "n_draws": 10000,
+  "seed": 42,
+  "method": "Class medians drawn from their bootstrap replicates directly, not from a summarised 95 % interval; class fractions drawn from a Dirichlet with concentration equal to the observed counts.",
+  "components_sd_GPa": {
+    "class_medians": 0.2572523822324794,
+    "class_fractions": 0.30699350474826137
+  },
+  "combined_sd_GPa": 0.39992429267037555,
+  "percentile_95_interval_GPa": [
+    20.542658085540236,
+    22.104734026340342
+  ],
+  "excluded": "Classification thresholds, the choice of basalt input, and cross-section representativeness. The first two are analysis choices rather than random quantities and are reported as sensitivities in Supplementary Tables S1 and S2; the third cannot be estimated from a single section."
+}

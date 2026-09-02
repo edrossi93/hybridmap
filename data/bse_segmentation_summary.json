@@ -1,0 +1,29 @@
+{
+  "area_mm2": 6.652171490065921,
+  "n_tiles": 91,
+  "zone_area_from_mosaic_mask": {
+    "basalt": 0.3523195923195923,
+    "flax": 0.6079012897194715,
+    "unmarked": 0.039779117960936146
+  },
+  "in_zone_fibre_fraction_pooled_over_tiles": {
+    "basalt_fib": 0.6646377068647134,
+    "flax_fib": 0.6246745060423368
+  },
+  "volume_fraction": {
+    "basalt": 0.24386564623084106,
+    "flax": 0.3954719637752699,
+    "matrix": 0.36066238999388905
+  },
+  "published": {
+    "basalt": 0.24386564623084106,
+    "flax": 0.39547196377526983,
+    "matrix": 0.3606623899938891
+  },
+  "ci_95_on_the_mean_pct": {
+    "basalt": 1.0707120557325471,
+    "flax": 3.165865170575292
+  },
+  "method": "Zone areas are renormalised over the marked zones only; the unmarked interface band, 4.0 % of the mosaic, is excluded because the tow boundary is diffuse. Each zone's area share is then multiplied by its pooled in-zone fibre fraction.",
+  "note": "Fractions are of the solid phases. Voids and cracks are located by threshold, not by the classifier, and are excluded from the denominator."
+}

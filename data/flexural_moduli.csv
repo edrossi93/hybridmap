@@ -1,0 +1,11 @@
+specimen_id,configuration,toe_intercept_pct,E_D790_raw_GPa,E_D790_toe_compensated_GPa,E_window_0p28_0p43_GPa
+16Hybr_Bas_Long_1,basalt_face,0.0179,18.92,19.22,20.28
+16Hybr_Bas_Long_2,basalt_face,0.018,18.51,18.8,19.86
+16Hybr_Bas_Long_3,basalt_face,0.0181,18.3,18.59,19.66
+16Hybr_Bas_Long_4,basalt_face,0.0182,17.83,18.12,19.19
+16Hybr_Bas_Long_5,basalt_face,0.0178,19.2,19.51,20.56
+16Hybr_Flax_Long_1,flax_face,0.0372,19.29,20.42,19.46
+16Hybr_Flax_Long_2,flax_face,0.0269,18.62,19.26,18.33
+16Hybr_Flax_Long_3,flax_face,0.0268,18.89,19.52,18.52
+16Hybr_Flax_Long_4,flax_face,0.0269,18.62,19.26,18.33
+16Hybr_Flax_Long_5,flax_face,0.0158,19.54,19.83,17.78
