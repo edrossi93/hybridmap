@@ -1,0 +1,55 @@
+cff-version: 1.2.0
+message: If you use this deposit, please cite the paper and the deposit itself.
+title: >-
+  Data and analysis code for measured-input rule-of-mixtures prediction of the
+  flexural modulus of a flax/basalt/PA-11 hybrid laminate
+type: dataset
+license: MIT
+authors:
+  - given-names: Edoardo
+    family-names: Rossi
+    affiliation: >-
+      Department of Civil, Computer Science and Aeronautical Technologies,
+      Università degli Studi Roma Tre, Rome, Italy
+  - given-names: Pietro
+    family-names: Russo
+    affiliation: >-
+      Institute for Polymers, Composites and Biomaterials, National Research
+      Council, Pozzuoli, Italy
+  - given-names: Fabrizio
+    family-names: Sarasini
+    affiliation: >-
+      Department of Chemical Engineering Materials Environment, Sapienza
+      Università di Roma, Rome, Italy
+  - given-names: Jacopo
+    family-names: Tirillò
+    affiliation: >-
+      Department of Chemical Engineering Materials Environment, Sapienza
+      Università di Roma, Rome, Italy
+  - given-names: Edoardo
+    family-names: Bemporad
+    affiliation: >-
+      Department of Civil, Computer Science and Aeronautical Technologies,
+      Università degli Studi Roma Tre, Rome, Italy
+
+# The DOI is minted when the paper is accepted and goes here and in the README
+# at the same time. Neither is filled in from memory.
+# doi: 10.5281/zenodo.XXXXXXX
+
+preferred-citation:
+  type: article
+  title: >-
+    Measured-input rule-of-mixtures prediction of the flexural modulus of a
+    flax/basalt/PA-11 hybrid laminate from high-speed nanoindentation mapping
+  authors:
+    - given-names: Edoardo
+      family-names: Rossi
+    - given-names: Pietro
+      family-names: Russo
+    - given-names: Fabrizio
+      family-names: Sarasini
+    - given-names: Jacopo
+      family-names: Tirillò
+    - given-names: Edoardo
+      family-names: Bemporad
+  journal: Composites Part A

@@ -381,7 +381,12 @@ Deposit DOI: **[Zenodo DOI to be inserted on acceptance]**
 
 ## Licence
 
-Data under CC BY 4.0, code under MIT.
+The code in `scripts/` and `tests/` is under the MIT licence: `LICENSE`.
+
+The data in `data/` is under CC BY 4.0: `data/LICENSE`.
+
+Copyright (c) 2026 Edoardo Rossi, Università degli Studi Roma Tre. Use either
+freely, with attribution; `CITATION.cff` has the machine-readable form.
 
 ## A note on precision
 

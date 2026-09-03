@@ -256,12 +256,18 @@ class Deposit:
                 self.fail(f"{directory.name}/ holds modules the README does "
                           f"not name: {', '.join(missing)}")
 
+    # In data/ but not data: the dictionary describes measurements, and a
+    # licence and a dictionary are neither described by it nor counted in it.
+    NOT_DATA = {"DATA_DICTIONARY.md", "LICENSE"}
+
+    def data_files(self):
+        return [p for p in sorted(self.data.iterdir())
+                if p.name not in self.NOT_DATA]
+
     def check_data_files(self):
         """Nothing in data/ may be undocumented."""
         sections = self.dictionary_sections()
-        for path in sorted(self.data.iterdir()):
-            if path.name == "DATA_DICTIONARY.md":
-                continue
+        for path in self.data_files():
             self.checks += 1
             if path.name not in sections:
                 self.fail(f"{path.name} is in data/ but has no dictionary "
@@ -274,8 +280,7 @@ class Deposit:
             words = {"Eight": 8, "Nine": 9, "Ten": 10, "Eleven": 11,
                      "Twelve": 12}
             claimed = words.get(m.group(1))
-            actual = len([p for p in self.data.iterdir()
-                          if p.name != "DATA_DICTIONARY.md"])
+            actual = len(self.data_files())
             if claimed != actual:
                 self.fail(f"dictionary opens with '{m.group(1)} files'; "
                           f"data/ holds {actual}")
