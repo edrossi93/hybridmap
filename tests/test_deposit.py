@@ -299,6 +299,36 @@ class Deposit:
             self.fail(f"the README quotes more than one count of reproduced "
                       f"values: {', '.join(sorted(quoted))}")
 
+    def check_doi_agrees(self):
+        """
+        CITATION.cff and the README must be at the same stage on the DOI.
+
+        The DOI is minted when the paper is accepted and has to be written in
+        both places. Filling in one and forgetting the other is the entire
+        failure mode of a value recorded twice, and it would ship a citation
+        file pointing at a record the README says does not exist yet.
+        """
+        citation = self.root / "CITATION.cff"
+        if not citation.exists():
+            return
+
+        # A live DOI is uncommented in the .cff; the README carries it in bold
+        # beside the word DOI. Anything else means the placeholder is still in
+        # place, which is fine as long as both agree that it is.
+        cff = re.search(r"^\s*doi:\s*(\S+)", self.text(citation), re.M)
+        readme = re.search(r"DOI[^\n]*?\b(10\.\d{4,}/[^\s*`]+)",
+                           self.text(self.readme))
+
+        self.checks += 1
+        if bool(cff) != bool(readme):
+            has, lacks = ("CITATION.cff", "README.md") if cff else ("README.md",
+                                                                    "CITATION.cff")
+            self.fail(f"{has} carries a DOI and {lacks} does not; the DOI goes "
+                      f"in both places or neither")
+        elif cff and readme and cff.group(1).rstrip(".") != readme.group(1).rstrip("."):
+            self.fail(f"CITATION.cff says the DOI is {cff.group(1)} and the "
+                      f"README says {readme.group(1)}")
+
     def check_dependencies_agree(self):
         """
         requirements.txt and pyproject.toml must name the same packages.
@@ -402,6 +432,7 @@ class Deposit:
         self.check_modules()
         self.check_data_files()
         self.check_reproduce_count()
+        self.check_doi_agrees()
         self.check_dependencies_agree()
         self.check_house_style()
         self.check_imports_declared()

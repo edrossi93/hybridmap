@@ -156,9 +156,8 @@ def cmd_report(args):
     print(table.to_string(index=False,
                           float_format=lambda v: f"{v:.4f}"))
 
-    # The bound carries its resampled spread here, not in a separate command:
-    # a bound quoted bare invites being read as exact.
-    # It costs about a second on a map of several thousand indents.
+    # The bound carries its resampled spread here, because a bound quoted bare
+    # reads as exact. About a second on a map of several thousand indents.
     replicates = uncertainty.bootstrap_medians(
         labelled, cfg.phase_names, cols["modulus"],
         cfg.uncertainty["n_draws"], cfg.uncertainty["seed"])
@@ -246,7 +245,7 @@ def cmd_init(args):
     Write a starter config for a CSV, with the user's own column names in it.
 
     The column guesses are guesses and are marked as such. The cuts are placed
-    at even quantiles of the data, which is a stated rule and not a
+    at even quantiles of the data, which is a stated rule and no kind of
     judgement: a cut is a decision about where the populations divide, and this
     has not looked at the populations. The comment in the file says so, and
     'hybridmap histogram' is how to replace them with a real choice.
@@ -348,7 +347,7 @@ def _write_report(where, cfg, table, bounds, spread, replicates, sweep_table,
     Everything the report computed, as files instead of scrollback.
 
     A user analysing their own laminate needs a table they can put in a paper
-    and a figure they can look at, not terminal output to retype. The figures
+    and a figure they can look at, instead of terminal output to retype. The figures
     are the same three the histogram command writes, built from the same
     numbers as the tables beside them.
     """
@@ -367,10 +366,9 @@ def _write_report(where, cfg, table, bounds, spread, replicates, sweep_table,
         frame.to_csv(path, index=index, lineterminator="\n")
         written.append(path)
 
-    # Named for the construction, not called a confidence interval.
-    # There is more than one defensible interval for a median, they do not
-    # agree, and a column headed "interval" invites being compared against one
-    # built some other way.
+    # Named for the construction. There is more than one defensible interval
+    # for a median and they disagree, so a column headed "interval" would get
+    # compared against one built some other way.
     intervals = uncertainty.intervals(replicates, cfg.uncertainty["level"])
     phases = table.copy()
     phases["bootstrap_low"] = [intervals[c][0] for c in phases["class"]]
@@ -559,8 +557,8 @@ def cmd_macro(args):
     spec = cfg.macro.curves
     scale = spec.modulus_scale
 
-    # Scaled on the way out, not inside the fit. The fit works in whatever
-    # unit the file is in; the scale is the one place that records which.
+    # Scaled on the way out. The fit works in whatever unit the file is in,
+    # and the scale is the one place that records which.
     shown = reduced.copy()
     for column in [c for c in shown.columns if c.startswith("chord")]:
         shown[column] *= scale

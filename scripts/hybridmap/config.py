@@ -5,7 +5,7 @@ The whole point of this file is the second half of that sentence. A tool that
 accepts a config with a phase referencing a zone that does not exist, and then
 silently labels nothing, is worse than one that will not start.
 
-Two conventions are worth reading before writing a config.
+Two conventions to know before writing a config.
 
 Cuts are named once and referenced by name. A phase says it sits below the cut
 called "lower", not below 15.0. If each phase carried its own number, the same
@@ -21,7 +21,7 @@ reconstruct by hand.
 
 # Annotations are not evaluated at import with this in place, which keeps the
 # `float | None` spellings below from raising on Python 3.8 and 3.9. Without it
-# the whole deposit, reproduction path included, silently needs 3.10.
+# the whole deposit needs 3.10, reproduction path included.
 from __future__ import annotations
 
 import json
@@ -91,8 +91,8 @@ class MapSpec:
 # What a `read:` block may set, passed straight to pandas.read_csv. Deliberately
 # short. These four cover the exports people actually have to deal with, a
 # semicolon-separated European file with decimal commas and a placeholder for a
-# failed fit, and each one is a statement about the file, not about the
-# analysis. Anything longer would be a second configuration language.
+# failed fit, and each one describes the file itself. Anything longer would be
+# a second configuration language.
 READ_OPTIONS = {"sep", "decimal", "encoding", "na_values"}
 
 
@@ -165,8 +165,8 @@ class Substitution:
     """
     One "what if this phase's input were different" question.
 
-    A phase modulus is sometimes a choice between two defensible measurements
-    and not a single number. Asking what the bound would be under the other
+    A phase modulus is sometimes a choice between two defensible measurements.
+    Asking what the bound would be under the other
     one is a sensitivity, reported alongside the answer, not folded into it.
     """
     phase: str
@@ -238,10 +238,10 @@ def apply_overrides(doc, assignments):
     """
     Apply `--set cuts.lower=12` style overrides to the raw document.
 
-    They are applied before validation, not after, so an override is checked
-    exactly as if it had been written into the file. An override that creates a
-    key nobody reads is a typo, so a path whose parent does not exist is an
-    error, not a new branch of the document.
+    They are applied before validation, so an override is checked exactly as if
+    it had been written into the file. An override that creates a key nobody
+    reads is a typo, so a path whose parent does not exist is an error and the
+    document gains no keys it did not have.
     """
     for item in assignments or ():
         if "=" not in item:
@@ -355,9 +355,8 @@ def _phases(raw, cuts, zones):
             raise ConfigError(f"phases: '{name}' is declared twice")
         seen.add(name)
 
-        # One way of saying where a phase sits, not two. Written together the
-        # keys silently overwrite each other, and the reader of the config has
-        # no way to tell which one won.
+        # Written together these keys overwrite each other, and the config
+        # gives its reader no way to tell which one won.
         given = [k for k in ("between", "below", "above") if k in p]
         if "between" in given and len(given) > 1:
             raise ConfigError(
@@ -600,7 +599,7 @@ def from_document(doc, base, source=None):
     columns = _need(m, "columns", "map")
     # The one column with no default. Everything else about a map is optional
     # because some maps genuinely lack it, but a phase rule with nothing to cut
-    # on is not a configuration, it is a blank.
+    # on is a blank.
     if "modulus" not in columns:
         raise ConfigError("map.columns: 'modulus' is required; it is the "
                           "property the phases are cut on")
@@ -630,11 +629,11 @@ def from_document(doc, base, source=None):
     if not isinstance(cuts_raw, dict) or not cuts_raw:
         raise ConfigError("cuts: expected at least one named modulus cut, for "
                           "example  cuts: {split: 15.0}")
-    # A name to value mapping, not a list: the sweep and the phases both refer
-    # to a cut by the name the user gave it.
+    # A name to value mapping: the sweep and the phases both refer to a cut by
+    # the name the user gave it.
     cuts = {str(k): _float(v, f"cuts.{k}") for k, v in cuts_raw.items()}
 
-    # by_depth sits in the same section but is not a coordinate to cut on.
+    # by_depth sits in the same section but holds no coordinate to cut on.
     zones = _zones(doc.get("zones"),
                    {k: v for k, v in spec.columns.items() if k != "by_depth"})
     phases = _phases(_need(doc, "phases", "config"), cuts, zones)

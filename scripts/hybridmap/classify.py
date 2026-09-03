@@ -9,9 +9,8 @@ architectural knowledge the user has about their own section.
 
 Phases are matched in the order the config lists them and the first match wins.
 An indent matching no phase is left unclassified rather than forced into the
-nearest one: it does not then count towards any fraction, which is the honest
-outcome and is why `config.coverage_warnings` says out loud when an interval is
-unclaimed.
+nearest one: it does not then count towards any fraction, which is why
+`config.coverage_warnings` says out loud when an interval is unclaimed.
 """
 
 import numpy as np
@@ -58,7 +57,7 @@ def assign_zones(df, zones, cols):
     conditions = [x < b.below for b in zones.bands if b.below is not None]
     names = [b.name for b in zones.bands if b.below is not None]
     if not conditions:
-        # A single open band: everything is in it. One zone is the honest
+        # A single open band: everything is in it. One zone is the right
         # description of a specimen with no architecture to exploit, and
         # np.select cannot be given a default with nothing to select on.
         return pd.Series(zones.bands[-1].name, index=df.index)

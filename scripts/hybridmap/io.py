@@ -13,8 +13,8 @@ zone column that happened to be the one just renamed away. So the frame keeps
 the user's own names and every function downstream is told which column to use.
 
 Nothing here converts units either. The deposit's convention is that the unit
-lives in the column name, and a tool that silently rescaled someone's data
-would be doing the one thing this analysis cannot afford.
+lives in the column name, and a tool that rescaled someone's data behind
+their back would be doing the one thing this analysis cannot afford.
 """
 
 from pathlib import Path
@@ -43,9 +43,8 @@ def read_table(path, options=None, what="table"):
     if frame.empty:
         raise ConfigError(f"{path.name} has no rows")
     if len(frame.columns) == 1:
-        # One column almost always means the separator is wrong, not that
-        # somebody deposited a single-column file. The symptom otherwise
-        # surfaces much later, as a missing column.
+        # One column almost always means the separator is wrong. The symptom
+        # otherwise surfaces much later, as a missing column.
         raise ConfigError(
             f"{path.name} read as a single column, {frame.columns[0]!r}. If it "
             f"is not comma separated, say so with a read block, for example "
@@ -97,9 +96,8 @@ def numeric(df, column, why="this column"):
 
     Empty cells are allowed and become NaN: a failed fit is a real thing for a
     map to contain, and the classification has a place for it. Text where a
-    number belongs is not allowed, because the alternative is silently dropping
-    every row the reader could not parse and reporting a median over what is
-    left.
+    number belongs is not allowed: the alternative is dropping every row the
+    reader could not parse and reporting a median over what is left.
     """
     values = df[column]
     if pd.api.types.is_numeric_dtype(values):
@@ -163,8 +161,8 @@ def describe_map(df, cols, cfg):
                 f"fall in the last zone band by default")
 
     # A cut outside the data is not an error: a user may be reusing a config
-    # across specimens. It does mean one phase will be empty, which is worth
-    # saying before the bound comes out of it.
+    # across specimens. It does mean one phase will be empty, and that
+    # should be said before the bound comes out of it.
     if finite.size:
         for name, value in cfg.cuts.items():
             if value < finite.min() or value > finite.max():

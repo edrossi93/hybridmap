@@ -2,7 +2,7 @@
 hybridmap: measured-input rule of mixtures from an indentation map.
 
 The chain is classify, aggregate, bound, compare against a macroscopic
-measurement. Every choice that makes it one laboratory's analysis and not a
+measurement. Every choice that makes it one laboratory's analysis instead of a
 method, where the specimen ends, where the phases divide, what the phases are
 called, which column holds what, is read from a config file.
 
@@ -21,9 +21,9 @@ a CSV and never an instrument file.
 a module that does that as a side effect of an unrelated import is a nuisance.
 """
 
-# plots is missing from this list on purpose: importing it selects a
-# matplotlib backend, and a module that does that as a side effect of an
-# unrelated import is a nuisance to anyone who wanted only the arithmetic.
+# plots is left out of this list deliberately: importing it selects a
+# matplotlib backend, and doing that as a side effect of an unrelated import
+# is a nuisance to anyone who wanted only the arithmetic.
 from . import aggregate, classify, cluster, config, io, macro, mixtures
 from .config import Config, ConfigError, load
 
