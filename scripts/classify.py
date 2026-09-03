@@ -1,5 +1,11 @@
 """
-Rule-based assignment of indents to the four mechanical populations.
+Rule-based assignment of indents to the four classes.
+
+Three of them are stiffness levels, compliant, mixed-volume and pure fibre. The
+fourth exists because the compliant level holds two constituents that stiffness
+cannot tell apart, so flax and PA-11 are separated by where they sit instead.
+The depth-resolved acquisition corroborates that split from the other side: the
+two compliant medians are 3.86 and 5.37 GPa at 150 nm, p = 8.2e-8.
 
 This is the paper's configuration of the general rule in `hybridmap.classify`:
 the same zone-and-threshold machinery, with our thresholds, our zone boundaries

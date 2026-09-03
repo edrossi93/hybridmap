@@ -299,6 +299,39 @@ class Deposit:
             self.fail(f"the README quotes more than one count of reproduced "
                       f"values: {', '.join(sorted(quoted))}")
 
+    def check_citation_authors_agree(self):
+        """
+        CITATION.cff names the five authors twice, and the two must match.
+
+        Once for the dataset and once under preferred-citation. Correcting a
+        name, adding an ORCID or reordering in one block and not the other is
+        the same failure the DOI check exists to catch, and the two lists sit
+        forty lines apart.
+        """
+        citation = self.root / "CITATION.cff"
+        if not citation.exists():
+            return
+        text = self.text(citation)
+
+        # Split at preferred-citation, then read the name pairs on each side.
+        head, _, tail = text.partition("preferred-citation:")
+        def names(block):
+            return re.findall(r"given-names:\s*(\S+)\s*\n\s*family-names:\s*(\S+)",
+                              block)
+
+        self.checks += 1
+        dataset, article = names(head), names(tail)
+        if not dataset or not article:
+            self.fail("CITATION.cff should list authors for the dataset and "
+                      "again under preferred-citation; one of the two is empty")
+        elif dataset != article:
+            only_dataset = [f"{g} {f}" for g, f in dataset if (g, f) not in article]
+            only_article = [f"{g} {f}" for g, f in article if (g, f) not in dataset]
+            detail = (f"dataset only: {', '.join(only_dataset)}; "
+                      f"citation only: {', '.join(only_article)}"
+                      if only_dataset or only_article else "the order differs")
+            self.fail(f"CITATION.cff's two author lists disagree ({detail})")
+
     def check_doi_agrees(self):
         """
         CITATION.cff and the README must be at the same stage on the DOI.
@@ -432,6 +465,7 @@ class Deposit:
         self.check_modules()
         self.check_data_files()
         self.check_reproduce_count()
+        self.check_citation_authors_agree()
         self.check_doi_agrees()
         self.check_dependencies_agree()
         self.check_house_style()

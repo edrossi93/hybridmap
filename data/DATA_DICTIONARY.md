@@ -58,7 +58,7 @@ Columns as above, plus:
 | column | values | notes |
 |---|---|---|
 | `zone` | `basalt`, `flax` | architectural half, from the x position |
-| `constituent` | `flax`, `matrix`, `mixed-volume`, `basalt`, `QC/invalid` | the four mechanical populations |
+| `constituent` | `flax`, `matrix`, `mixed-volume`, `basalt`, `QC/invalid` | three stiffness levels, with the compliant one split into flax and matrix by position |
 
 `y_um` runs −17.5 to 80.0 here: the origin was re-zeroed on the retained
 indents, so it is offset by −17.5 µm from `shallow_map.csv`. The spacing is

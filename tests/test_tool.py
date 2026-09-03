@@ -236,9 +236,20 @@ def config_matches_the_scripts():
 
 
 if __name__ == "__main__":
-    with tempfile.TemporaryDirectory(prefix="hybridmap_test_") as tmp:
-        synthetic_dataset(Path(tmp))
-        macro_routes(Path(tmp))
+    # The synthetic map is written to a temporary directory, so a full or
+    # read-only TMPDIR surfaces here as a disk error from inside the generator
+    # and reads like a fault in the tool. Say which it is and where.
+    try:
+        with tempfile.TemporaryDirectory(prefix="hybridmap_test_") as tmp:
+            synthetic_dataset(Path(tmp))
+            macro_routes(Path(tmp))
+    except OSError as exc:
+        print(f"\ncould not use the temporary directory "
+              f"{tempfile.gettempdir()}: {exc}")
+        print("This is the environment, not the tool. Point TMPDIR at a "
+              "writable directory with room to spare and run this again.")
+        sys.exit(1)
+
     paper_config()
     config_matches_the_scripts()
 

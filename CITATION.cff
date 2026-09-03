@@ -26,11 +26,14 @@ authors:
     affiliation: >-
       Department of Chemical Engineering Materials Environment, Sapienza
       Università di Roma, Rome, Italy
+  # Dual affiliation in the manuscript, superscripts 1 and 2. CITATION.cff
+  # allows one affiliation string per author, so both are named in it.
   - given-names: Edoardo
     family-names: Bemporad
     affiliation: >-
       Department of Civil, Computer Science and Aeronautical Technologies,
-      Università degli Studi Roma Tre, Rome, Italy
+      Università degli Studi Roma Tre, Rome, Italy; and Institute for Polymers,
+      Composites and Biomaterials, National Research Council, Pozzuoli, Italy
 
 # The DOI is minted when the paper is accepted and goes here and in the README
 # at the same time. Neither is filled in from memory.
