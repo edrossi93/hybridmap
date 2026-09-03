@@ -395,7 +395,7 @@ The first thing this test found, on the first run, was that a single-zone config
 
 If you use this, please cite the paper and this deposit.
 
-Deposit DOI: **[Zenodo DOI to be inserted on acceptance]**
+Deposit DOI: **10.5281/zenodo.22283997**. The DOI is reserved: it is permanent, and it resolves once the record is published on acceptance of the paper.
 
 ---
 
