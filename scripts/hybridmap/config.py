@@ -162,6 +162,20 @@ class Macro:
 
 
 @dataclass(frozen=True)
+class Substitution:
+    """
+    One "what if this phase's input were different" question.
+
+    A phase modulus is sometimes a choice between two defensible measurements
+    rather than a single number. Asking what the bound would be under the other
+    one is a sensitivity, reported alongside the answer, not folded into it.
+    """
+    phase: str
+    value: float
+    label: str = ""
+
+
+@dataclass(frozen=True)
 class Clustering:
     features: tuple[str, ...] = ()
     k: int = 2
@@ -180,6 +194,8 @@ class Config:
     sweep: dict = field(default_factory=dict)
     macro: Macro | None = None
     clustering: Clustering | None = None
+    sensitivity: tuple = ()
+    uncertainty: dict = field(default_factory=dict)
     qc: QC | None = None
     source: Path | None = None
 
@@ -520,6 +536,33 @@ def _qc(doc):
               if "first_max" in pa else None)
 
 
+def _sensitivity(raw, phases):
+    """Substitutions to report beside the answer, checked against the phases."""
+    out = []
+    known = [p.name for p in phases]
+    for i, item in enumerate(raw or ()):
+        phase = _need(item, "phase", f"sensitivity[{i}]")
+        if phase not in known:
+            raise ConfigError(f"sensitivity[{i}] names the phase '{phase}', "
+                              f"which is not one of yours: {', '.join(known)}")
+        out.append(Substitution(
+            phase=phase,
+            value=_float(_need(item, "value", f"sensitivity[{i}]"),
+                         f"sensitivity[{i}].value"),
+            label=str(item.get("label", ""))))
+    return tuple(out)
+
+
+def _uncertainty(doc):
+    """Resampling settings. Both have defaults; both are stated when used."""
+    doc = doc or {}
+    # Ten thousand replicates is past convergence for a bound of this kind and
+    # still runs in seconds. The seed carries no meaning beyond being recorded.
+    return {"n_draws": int(doc.get("n_draws", 10_000)),
+            "seed": int(doc.get("seed", 0)),
+            "level": _float(doc.get("level", 95.0), "uncertainty.level")}
+
+
 def _clustering(doc):
     if doc is None:
         return None
@@ -590,6 +633,8 @@ def from_document(doc, base, source=None):
                   map=spec, cuts=cuts, phases=phases, zones=zones, sweep=sweep,
                   macro=_macro(doc.get("macro"), base),
                   clustering=_clustering(doc.get("clustering")),
+                  sensitivity=_sensitivity(doc.get("sensitivity"), phases),
+                  uncertainty=_uncertainty(doc.get("uncertainty")),
                   qc=_qc(doc.get("qc")), source=source)
 
 

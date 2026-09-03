@@ -185,9 +185,92 @@ python -m hybridmap histogram --config examples/paper_shallow.yaml --out figs
 python -m hybridmap report    --config examples/paper_shallow.yaml
 ```
 
-The commands are `validate`, `classify`, `report`, `sweep`, `histogram` and `macro`. Any of them takes `--set` to change one value without editing the file, for example `--set cuts.lower=12`. A configuration problem exits with a message naming what to fix rather than a traceback.
+| command | what it does |
+|---|---|
+| `init` | Reads your CSV and writes a starter config with your own column names in it. Start here. |
+| `validate` | Checks the config against the data and reports what it found: values usable and missing, the modulus range, whether your cuts fall inside it. |
+| `histogram` | The modulus distribution with your cuts drawn on it. This is how a cut gets chosen. |
+| `report` | The whole chain. `--out DIR` also writes the tables and figures. |
+| `classify` | The per-indent labels, as a CSV. |
+| `sweep` | The bounds across a grid of cut values. |
+| `uncertainty` | The resampled spread on the bound, and where it comes from. |
+| `cluster` | The unsupervised cross-check, if you have per-indent features. |
+| `macro` | Reduces bending curves to per-specimen moduli. |
+
+Any of them takes `--set` to change one value without editing the file, for example `--set cuts.lower=12`. A configuration problem exits with a message naming what to fix rather than a traceback.
 
 Configs are YAML, and JSON with the same keys is read too. YAML is the documented form because a threshold should carry its reason on the line above it.
+
+### Starting from your own CSV
+
+```
+cd scripts
+python -m hybridmap init      --map /path/to/your_map.csv --out mine.yaml
+python -m hybridmap validate  --config mine.yaml
+python -m hybridmap histogram --config mine.yaml --out figs
+# look at figs/modulus_histogram.png, then edit the cuts in mine.yaml
+python -m hybridmap report    --config mine.yaml --out results
+```
+
+`init` guesses which column is which from the column names and lays out one cut per phase boundary at even quantiles of your data. Those quantile cuts are a placeholder and the file says so: they spread the indents evenly between phases and mean nothing physically. The histogram is how you replace them with a choice you can defend.
+
+---
+
+## What your CSV has to look like
+
+The tool reads two kinds of table and never anything else. It does not rename your columns and it does not convert your units.
+
+### The map, one row per indent
+
+| role | required | what it must be |
+|---|---|---|
+| `modulus` | yes | A number. This is what the phases are cut on. Empty cells are allowed and become unusable indents; text is not. |
+| `position` | only if `zones` cuts bands on a coordinate | A number, in whatever unit you like. |
+| `id` | no | Anything, carried through so you can join results back to your own records. |
+| columns named by `qc` or `clustering` | only if you use those sections | Numbers. |
+
+Any other column in the file is carried through untouched. There is no required naming convention: `E_GPa`, `reduced_modulus_GPa` and `Er` are all fine, because you say which is which in the config.
+
+If your export is not comma separated, or uses a decimal comma, say so and nothing else changes:
+
+```yaml
+map:
+  path: your_map.csv
+  read: {sep: ";", decimal: ",", encoding: latin-1, na_values: ["---"]}
+```
+
+The tool does not try to detect that for you. Guessing a decimal separator is how a factor of a thousand gets into an analysis without anyone noticing.
+
+### The curves, one row per recorded point
+
+Needed only if you want the tool to reduce your bending data rather than being told the answer. Two shapes are accepted.
+
+**Already reduced**, which is what testing software usually exports:
+
+```yaml
+macro:
+  from_curves:
+    path: your_curves.csv
+    columns: {specimen: id, group: configuration, strain: strain_pct, stress: stress_MPa}
+    chord: [0.05, 0.25]       # per cent strain, ASTM D790
+    toe_window: 0.15
+```
+
+**As recorded**, force against displacement, which is what the machine actually writes. Give the specimen geometry in millimetres and the tool converts with the standard formulae for a rectangular bar in three-point bending, `stress = 3PL/2bd²` and `strain = 6Dd/L²`:
+
+```yaml
+macro:
+  from_curves:
+    path: your_curves.csv
+    columns: {specimen: id, group: face, displacement: disp_mm, force: force_N}
+    geometry: {span: 40.0, width: 12.7, thickness: 3.2}
+    chord: [0.05, 0.25]
+    toe_window: 0.15
+```
+
+Either way the chord comes out as a slope in stress-unit per per-cent strain. `modulus_scale` converts it to the unit your map is in, and defaults to `0.1`, which is right when stress is in MPa and you want GPa. Set it to `1` if your stress is already in GPa. The printed output always names the scale it used.
+
+With two groups, the tool also reports the mean, standard deviation and count per group, Welch's *t* with its *p*, and Hedges *g*.
 
 ### The two worked examples
 
@@ -210,6 +293,8 @@ Read them side by side before writing your own. What differs between them is exa
 | `sweep` | the values to try for each cut | yes |
 | `macro` | a measured modulus with its uncertainty, or bending curves to reduce to one | yes |
 | `clustering` | the feature columns, k, and the seed for the unsupervised cross-check | yes |
+| `sensitivity` | phase inputs to substitute and report beside the answer | yes |
+| `uncertainty` | how many resampling draws, and the seed | yes |
 
 Three points about the schema, because they are the ones that surprise people.
 
@@ -240,6 +325,7 @@ Making a threshold configurable is nearly useless if you have no way to choose i
 | `classify.py` | Zones, the phase rule, and the quality check. |
 | `aggregate.py` | Counts, fractions and per-phase median modulus. |
 | `mixtures.py` | Voigt, Reuss and Hill, input substitution, and the cut sweep. |
+| `uncertainty.py` | The resampled spread on the bound, and the interval on each phase median. |
 | `macro.py` | The measured comparison, including the chord-modulus route to one. |
 | `cluster.py` | k-means and Gaussian-mixture cross-check on named features. |
 | `plots.py` | The histogram, the sweep and the prediction against the measurement. |

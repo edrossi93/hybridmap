@@ -68,6 +68,22 @@ sweep:
   lower: [10, 15, 20]
   upper: [60, 65, 70, 75, 80]
 
+# What the bound would be if a phase input were taken differently. Both of these
+# are choices between defensible values rather than uncertainty, so they are
+# reported beside the answer instead of being folded into it.
+sensitivity:
+  # The basalt median measured in the depth-resolved acquisition, where the
+  # compliant material around a fibre is inside the probed volume.
+  - {phase: basalt, value: 49.47, label: basalt from the depth-resolved map}
+  # Bulk PA-11, rather than the polymer as measured inside the laminate.
+  - {phase: matrix, value: 1.5, label: matrix at the bulk PA-11 value}
+
+# Resampling settings for the interval on the bound. The seed carries no
+# meaning; what matters is that it is written down.
+uncertainty:
+  n_draws: 10000
+  seed: 42
+
 macro:
   # Three-point bending on the same plaque, five specimens per configuration.
   # The comparison values are computed from the curves below rather than typed
