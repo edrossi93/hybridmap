@@ -90,7 +90,11 @@ def main():
     }
 
     out = DATA / "uncertainty_budget.json"
-    out.write_text(json.dumps(budget, indent=2), encoding="utf8")
+    # Newlines pinned to "\n" rather than the platform default, so running
+    # this on Windows does not rewrite every line of a file that has not
+    # changed and leave a diff that looks like a result moved.
+    out.write_text(json.dumps(budget, indent=2) + "\n",
+                   encoding="utf8", newline="\n")
 
     lo, hi = budget["percentile_95_interval_GPa"]
     print(f"Voigt point estimate      {result['point']:.3f} GPa")

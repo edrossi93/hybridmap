@@ -31,11 +31,29 @@ from .mixtures import bounds
 
 
 def bootstrap_medians(df, classes, modulus_col, n_draws=10_000, seed=0,
-                      label_col="constituent"):
-    """One column of median replicates per phase, in the order given."""
+                      label_col="constituent", seed_per_phase=False):
+    """One column of median replicates per phase, in the order given.
+
+    `seed_per_phase` picks between two readings of a stated seed, which give
+    the same interval to the first decimal and can differ in the second:
+
+      False   one generator, phases drawn in the order `classes` lists them,
+              so a phase's replicates depend on how many were drawn before it.
+              This is what the budget uses, and changing it would move the
+              published spread on the bound.
+      True    each phase gets its own generator from the same seed, so a phase
+              is independent of its position in the list and of which other
+              phases were requested.
+
+    The second is the better default for a per-phase table, because a reader
+    recomputing one row should not have to know what was computed before it.
+    The first is kept because the budget was published under it.
+    """
     rng = np.random.default_rng(seed)
     out = {}
     for name in classes:
+        if seed_per_phase:
+            rng = np.random.default_rng(seed)
         values = df.loc[df[label_col] == name, modulus_col].to_numpy(float)
         # Non-finite values are dropped rather than counted as zero. They are
         # failed fits, and a zero would pull the median down.

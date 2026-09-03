@@ -51,13 +51,18 @@ ACQUISITIONS = [
 
 def intervals(df, modulus_col, classes=CLASSES, n_draws=N_DRAWS, seed=SEED):
     """One row per class: n, median, and the interval on that median."""
-    # One generator for all four classes, drawn in the order CLASSES lists
-    # them, which is what uncertainty_budget.py does for the +/- on the bound.
-    # Seeding per class instead moves the second decimal, so the convention has
-    # to be stated somewhere: a caption that says "seed 42" does not say this,
-    # and the two readings do not give the same last digit.
+    # Each class gets its own generator from the same seed, so a row does not
+    # depend on how many classes were drawn before it. A caption that says
+    # "seed 42" does not fix this, and the two readings differ in the second
+    # decimal, so the convention has to be pinned deliberately.
+    #
+    # This reading is the one the paper already uses. The Methods sensitivity
+    # note prints the shallow basalt interval as 83.7 to 87.8, which is what
+    # per-class seeding gives; sharing one generator across the four classes
+    # gives 87.64 and would put that sentence out of step with this table.
     replicates = _unc.bootstrap_medians(df, classes, modulus_col,
-                                        n_draws=n_draws, seed=seed)
+                                        n_draws=n_draws, seed=seed,
+                                        seed_per_phase=True)
     bounds = _unc.intervals(replicates, level=95.0)
 
     rows = []

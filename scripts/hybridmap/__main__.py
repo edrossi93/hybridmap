@@ -330,7 +330,7 @@ def cmd_init(args):
 
     text = "\n".join(lines)
     if args.out:
-        Path(args.out).write_text(text, encoding="utf8")
+        Path(args.out).write_text(text, encoding="utf8", newline="\n")
         print(f"written to {args.out}")
         # No invocation prefix: this runs both as `python -m hybridmap` and
         # as an installed `hybridmap`.
@@ -398,7 +398,8 @@ def _write_report(where, cfg, table, bounds, spread, replicates, sweep_table,
             "sensitivity section instead of being folded in here."),
     }
     path = out / "summary.json"
-    path.write_text(json.dumps(summary, indent=2), encoding="utf8")
+    path.write_text(json.dumps(summary, indent=2) + "\n",
+                    encoding="utf8", newline="\n")
     written.append(path)
 
     if sweep_table is not None:
