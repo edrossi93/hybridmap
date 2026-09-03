@@ -400,7 +400,9 @@ Deposit DOI: **[Zenodo DOI to be inserted on acceptance]**
 
 ## Licence
 
-The code in `scripts/` and `tests/` is under the MIT licence: `LICENSE`.
+The code in `scripts/` and `tests/` is under the MIT licence: `LICENSE`. That
+file holds the licence text and nothing else, so GitHub reports the repository
+as MIT; anything appended to it makes the detection fall back to "Other".
 
 The data in `data/` is under CC BY 4.0: `data/LICENSE`.
 
