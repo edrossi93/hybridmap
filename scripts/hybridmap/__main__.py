@@ -19,7 +19,6 @@ import argparse
 import sys
 
 import numpy as np
-import pandas as pd
 
 from . import aggregate, classify, io, macro, mixtures
 from .config import ConfigError, coverage_warnings, load
@@ -110,6 +109,15 @@ def cmd_classify(args):
     return 0
 
 
+def _reduce_curves(cfg):
+    """The per-specimen moduli, or None when no curves are configured."""
+    if not cfg.macro or not cfg.macro.curves:
+        return None
+    spec = cfg.macro.curves
+    curves = io.read_table(spec.path, spec.read, "macro.from_curves")
+    return macro.moduli_from_curves(curves, spec)
+
+
 def _sweep(cfg, labelled, cols):
     return mixtures.sweep(labelled, cfg.phases, cfg.cuts, cfg.sweep,
                           cols["modulus"], cfg.phase_names)
@@ -154,10 +162,20 @@ def cmd_report(args):
                   f"{s['max_deviation_GPa']:.2f}")
 
     if cfg.macro:
-        measured = macro.measurements(cfg.macro)
-        if cfg.macro.curves and not measured:
-            print("\nmacro.from_curves is configured; run "
-                  "'hybridmap macro' to reduce the curves first")
+        # The curves are reduced here rather than left to a second command.
+        # Before this the user was told to go and run one, then type its
+        # answers back into the config, in a unit nothing had mentioned.
+        reduced = _reduce_curves(cfg)
+        scale = cfg.macro.curves.modulus_scale if reduced is not None else 1.0
+        measured = macro.measurements(cfg.macro, reduced, scale)
+
+        if reduced is not None:
+            print(f"\nfrom {cfg.macro.curves.path.name}, "
+                  f"{len(reduced)} specimens")
+            print(macro.summarise(reduced, scale)
+                  .to_string(float_format=lambda v: f"{v:.3f}"))
+            _contrast(reduced, scale)
+
         if measured:
             print("\nagainst the macroscopic measurement")
             print(macro.compare((voigt, hill, reuss), measured)
@@ -210,18 +228,42 @@ def cmd_histogram(args):
     return 0
 
 
+def _contrast(reduced, scale):
+    """Print the two-group comparison, when there are exactly two groups."""
+    c = macro.contrast(reduced, scale)
+    if c is None:
+        return
+    print(f"{c['groups'][0]} against {c['groups'][1]}: "
+          f"Welch t {c['welch_t']:.3f}, p {c['p']:.4f}, "
+          f"Hedges g {c['hedges_g']:.3f}")
+
+
 def cmd_macro(args):
     cfg, _, _ = _load(args)
-    if not cfg.macro or not cfg.macro.curves:
+    reduced = _reduce_curves(cfg)
+    if reduced is None:
         raise ConfigError("this config has no macro.from_curves section")
     spec = cfg.macro.curves
-    curves = pd.read_csv(spec.path)
-    table = macro.moduli_from_curves(curves, spec)
-    print(table.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
-    print("\nby group, in the units of the file")
-    print(macro.summarise(table).to_string(float_format=lambda v: f"{v:.4f}"))
+    scale = spec.modulus_scale
+
+    # Scaled on the way out rather than inside the fit. The fit works in
+    # whatever unit the file is in, and the scale is the single place that
+    # records what that was.
+    shown = reduced.copy()
+    for column in [c for c in shown.columns if c.startswith("chord")]:
+        shown[column] *= scale
+
+    print(f"{'force and displacement' if spec.is_raw else 'stress and strain'} "
+          f"from {spec.path.name}, moduli scaled by {scale:g}")
+    print(shown.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
+
+    print("\nby group")
+    print(macro.summarise(reduced, scale)
+          .to_string(float_format=lambda v: f"{v:.4f}"))
+    _contrast(reduced, scale)
+
     if args.out:
-        table.to_csv(args.out, index=False)
+        shown.to_csv(args.out, index=False, lineterminator="\n")
         print(f"written to {args.out}")
     return 0
 

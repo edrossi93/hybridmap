@@ -120,12 +120,39 @@ class Measured:
 
 @dataclass(frozen=True)
 class Curves:
-    """The bending-curve route to a measured modulus."""
+    """
+    The bending-curve route to a measured modulus.
+
+    Two input shapes are accepted. Stress against strain, which is what a curve
+    already reduced by the testing software looks like, and force against
+    displacement, which is what the machine actually records. The second needs
+    the specimen geometry, and is converted with the same standard the chord
+    and the toe correction come from.
+    """
     path: Path
     columns: dict
     chord: tuple[float, float]
     toe_window: float | None = None
     extra_window: tuple[float, float] | None = None
+    geometry: dict = field(default_factory=dict)
+    modulus_scale: float = 0.1
+    read: dict = field(default_factory=dict)
+
+    @property
+    def is_raw(self):
+        """True when the file holds force and displacement rather than stress."""
+        return "force" in self.columns and "displacement" in self.columns
+
+
+# What the geometry block has to give, in millimetres, to turn a force and a
+# displacement into a stress and a strain.
+GEOMETRY = ("span", "width", "thickness")
+
+# The chord is a slope in stress-unit per per-cent-strain, so with stress in
+# MPa it is MPa per per cent, and a tenth of that is GPa. This default is right
+# for the two shapes documented above, N and mm giving MPa, and wrong for
+# anyone feeding in stress already in GPa, who should set it to 1.
+DEFAULT_MODULUS_SCALE = 0.1
 
 
 @dataclass(frozen=True)
@@ -432,14 +459,53 @@ def _macro(doc, base):
         if not isinstance(chord, (list, tuple)) or len(chord) != 2:
             raise ConfigError("macro.from_curves.chord: expected [low, high], "
                               "the strain interval the chord is measured over")
+        columns = dict(_need(c, "columns", "macro.from_curves"))
+        if "specimen" not in columns:
+            raise ConfigError("macro.from_curves.columns.specimen is required; "
+                              "the curves are grouped by it")
+
+        geometry = dict(c.get("geometry") or {})
+        reduced = {"strain", "stress"} <= set(columns)
+        raw = {"displacement", "force"} <= set(columns)
+        if reduced == raw:
+            raise ConfigError(
+                "macro.from_curves.columns: name either 'strain' and 'stress', "
+                "for curves the testing software has already reduced, or "
+                "'displacement' and 'force', for what the machine recorded, "
+                "but not both and not neither")
+        if raw:
+            missing = [k for k in GEOMETRY if k not in geometry]
+            if missing:
+                raise ConfigError(
+                    f"macro.from_curves.geometry needs {', '.join(missing)} to "
+                    f"turn force and displacement into stress and strain. All "
+                    f"three of {', '.join(GEOMETRY)} in millimetres.")
+            geometry = {k: _float(geometry[k], f"macro.from_curves.geometry.{k}")
+                        for k in GEOMETRY}
+            if any(v <= 0 for v in geometry.values()):
+                raise ConfigError("macro.from_curves.geometry: span, width and "
+                                  "thickness must all be positive")
+
+        read = dict(c.get("read") or {})
+        unknown = sorted(set(read) - READ_OPTIONS)
+        if unknown:
+            raise ConfigError(f"macro.from_curves.read: {', '.join(unknown)} is "
+                              f"not something this reads. Allowed: "
+                              f"{', '.join(sorted(READ_OPTIONS))}")
+
         extra = c.get("extra_window")
         curves = Curves(
             path=(base / str(_need(c, "path", "macro.from_curves"))).resolve(),
-            columns=_need(c, "columns", "macro.from_curves"),
+            columns=columns,
             chord=(float(chord[0]), float(chord[1])),
             toe_window=_float(c["toe_window"], "macro.from_curves.toe_window")
             if "toe_window" in c else None,
-            extra_window=(float(extra[0]), float(extra[1])) if extra else None)
+            extra_window=(float(extra[0]), float(extra[1])) if extra else None,
+            geometry=geometry,
+            modulus_scale=_float(c["modulus_scale"],
+                                 "macro.from_curves.modulus_scale")
+            if "modulus_scale" in c else DEFAULT_MODULUS_SCALE,
+            read=read)
     return Macro(tuple(measured), curves)
 
 

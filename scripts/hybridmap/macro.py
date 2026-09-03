@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from . import io
-from .config import ConfigError
+from .config import ConfigError, Measured
 
 
 def chord_modulus(strain, stress, lo, hi):
@@ -64,25 +64,58 @@ def toe_intercept(strain, stress, width):
     return intercept
 
 
+def to_stress_strain(displacement, force, geometry):
+    """
+    Force and displacement to stress and strain, for three-point bending.
+
+    The standard formulae for a rectangular bar in three-point bending, which
+    is the same standard the chord interval and the toe correction come from:
+
+        stress = 3 P L / (2 b d^2)
+        strain = 6 D d / L^2
+
+    With force in newtons and every length in millimetres the stress comes out
+    in MPa. The strain is returned in per cent, so that the chord interval
+    means the same thing whichever of the two input shapes was given.
+    """
+    span, width, thickness = (geometry["span"], geometry["width"],
+                              geometry["thickness"])
+    stress = 3.0 * force * span / (2.0 * width * thickness ** 2)
+    strain = 100.0 * 6.0 * displacement * thickness / span ** 2
+    return strain, stress
+
+
+def _curve(group, spec):
+    """One specimen's curve as strain in per cent against stress."""
+    cols = spec.columns
+    if spec.is_raw:
+        group = group.sort_values(cols["displacement"])
+        return to_stress_strain(group[cols["displacement"]].to_numpy(float),
+                                group[cols["force"]].to_numpy(float),
+                                spec.geometry)
+    group = group.sort_values(cols["strain"])
+    return (group[cols["strain"]].to_numpy(float),
+            group[cols["stress"]].to_numpy(float))
+
+
 def moduli_from_curves(curves, spec):
     """
     One row per specimen: the toe intercept and the chord before and after it.
 
-    Values are returned unrounded and in the units the file is in. Rounding and
-    naming are the caller's, because those are reporting conventions and belong
-    with whoever is doing the reporting.
+    Values are returned unrounded, as a slope in stress-unit per per-cent
+    strain. Scaling to a modulus unit and rounding are the caller's, because
+    those are reporting conventions and belong with whoever reports.
     """
     cols = spec.columns
-    needed = [cols[k] for k in ("specimen", "strain", "stress") if k in cols]
-    io.require(curves, needed, "the chord-modulus calculation")
-    specimen, strain_c, stress_c = cols["specimen"], cols["strain"], cols["stress"]
+    pair = ("displacement", "force") if spec.is_raw else ("strain", "stress")
+    io.require(curves, [cols[k] for k in ("specimen",) + pair],
+               "the chord-modulus calculation")
+    specimen = cols["specimen"]
     group_c = cols.get("group")
 
     rows = []
     for name, group in curves.groupby(specimen):
-        group = group.sort_values(strain_c)
-        strain = group[strain_c].to_numpy(float)
-        stress = group[stress_c].to_numpy(float)
+        strain, stress = _curve(group, spec)
 
         toe = toe_intercept(strain, stress, spec.toe_window) \
             if spec.toe_window else 0.0
@@ -113,11 +146,62 @@ def summarise(table, scale=1.0, column="chord_toe_compensated"):
     return out.rename(columns={"count": "n"})
 
 
-def measurements(macro):
-    """The measured comparisons a config declares, as a list."""
+def contrast(table, scale=1.0, column="chord_toe_compensated"):
+    """
+    Compare exactly two groups: Welch's t, its p, and Hedges g.
+
+    Welch rather than Student because the two groups need not have the same
+    variance and there is no reason to assume they do. Hedges g rather than
+    Cohen d because the correction matters at these sample sizes: five
+    specimens per group is where the uncorrected d is visibly optimistic.
+
+    Returns None unless there are exactly two groups, because a difference
+    between two things is the only question this answers.
+    """
+    if "group" not in table:
+        return None
+    groups = list(dict.fromkeys(table.group))
+    if len(groups) != 2:
+        return None
+
+    a = table.loc[table.group == groups[0], column].to_numpy(float) * scale
+    b = table.loc[table.group == groups[1], column].to_numpy(float) * scale
+    if len(a) < 2 or len(b) < 2:
+        return None
+
+    from scipy import stats
+
+    t, p = stats.ttest_ind(a, b, equal_var=False)
+    na, nb = len(a), len(b)
+    sa, sb = a.std(ddof=1), b.std(ddof=1)
+    pooled = np.sqrt(((na - 1) * sa ** 2 + (nb - 1) * sb ** 2) / (na + nb - 2))
+    g = (1 - 3 / (4 * (na + nb) - 9)) * (a.mean() - b.mean()) / pooled
+    return {"groups": groups, "welch_t": float(t), "p": float(p),
+            "hedges_g": float(g)}
+
+
+def measurements(macro, curves_table=None, scale=1.0,
+                 column="chord_toe_compensated"):
+    """
+    Everything to compare the prediction against.
+
+    The values a config states outright, plus one per group reduced from the
+    curves when they are given. Before this, a user who configured curves had
+    to run a second command and type the answers back into the config, in a
+    unit the tool never told them about.
+    """
     if macro is None:
         return []
-    return list(macro.measured)
+    out = list(macro.measured)
+    if curves_table is None:
+        return out
+
+    summary = summarise(curves_table, scale, column)
+    for name, row in summary.iterrows():
+        out.append(Measured(label=str(name), value=float(row["mean"]),
+                            sd=None if pd.isna(row["std"]) else float(row["std"]),
+                            n=int(row["n"])))
+    return out
 
 
 def compare(bounds, measured, names=("Voigt", "Hill", "Reuss")):

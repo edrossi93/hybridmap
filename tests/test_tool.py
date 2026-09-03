@@ -107,6 +107,49 @@ def synthetic_dataset(generated):
           counts.get("QC/invalid", 0) == 20, f"{counts.get('QC/invalid', 0)} of 20")
 
 
+def macro_routes(generated):
+    """
+    The two accepted curve shapes must give the same modulus.
+
+    The deposited curves are stress against strain. Inverting them through a
+    chosen geometry gives the force and displacement a machine would have
+    recorded for that specimen, and putting those back through the tool has to
+    return what we started with. Nothing is invented: the geometry cancels, and
+    the test is that it cancels exactly.
+    """
+    print("\nthe two curve input shapes against each other")
+    from hybridmap import macro
+    from hybridmap.config import Curves
+
+    reduced_cols = {"specimen": "specimen_id", "group": "configuration",
+                    "strain": "strain_pct", "stress": "stress_MPa"}
+    span, width, thickness = 40.0, 12.7, 3.2
+
+    curves = pd.read_csv(ROOT / "data" / "flexural_curves.csv")
+    raw = curves.assign(
+        force_N=curves.stress_MPa * 2 * width * thickness ** 2 / (3 * span),
+        displacement_mm=curves.strain_pct / 100 * span ** 2 / (6 * thickness))
+    path = generated / "as_recorded.csv"
+    raw.to_csv(path, index=False, lineterminator="\n")
+
+    common = dict(chord=(0.05, 0.25), toe_window=0.15)
+    from_reduced = macro.moduli_from_curves(
+        curves, Curves(path=path, columns=reduced_cols, **common))
+    from_raw = macro.moduli_from_curves(raw, Curves(
+        path=path,
+        columns={"specimen": "specimen_id", "group": "configuration",
+                 "displacement": "displacement_mm", "force": "force_N"},
+        geometry={"span": span, "width": width, "thickness": thickness},
+        **common))
+
+    worst = float((from_reduced.chord_toe_compensated
+                   - from_raw.chord_toe_compensated).abs().max())
+    check("force and displacement give the same chord as stress and strain",
+          worst < 1e-9, f"largest difference {worst:.2e} MPa per per cent")
+    check("both routes cover every specimen",
+          len(from_raw) == len(from_reduced) == 10, f"{len(from_raw)} specimens")
+
+
 def paper_config():
     """The worked example must still be the paper."""
     print("\nthe worked example against the published values")
@@ -195,6 +238,7 @@ def config_matches_the_scripts():
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="hybridmap_test_") as tmp:
         synthetic_dataset(Path(tmp))
+        macro_routes(Path(tmp))
     paper_config()
     config_matches_the_scripts()
 

@@ -69,13 +69,12 @@ sweep:
   upper: [60, 65, 70, 75, 80]
 
 macro:
-  # Three-point bending on the same plaque, five specimens per configuration,
-  # ASTM D790 chord with the Annex A1.1 toe compensation. These two numbers are
-  # the reduction of the curves named below.
-  measured:
-    - {label: basalt face in tension, value: 18.85, sd: 0.54, n: 5}
-    - {label: flax face in tension,   value: 19.66, sd: 0.48, n: 5}
-
+  # Three-point bending on the same plaque, five specimens per configuration.
+  # The comparison values are computed from the curves below rather than typed
+  # in as a measured block: a number transcribed into a config is a number that
+  # can be transcribed wrongly, and the point of the deposit is that everything
+  # is recomputed. See tests/synthetic.yaml for the measured form, which is
+  # what to use when all you have is a value and its uncertainty.
   from_curves:
     path: ../../data/flexural_curves.csv
     columns:
