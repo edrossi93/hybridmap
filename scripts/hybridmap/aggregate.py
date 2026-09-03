@@ -1,8 +1,7 @@
 """
 Reduce labelled indents to one row per phase: how many, what share, how stiff.
 
-Two decisions are carried here and both are worth stating where the numbers are
-made, not in a paper somewhere.
+Two decisions are carried here and both belong where the numbers are made.
 
 The fractions are indent-class fractions: indents carrying a label over indents
 carrying any label. They are not measured volume fractions. Anything excluded,
@@ -28,7 +27,7 @@ def class_table(df, classes, modulus_col, label_col="constituent",
     nan. That used to happen quietly, so a cut placed where the user has no
     population produced a printed nan and nothing else. `on_empty` is "allow"
     only for the cut sweep, which is entitled to explore cuts that empty a
-    phase and reports those rows as nan on purpose.
+    phase and reports those rows as nan.
     """
     # Dropped here, so the fractions are over classified indents only: a
     # quality failure does not vote, and neither does an indent no phase

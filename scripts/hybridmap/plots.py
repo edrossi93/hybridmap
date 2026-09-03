@@ -2,7 +2,7 @@
 The three diagnostics a user needs to justify their own choices.
 
 A histogram with the cuts drawn on it, because a cut is defended by the shape
-of the distribution it sits in and by nothing else. A sweep, because the honest
+of the distribution it sits in and by nothing else. A sweep, because the fair
 report of a chosen cut is how much the answer moves when it is chosen
 differently. A prediction against the measurement, because that is the question.
 
@@ -100,7 +100,7 @@ def sweep_plot(table, cut_names, reference=None, ax=None):
     Every bound in the swept grid, against the first cut.
 
     One line per combination of the remaining cuts, so a two-cut sweep reads as
-    a small family of curves, not a table of numbers nobody checks.
+    a small family of curves instead of a table nobody checks.
     """
     _style()
     if ax is None:

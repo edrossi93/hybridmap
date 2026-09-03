@@ -132,7 +132,7 @@ def moduli_from_curves(curves, spec):
         if group_c:
             row["group"] = group[group_c].iloc[0]
         if spec.extra_window:
-            # Measured on the raw strain axis on purpose. A second window is
+            # Measured on the raw strain axis, deliberately. A second window is
             # usually placed relative to a feature located on the raw curve, so
             # shifting it by the toe correction would move it away from the
             # thing that defined it.

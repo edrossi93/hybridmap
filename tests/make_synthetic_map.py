@@ -24,12 +24,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Fixed, so a failing test means the code changed and not the draw.
+# Fixed, so a failing test means the code changed.
 SEED = 20240902
 
 # Three populations: a compliant matrix, a stiff reinforcement, and contacts
 # that caught both. Separated by several standard deviations, because the
-# fixture is there to test the plumbing and not to be a hard classification
+# fixture is there to test the plumbing, not to be a hard classification
 # problem; a test that fails because two populations genuinely overlap would
 # tell us nothing about the tool.
 POPULATIONS = [
