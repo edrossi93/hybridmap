@@ -93,7 +93,7 @@ One caveat on the flax standard deviation: recomputing it from `flexural_moduli.
 
 ## What is in `scripts/`
 
-Fourteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
+Fifteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
 
 **Start here.**
 
@@ -110,6 +110,7 @@ Fourteen files, in three groups, plus the `hybridmap/` package and the example c
 | `clustering_check.py` | k-means and Gaussian-mixture cross-check, ARI against the rule. |
 | `uncertainty_budget.py` | The resampled uncertainty on the Voigt bound. Writes `data/uncertainty_budget.json`. |
 | `make_flexural_moduli.py` | Chord moduli from the bending curves. Reproduces `data/flexural_moduli.csv` exactly. |
+| `table2_intervals.py` | The per-class confidence intervals of Table 2, by the construction its caption declares. |
 
 **Figures.** Each writes the figure it is named for, from the deposited data only.
 
