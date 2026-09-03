@@ -1,6 +1,6 @@
 # Nanoindentation data and analysis code
 
-Data and code behind *Measured-input rule-of-mixtures prediction of the flexural modulus of a flax/basalt/PA-11 hybrid laminate from high-speed nanoindentation mapping*.
+Data and code behind *Estimating the flexural modulus of a hybrid flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a rule of mixtures*.
 
 Everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one and tells you if anything has drifted.
 

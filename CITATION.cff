@@ -1,8 +1,9 @@
 cff-version: 1.2.0
 message: If you use this deposit, please cite the paper and the deposit itself.
 title: >-
-  Data and analysis code for measured-input rule-of-mixtures prediction of the
-  flexural modulus of a flax/basalt/PA-11 hybrid laminate
+  Data and analysis code for estimating the flexural modulus of a hybrid
+  flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a
+  rule of mixtures
 type: dataset
 license: MIT
 authors:
@@ -42,8 +43,8 @@ authors:
 preferred-citation:
   type: article
   title: >-
-    Measured-input rule-of-mixtures prediction of the flexural modulus of a
-    flax/basalt/PA-11 hybrid laminate from high-speed nanoindentation mapping
+    Estimating the flexural modulus of a hybrid flax/basalt/PA-11 laminate from
+    high-speed nanoindentation mapping and a rule of mixtures
   authors:
     - given-names: Edoardo
       family-names: Rossi

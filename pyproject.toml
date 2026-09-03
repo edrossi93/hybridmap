@@ -17,7 +17,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hybridmap"
 version = "1.0.0"
-description = "Measured-input rule of mixtures from an indentation map"
+description = "Rule of mixtures from an indentation map, with measured inputs"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
