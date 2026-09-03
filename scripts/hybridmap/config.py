@@ -85,6 +85,15 @@ class MapSpec:
     kind: str
     columns: dict
     by_depth: dict = field(default_factory=dict)
+    read: dict = field(default_factory=dict)
+
+
+# What a `read:` block may set, passed straight to pandas.read_csv. Deliberately
+# short. These four cover the exports people actually have to deal with, a
+# semicolon-separated European file with decimal commas and a placeholder for a
+# failed fit, and each one is a statement about the file rather than about the
+# analysis. Anything longer would be a second configuration language.
+READ_OPTIONS = {"sep", "decimal", "encoding", "na_values"}
 
 
 @dataclass(frozen=True)
@@ -474,9 +483,16 @@ def from_document(doc, base, source=None):
                           f"row per indent, or 'depth_resolved', properties at "
                           f"several depths")
 
+    read = dict(m.get("read") or {})
+    unknown = sorted(set(read) - READ_OPTIONS)
+    if unknown:
+        raise ConfigError(f"map.read: {', '.join(unknown)} is not something "
+                          f"this reads. Allowed: {', '.join(sorted(READ_OPTIONS))}")
+
     spec = MapSpec(path=(base / str(_need(m, "path", "map"))).resolve(),
                    kind=kind, columns=dict(columns),
-                   by_depth=dict(columns.get("by_depth") or {}))
+                   by_depth=dict(columns.get("by_depth") or {}),
+                   read=read)
     if spec.by_depth and kind == "single_depth":
         raise ConfigError("map.columns.by_depth is set but map.kind is "
                           "'single_depth'. A single-depth map has no depth "

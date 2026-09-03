@@ -62,8 +62,11 @@ def sweep(frame, phases, cuts, grids, modulus_col, classes=None,
         moved = dict(cuts)
         moved.update(zip(names, combo))
         labels = classify(E, zone, phases, moved).values
+        # "allow" here, not error: a sweep exists to try cuts the user has
+        # not committed to, and one of those emptying a phase is a result
+        # worth showing as nan rather than a reason to abandon the grid.
         t = class_table(frame.assign(**{label_col: labels}), classes,
-                        modulus_col, label_col, median_col)
+                        modulus_col, label_col, median_col, on_empty="allow")
         v, h, r = bounds(t.fraction, t[median_col])
         row = {f"{n}_GPa": value for n, value in zip(names, combo)}
         row.update({"Voigt_GPa": v, "Hill_GPa": h, "Reuss_GPa": r})

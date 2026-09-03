@@ -54,7 +54,7 @@ def assign_zones(df, zones, cols):
     if axis is None:
         raise ConfigError(f"zones.axis is '{zones.axis}', which this map does "
                           f"not declare in map.columns")
-    x = df[axis].to_numpy(dtype=float)
+    x = io.numeric(df, axis, "the zones are cut on").to_numpy()
     conditions = [x < b.below for b in zones.bands if b.below is not None]
     names = [b.name for b in zones.bands if b.below is not None]
     if not conditions:
@@ -140,7 +140,8 @@ def apply(df, cfg, cols, zone_col=ZONE_COL, label_col=LABEL_COL):
     kept = df.loc[~discarded(zones, cfg.zones)].copy()
     kept[zone_col] = zones.loc[kept.index]
 
-    kept[label_col] = classify(kept[cols["modulus"]].to_numpy(),
+    kept[label_col] = classify(io.numeric(kept, cols["modulus"],
+                                          "the phases are cut on").to_numpy(),
                                kept[zone_col].to_numpy(),
                                cfg.phases, cfg.cuts).values
 

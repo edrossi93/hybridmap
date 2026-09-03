@@ -49,6 +49,19 @@ def cmd_validate(args):
     print(f"  map        {cfg.map.path.name}, {len(frame)} rows, "
           f"{cfg.map.kind.replace('_', ' ')}")
     print(f"  modulus    {cols['modulus']}")
+
+    # What the tool actually sees in the file. A config can be perfectly valid
+    # against a file it is reading wrongly, and the two questions a user has
+    # when a run looks odd are whether the file was read as intended and
+    # whether the cuts are anywhere near the data.
+    data = io.describe_map(frame, cols, cfg)
+    if data["usable"]:
+        print(f"  values     {data['usable']} usable, {data['missing']} missing"
+              f"; {data['min']:.3g} to {data['max']:.3g}, "
+              f"median {data['median']:.3g}")
+    if "position" in data:
+        lo, hi = data["position"]
+        print(f"  position   {cols['position']}, {lo:.4g} to {hi:.4g}")
     if cfg.zones:
         print(f"  zones      {', '.join(cfg.zones.names) or 'none kept'}")
         dropped = [b.name for b in cfg.zones.bands if b.discard]
@@ -68,6 +81,8 @@ def cmd_validate(args):
         if cfg.macro.curves:
             print(f"  curves     {cfg.macro.curves.path.name}")
     _warn(cfg)
+    for w in data["warnings"]:
+        print(f"  warning: {w}")
 
     # Loading is not proof it will run: the columns the clustering and the
     # quality check name are only touched later, and a config that fails then
