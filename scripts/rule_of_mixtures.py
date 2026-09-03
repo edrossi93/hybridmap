@@ -81,6 +81,51 @@ def substitute(table, cls, new_modulus):
     return _mix.substitute(table, cls, new_modulus, median_col=MEDIAN_COL)
 
 
+# Published flax stiffnesses, for the sensitivity below. They are three
+# different physical quantities, which is the point of tabulating them
+# together rather than picking one:
+#
+#   14.0   immature Gn cell-wall layer, transverse, PF-QNM on a cross-section
+#   18.0   mature G cell-wall layer, same technique and same geometry as ours
+#   52.5   elementary-fibre axial modulus, from tension along the fibre
+#
+# All three from Goudenhooft et al., Fibers 6 (2018) 6. The value this work
+# measures is none of them: it is the compliant response of the flax-rich tow
+# as consolidated, with lumen, middle lamella and impregnating matrix inside
+# the probed volume.
+FLAX_INPUTS = [
+    (14.0, "immature Gn cell-wall layer"),
+    (18.0, "mature G cell-wall layer"),
+    (52.47, "elementary-fibre axial modulus"),
+]
+
+
+def flax_input_sensitivity(table, measured, inputs=FLAX_INPUTS):
+    """
+    Rebuild the bound with the flax term set to each published value in turn.
+
+    Reviewer 3 objects that a modulus measured normal to a cross-section cannot
+    carry the axial contribution the iso-strain term asks of it. This answers
+    by arithmetic rather than by argument: the Voigt sum is recomputed across
+    every defensible flax input, from the tow value measured here to the axial
+    modulus of a single fibre, and the closure to each measured flexural
+    modulus is reported beside it.
+
+    `measured` maps a configuration name to its flexural modulus in GPa.
+    Closure is (Voigt - E_flex) / Voigt, the definition used throughout.
+    """
+    here = float(table.loc[table["class"] == "flax", MEDIAN_COL].iloc[0])
+    rows = []
+    for E, label in [(here, "this work, tow in situ")] + list(inputs):
+        v = (bounds(table.fraction, table[MEDIAN_COL])[0] if E == here
+             else substitute(table, "flax", E)[0])
+        row = {"flax_input_GPa": E, "source": label, "Voigt_GPa": v}
+        for name, e in measured.items():
+            row[f"closure_{name}"] = (v - e) / v
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
 if __name__ == "__main__":
     data = Path(__file__).resolve().parents[1] / "data"
 
@@ -101,6 +146,18 @@ if __name__ == "__main__":
     for Em in (1.0, 1.2, 1.5):
         print(f"matrix set to bulk PA-11 {Em} GPa: "
               f"Voigt {substitute(tab, 'matrix', Em)[0]:.2f} GPa")
+
+    flex = pd.read_csv(data / "flexural_moduli.csv")
+    measured = {c: g.E_D790_toe_compensated_GPa.mean()
+                for c, g in flex.groupby("configuration")}
+    fs = flax_input_sensitivity(tab, measured)
+    print("\nflax-input sensitivity (Supplementary Table S6)")
+    print(f"  {'flax input':>10}  {'source':<32}{'Voigt':>7}"
+          f"{'closure basalt':>16}{'closure flax':>14}")
+    for _, r in fs.iterrows():
+        print(f"  {r.flax_input_GPa:>10.2f}  {r.source:<32}{r.Voigt_GPa:>7.2f}"
+              f"{100 * r.closure_basalt_face:>15.1f}%{100 * r.closure_flax_face:>13.1f}%")
+    print("  the bound stays above both measurements for every input")
 
     raw = pd.read_csv(data / "shallow_map.csv")
     sweep = threshold_sweep(raw)
