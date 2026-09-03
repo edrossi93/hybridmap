@@ -1,0 +1,42 @@
+# Packaging is optional. The deposit runs as it stands, with `cd scripts` and
+# `python -m hybridmap`, and the reproduction path needs nothing installed.
+#
+# This exists so that someone using the tool on their own data can run it from
+# wherever their data is:
+#
+#     pip install -e .
+#     hybridmap report --config my_config.yaml
+#
+# The package is declared where it already lives, under scripts/, so that
+# installing changes nothing about the layout the paper scripts rely on.
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hybridmap"
+version = "1.0.0"
+description = "Measured-input rule of mixtures from an indentation map"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [{name = "Edoardo Rossi"}]
+
+# Kept in step with requirements.txt by tests/test_deposit.py, which fails if
+# the two ever name different packages.
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.10",
+    "scikit-learn>=1.3",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+hybridmap = "hybridmap.__main__:main"
+
+[tool.setuptools]
+package-dir = {"" = "scripts"}
+packages = ["hybridmap"]

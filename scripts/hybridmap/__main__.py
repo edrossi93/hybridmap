@@ -1,15 +1,27 @@
 """
-Command line for the tool. Run from the scripts/ directory:
+Command line for the tool.
 
-    python -m hybridmap validate  --config examples/paper_shallow.yaml
-    python -m hybridmap histogram --config examples/paper_shallow.yaml --out figs
-    python -m hybridmap report    --config examples/paper_shallow.yaml
-    python -m hybridmap sweep     --config examples/paper_shallow.yaml
-    python -m hybridmap classify  --config examples/paper_shallow.yaml --out labelled.csv
+Run it from the scripts/ directory as `python -m hybridmap`, or install the
+deposit with `pip install -e .` and call `hybridmap` from anywhere.
 
-Every command takes --set to override one value without editing the file, for
-example --set cuts.lower=12. Overrides are applied before validation, so a
-typo in one is caught the same way a typo in the file is.
+Starting from your own CSV:
+
+    hybridmap init      --map your_map.csv --out yours.yaml
+    hybridmap validate  --config yours.yaml
+    hybridmap histogram --config yours.yaml --out figs
+    hybridmap report    --config yours.yaml --out results
+
+The other commands, once the config is settled:
+
+    classify      the per-indent labels, as a CSV
+    sweep         the bounds across a grid of cut values
+    uncertainty   the resampled spread on the bound
+    cluster       the unsupervised cross-check
+    macro         bending curves reduced to per-specimen moduli
+
+Every command except init takes --set to override one value without editing the
+file, for example --set cuts.lower=12. Overrides are applied before validation,
+so a typo in one is caught the same way a typo in the file is.
 
 A configuration error exits 2 and prints what to fix. Nothing here writes to
 the input file or to data/.
@@ -321,8 +333,11 @@ def cmd_init(args):
     if args.out:
         Path(args.out).write_text(text, encoding="utf8")
         print(f"written to {args.out}")
-        print(f"next: python -m hybridmap histogram --config {args.out} "
-              f"--out figs")
+        # Named without an invocation prefix: this runs both as
+        # `python -m hybridmap` and as an installed `hybridmap`, and printing
+        # one of those would be wrong for half its users.
+        print(f"next: 'histogram --config {args.out} --out figs', to choose "
+              f"the cuts, then 'report'")
     else:
         print(text)
     return 0
@@ -509,7 +524,7 @@ def cmd_histogram(args):
     cfg, frame, cols = _load(args)
     labelled = _labelled(cfg, frame, cols)
     fig = plots.modulus_histogram(labelled[cols["modulus"]], cfg, log=args.log)
-    path = plots.save(fig, f"{cfg.source.stem}_modulus_histogram", args.out)
+    path = plots.save(fig, "modulus_histogram", args.out)
     print(f"written to {path}")
 
     if cfg.sweep:
@@ -517,13 +532,13 @@ def cmd_histogram(args):
         s = mixtures.sweep_summary(sw, cfg.cuts)
         fig = plots.sweep_plot(sw, list(cfg.sweep),
                                s["reference_GPa"] if s else None)
-        print(f"written to {plots.save(fig, f'{cfg.source.stem}_cut_sweep', args.out)}")
+        print(f"written to {plots.save(fig, 'cut_sweep', args.out)}")
 
     measured = macro.measurements(cfg.macro)
     if measured:
         table, bounds = _table_and_bounds(cfg, labelled, cols)
         fig = plots.prediction_vs_measurement(bounds, measured)
-        print(f"written to {plots.save(fig, f'{cfg.source.stem}_prediction', args.out)}")
+        print(f"written to {plots.save(fig, 'prediction', args.out)}")
     return 0
 
 
@@ -578,6 +593,13 @@ def build_parser():
                         help="override one config value, e.g. cuts.lower=12")
         return sp
 
+    sp = sub.add_parser("init", help="write a starter config for a CSV")
+    sp.add_argument("--map", required=True, help="the map CSV to describe")
+    sp.add_argument("--out", help="write the config here rather than to stdout")
+    sp.add_argument("--phases", default=3, type=int,
+                    help="how many phases to lay out, default 3")
+    sp.set_defaults(fn=cmd_init)
+
     common(sub.add_parser("validate", help="check a config against its data")
            ).set_defaults(fn=cmd_validate)
 
@@ -607,12 +629,6 @@ def build_parser():
     sp.add_argument("--log", action="store_true", help="logarithmic counts")
     sp.set_defaults(fn=cmd_histogram)
 
-    sp = sub.add_parser("init", help="write a starter config for a CSV")
-    sp.add_argument("--map", required=True, help="the map CSV to describe")
-    sp.add_argument("--out", help="write the config here rather than to stdout")
-    sp.add_argument("--phases", default=3, type=int,
-                    help="how many phases to lay out, default 3")
-    sp.set_defaults(fn=cmd_init)
 
     sp = common(sub.add_parser("macro", help="reduce bending curves to moduli"))
     sp.add_argument("--out", help="write the per-specimen table here")

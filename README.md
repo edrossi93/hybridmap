@@ -18,7 +18,15 @@ Expected last line: `34 of 34 values reproduce`.
 
 Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
-If you came here to run the method on your own map rather than to check ours, skip to *Running this on your own map*.
+### Where to go next
+
+| if you want to | go to |
+|---|---|
+| check that the paper's numbers are what the data says | *Reproducing specific things* |
+| know what is in the deposited files | *What is in `data/`* |
+| run the method on your own map | *Running this on your own map* |
+| know what your CSV has to look like | *What your CSV has to look like* |
+| cite this, or check the licence | *Citation*, *Licence* |
 
 ---
 
@@ -211,6 +219,17 @@ python -m hybridmap histogram --config mine.yaml --out figs
 # look at figs/modulus_histogram.png, then edit the cuts in mine.yaml
 python -m hybridmap report    --config mine.yaml --out results
 ```
+
+Those commands run from `scripts/` because that is where the package sits. To
+use the tool on data kept somewhere else, install it once and drop the `cd`:
+
+```
+pip install -e .
+hybridmap report --config /path/to/mine.yaml --out results
+```
+
+Installing is optional and changes nothing else. The reproduction path above
+needs no install at all.
 
 `init` guesses which column is which from the column names and lays out one cut per phase boundary at even quantiles of your data. Those quantile cuts are a placeholder and the file says so: they spread the indents evenly between phases and mean nothing physically. The histogram is how you replace them with a choice you can defend.
 

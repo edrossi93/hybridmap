@@ -299,6 +299,40 @@ class Deposit:
             self.fail(f"the README quotes more than one count of reproduced "
                       f"values: {', '.join(sorted(quoted))}")
 
+    def check_dependencies_agree(self):
+        """
+        requirements.txt and pyproject.toml must name the same packages.
+
+        Two lists of dependencies is one more than anybody keeps up to date.
+        Whichever gets a new entry, this fails until the other does too.
+        """
+        pyproject = self.root / "pyproject.toml"
+        req = self.root / "requirements.txt"
+        if not pyproject.exists() or not req.exists():
+            return
+
+        def names(text):
+            return {re.split(r"[<>=!\[;]", line.strip().strip('",'))[0]
+                    .strip().lower()
+                    for line in text.splitlines()
+                    if line.strip() and not line.strip().startswith("#")}
+
+        declared = names(self.text(req))
+        block = re.search(r"dependencies\s*=\s*\[(.*?)\]",
+                          self.text(pyproject), re.S)
+        self.checks += 1
+        if block is None:
+            self.fail("pyproject.toml declares no dependencies block")
+            return
+        packaged = names(block.group(1)) - {""}
+
+        for missing in sorted(declared - packaged):
+            self.fail(f"{missing} is in requirements.txt but not in "
+                      f"pyproject.toml")
+        for missing in sorted(packaged - declared):
+            self.fail(f"{missing} is in pyproject.toml but not in "
+                      f"requirements.txt")
+
     def check_house_style(self):
         """
         No em-dashes, anywhere that ships.
@@ -368,6 +402,7 @@ class Deposit:
         self.check_modules()
         self.check_data_files()
         self.check_reproduce_count()
+        self.check_dependencies_agree()
         self.check_house_style()
         self.check_imports_declared()
         return self
