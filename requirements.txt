@@ -1,6 +1,30 @@
+# Python 3.8 or newer. The deposit is tested on 3.10 and 3.12; 3.8 is the
+# oldest the code will import on, and nothing here uses a newer language
+# feature than that.
+#
+#     pip install -r requirements.txt
+#
+# The versions below are the ones this work was done against, not the oldest
+# that would serve. Older releases may well work and have not been tested.
+
+# Arrays and the random draws behind the bootstrap and the Dirichlet.
 numpy>=1.24
+
+# Every table in and out: the maps, the curves, the class tables.
 pandas>=2.0
+
+# Welch's t-test and the bootstrap percentiles. Used by the flexural
+# comparison and by reproduce_paper_values.py, not by the classification.
 scipy>=1.10
+
+# k-means, Gaussian mixtures and the adjusted Rand index, for the unsupervised
+# cross-check only. The rule-based classification does not use it.
 scikit-learn>=1.3
+
+# Figures, both the paper's and the tool's diagnostics.
 matplotlib>=3.7
+
+# Reads the configuration files. YAML rather than JSON so a threshold can carry
+# the reason for its value on the line above it. Configs written as JSON are
+# read too, and need nothing beyond the standard library.
 pyyaml>=6.0

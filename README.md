@@ -16,7 +16,7 @@ python reproduce_paper_values.py
 
 Expected last line: `34 of 34 values reproduce`.
 
-Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
+Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
 If you came here to run the method on your own map rather than to check ours, skip to *Running this on your own map*.
 

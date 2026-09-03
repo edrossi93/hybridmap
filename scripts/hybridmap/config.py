@@ -19,6 +19,11 @@ flexibility: the classification is the step a sceptical reader will want to
 reconstruct by hand.
 """
 
+# Annotations are not evaluated at import with this in place, which keeps the
+# `float | None` spellings below from raising on Python 3.8 and 3.9. Without it
+# the whole deposit, reproduction path included, silently needs 3.10.
+from __future__ import annotations
+
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
