@@ -53,6 +53,8 @@ def sweep(frame, phases, cuts, grids, modulus_col, classes=None,
                          "and the values to try for each")
 
     names = list(grids)
+    # Phase order fixes the column order of every table downstream, so it comes
+    # from the config rather than from whatever order the labels appear in.
     classes = list(classes) if classes else [p.name for p in phases]
     E = frame[modulus_col].to_numpy()
     zone = frame[zone_col].to_numpy() if zone_col in frame else None

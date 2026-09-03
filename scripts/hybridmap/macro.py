@@ -32,6 +32,9 @@ def chord_modulus(strain, stress, lo, hi):
     reach GPa; that conversion is left to the caller because only the caller
     knows what units the file is in.
     """
+    # Two points define a line, so fewer than two is not a thin fit but no fit
+    # at all. Usually it means the chord interval was written for a different
+    # strain unit than the file is in.
     inside = (strain >= lo) & (strain <= hi)
     if inside.sum() < 2:
         raise ValueError(f"only {int(inside.sum())} points fall between "
@@ -56,6 +59,8 @@ def toe_intercept(strain, stress, width):
     steepest, intercept = -np.inf, 0.0
     for start in strain:
         inside = (strain >= start) & (strain <= start + width)
+        # Three points minimum, so a window that catches the sparse tail of a
+        # curve cannot win on the strength of a two-point line through noise.
         if inside.sum() < 3:
             continue
         slope, offset = np.polyfit(strain[inside], stress[inside], 1)

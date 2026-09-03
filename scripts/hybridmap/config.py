@@ -263,7 +263,13 @@ def apply_overrides(doc, assignments):
 
 
 def _scalar(raw):
-    """Read an override value as the type it looks like, string as a fallback."""
+    """
+    Read an override value as the type it looks like, string as a fallback.
+
+    JSON rather than a hand-written parser, so that --set sweep.lower=[10,15]
+    gives a list and --set map.read.sep=';' gives a string, with one rule
+    covering both instead of a guess per case.
+    """
     try:
         return json.loads(raw)
     except (ValueError, TypeError):
@@ -349,6 +355,16 @@ def _phases(raw, cuts, zones):
         if name in seen:
             raise ConfigError(f"phases: '{name}' is declared twice")
         seen.add(name)
+
+        # One way of saying where a phase sits, not two. Written together the
+        # keys silently overwrite each other, and the reader of the config has
+        # no way to tell which one won.
+        given = [k for k in ("between", "below", "above") if k in p]
+        if "between" in given and len(given) > 1:
+            raise ConfigError(
+                f"phases[{i}] '{name}' gives both 'between' and "
+                f"{' and '.join(repr(k) for k in given if k != 'between')}. "
+                f"'between' already bounds the phase on both sides.")
 
         lower = upper = None
         if "between" in p:
@@ -583,6 +599,9 @@ def from_document(doc, base, source=None):
 
     m = _need(doc, "map", "config")
     columns = _need(m, "columns", "map")
+    # The one column with no default. Everything else about a map is optional
+    # because some maps genuinely lack it, but a phase rule with nothing to cut
+    # on is not a configuration, it is a blank.
     if "modulus" not in columns:
         raise ConfigError("map.columns: 'modulus' is required; it is the "
                           "property the phases are cut on")
@@ -612,6 +631,8 @@ def from_document(doc, base, source=None):
     if not isinstance(cuts_raw, dict) or not cuts_raw:
         raise ConfigError("cuts: expected at least one named modulus cut, for "
                           "example  cuts: {split: 15.0}")
+    # Held as a name to value mapping rather than a list, because the sweep and
+    # the phases both refer to a cut by the name the user gave it.
     cuts = {str(k): _float(v, f"cuts.{k}") for k, v in cuts_raw.items()}
 
     # Zones are cut on one of the declared roles, so by_depth is not a
