@@ -2,7 +2,7 @@
 Reduce labelled indents to one row per phase: how many, what share, how stiff.
 
 Two decisions are carried here and both are worth stating where the numbers are
-made rather than in a paper somewhere.
+made, not in a paper somewhere.
 
 The fractions are indent-class fractions: indents carrying a label over indents
 carrying any label. They are not measured volume fractions. Anything excluded,
@@ -30,10 +30,9 @@ def class_table(df, classes, modulus_col, label_col="constituent",
     only for the cut sweep, which is entitled to explore cuts that empty a
     phase and reports those rows as nan on purpose.
     """
-    # Anything not carrying one of the configured phase names is dropped here
-    # rather than earlier, so the fractions are over classified indents only.
-    # A quality failure does not vote, and neither does an indent that fell in
-    # a modulus range no phase claimed.
+    # Dropped here, so the fractions are over classified indents only: a
+    # quality failure does not vote, and neither does an indent no phase
+    # claimed.
     d = df[df[label_col].isin(classes)]
     n = np.array([(d[label_col] == c).sum() for c in classes], float)
     if n.sum() == 0:

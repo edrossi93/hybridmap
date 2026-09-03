@@ -56,8 +56,7 @@ def run(df, features, modulus_col, k=4, seed=0, n_init=10, model="kmeans",
         use_pca=False, n_components=3, merge_lowest=0,
         label_col="constituent", invalid=INVALID):
     """Fit, align the numbering, and score against the rule's labels."""
-    # A tuple indexes a DataFrame as a single key rather than as a column
-    # list, and a config naturally holds features as a tuple.
+    # A tuple indexes a DataFrame as one key, not as a column list.
     features = list(features)
     io.require(df, features + [modulus_col], "the clustering cross-check")
 

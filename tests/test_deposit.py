@@ -45,7 +45,7 @@ class Deposit:
     """
     The checks, over one deposit directory.
 
-    Takes the root as an argument rather than assuming its own location, so
+    Takes the root as an argument, not assuming its own location, so
     that the same code can check a copy in a clean room, and so that the
     pre-publication gate, which lives outside the deposit, can run it without
     holding a second copy of the logic.

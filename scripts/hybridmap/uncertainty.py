@@ -16,7 +16,7 @@ uniform prior.
 Each resample of a phase has the size of that phase, which is what makes the
 spread reflect how well the phase is actually sampled: a class carrying a few
 hundred indents is less certain than one carrying a few thousand, and the
-budget should say so rather than treat them alike.
+budget should say so instead of treating them alike.
 
 What is deliberately outside this budget is anything that is a choice rather
 than a random quantity. Where the cuts go is a choice, reported by
@@ -63,7 +63,7 @@ def budget(table, replicates, classes, seed=0, n_draws=10_000,
     Three sums from the same replicates: everything varying, then each source
     varying alone with the other held at its point value. That is how the
     components are attributed, and why they are reported as separate standard
-    deviations rather than as one number.
+    deviations and not as one number.
     """
     E = np.column_stack([replicates[c] for c in classes])
 

@@ -54,7 +54,7 @@ def sweep(frame, phases, cuts, grids, modulus_col, classes=None,
 
     names = list(grids)
     # Phase order fixes the column order of every table downstream, so it comes
-    # from the config rather than from whatever order the labels appear in.
+    # from the config, not from whatever order the labels happen to appear in.
     classes = list(classes) if classes else [p.name for p in phases]
     E = frame[modulus_col].to_numpy()
     zone = frame[zone_col].to_numpy() if zone_col in frame else None
@@ -66,7 +66,7 @@ def sweep(frame, phases, cuts, grids, modulus_col, classes=None,
         labels = classify(E, zone, phases, moved).values
         # "allow" here, not error: a sweep exists to try cuts the user has
         # not committed to, and one of those emptying a phase is a result
-        # worth showing as nan rather than a reason to abandon the grid.
+        # worth showing as nan, not a reason to abandon the grid.
         t = class_table(frame.assign(**{label_col: labels}), classes,
                         modulus_col, label_col, median_col, on_empty="allow")
         v, h, r = bounds(t.fraction, t[median_col])
@@ -80,8 +80,7 @@ def sweep_summary(table, cuts):
     """
     The reference construction and how far the grid moves it.
 
-    Returned rather than printed so the caller decides how to say it, but the
-    reference row is found here because getting it wrong, comparing the grid
+    The caller decides how to say it. The reference row is found here because getting it wrong, comparing the grid
     against its own mean instead of against the configured cuts, would flatter
     the answer.
     """

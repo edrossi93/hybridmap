@@ -156,8 +156,8 @@ def cmd_report(args):
     print(table.to_string(index=False,
                           float_format=lambda v: f"{v:.4f}"))
 
-    # The bound carries its resampled spread here rather than in a separate
-    # command, because a bound quoted without one invites being read as exact.
+    # The bound carries its resampled spread here, not in a separate command:
+    # a bound quoted bare invites being read as exact.
     # It costs about a second on a map of several thousand indents.
     replicates = uncertainty.bootstrap_medians(
         labelled, cfg.phase_names, cols["modulus"],
@@ -199,9 +199,9 @@ def cmd_report(args):
             print(f"  {label:<48} Voigt {v:.2f}")
 
     if cfg.macro:
-        # The curves are reduced here rather than left to a second command.
-        # Before this the user was told to go and run one, then type its
-        # answers back into the config, in a unit nothing had mentioned.
+        # Reduced here. Before this the user was told to go and run a second
+        # command, then type its answers back into the config, in a unit
+        # nothing had mentioned.
         reduced = _reduce_curves(cfg)
         scale = cfg.macro.curves.modulus_scale if reduced is not None else 1.0
         measured = macro.measurements(cfg.macro, reduced, scale)
@@ -246,7 +246,7 @@ def cmd_init(args):
     Write a starter config for a CSV, with the user's own column names in it.
 
     The column guesses are guesses and are marked as such. The cuts are placed
-    at even quantiles of the data, which is a stated rule rather than a
+    at even quantiles of the data, which is a stated rule and not a
     judgement: a cut is a decision about where the populations divide, and this
     has not looked at the populations. The comment in the file says so, and
     'hybridmap histogram' is how to replace them with a real choice.
@@ -333,9 +333,8 @@ def cmd_init(args):
     if args.out:
         Path(args.out).write_text(text, encoding="utf8")
         print(f"written to {args.out}")
-        # Named without an invocation prefix: this runs both as
-        # `python -m hybridmap` and as an installed `hybridmap`, and printing
-        # one of those would be wrong for half its users.
+        # No invocation prefix: this runs both as `python -m hybridmap` and
+        # as an installed `hybridmap`.
         print(f"next: 'histogram --config {args.out} --out figs', to choose "
               f"the cuts, then 'report'")
     else:
@@ -346,7 +345,7 @@ def cmd_init(args):
 def _write_report(where, cfg, table, bounds, spread, replicates, sweep_table,
                   reduced, comparison, labelled, cols):
     """
-    Everything the report computed, as files rather than as scrollback.
+    Everything the report computed, as files instead of scrollback.
 
     A user analysing their own laminate needs a table they can put in a paper
     and a figure they can look at, not terminal output to retype. The figures
@@ -362,13 +361,13 @@ def _write_report(where, cfg, table, bounds, spread, replicates, sweep_table,
     written = []
 
     def csv(frame, name, index=False):
-        # Line endings pinned, so a table written on Windows and one written on
-        # Linux are the same file rather than differing in every line.
+        # Pinned, so a table written on Windows and one written on Linux are
+        # the same file.
         path = out / name
         frame.to_csv(path, index=index, lineterminator="\n")
         written.append(path)
 
-    # Named for the construction rather than called a confidence interval.
+    # Named for the construction, not called a confidence interval.
     # There is more than one defensible interval for a median, they do not
     # agree, and a column headed "interval" invites being compared against one
     # built some other way.
@@ -560,9 +559,8 @@ def cmd_macro(args):
     spec = cfg.macro.curves
     scale = spec.modulus_scale
 
-    # Scaled on the way out rather than inside the fit. The fit works in
-    # whatever unit the file is in, and the scale is the single place that
-    # records what that was.
+    # Scaled on the way out, not inside the fit. The fit works in whatever
+    # unit the file is in; the scale is the one place that records which.
     shown = reduced.copy()
     for column in [c for c in shown.columns if c.startswith("chord")]:
         shown[column] *= scale
@@ -595,7 +593,7 @@ def build_parser():
 
     sp = sub.add_parser("init", help="write a starter config for a CSV")
     sp.add_argument("--map", required=True, help="the map CSV to describe")
-    sp.add_argument("--out", help="write the config here rather than to stdout")
+    sp.add_argument("--out", help="write the config here instead of printing it")
     sp.add_argument("--phases", default=3, type=int,
                     help="how many phases to lay out, default 3")
     sp.set_defaults(fn=cmd_init)

@@ -43,9 +43,9 @@ def read_table(path, options=None, what="table"):
     if frame.empty:
         raise ConfigError(f"{path.name} has no rows")
     if len(frame.columns) == 1:
-        # One column almost always means the separator is wrong rather than
-        # that somebody really deposited a single-column file, and the symptom
-        # otherwise appears much later as a missing column.
+        # One column almost always means the separator is wrong, not that
+        # somebody deposited a single-column file. The symptom otherwise
+        # surfaces much later, as a missing column.
         raise ConfigError(
             f"{path.name} read as a single column, {frame.columns[0]!r}. If it "
             f"is not comma separated, say so with a read block, for example "

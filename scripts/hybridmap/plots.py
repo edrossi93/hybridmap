@@ -16,8 +16,7 @@ from pathlib import Path
 import matplotlib
 import numpy as np
 
-# Written to file more often than shown, and a user on a machine with no
-# display should not have to know about backends to get a PNG.
+# Written to file more often than shown, and headless machines are common.
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt          # noqa: E402
 
@@ -41,7 +40,7 @@ def _bands(cfg):
     Modulus intervals in the config, each with the phases that claim it.
 
     Phases that share an interval and differ only by zone, which is how a
-    compliant band is usually split, are drawn once rather than shaded twice.
+    compliant band is usually split, are drawn once and not shaded twice.
     """
     groups = {}
     for p in cfg.phases:
@@ -101,7 +100,7 @@ def sweep_plot(table, cut_names, reference=None, ax=None):
     Every bound in the swept grid, against the first cut.
 
     One line per combination of the remaining cuts, so a two-cut sweep reads as
-    a small family of curves rather than as a table of numbers nobody checks.
+    a small family of curves, not a table of numbers nobody checks.
     """
     _style()
     if ax is None:

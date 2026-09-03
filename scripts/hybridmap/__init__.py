@@ -2,7 +2,7 @@
 hybridmap: measured-input rule of mixtures from an indentation map.
 
 The chain is classify, aggregate, bound, compare against a macroscopic
-measurement. Every choice that makes it one laboratory's analysis rather than a
+measurement. Every choice that makes it one laboratory's analysis and not a
 method, where the specimen ends, where the phases divide, what the phases are
 called, which column holds what, is read from a config file.
 

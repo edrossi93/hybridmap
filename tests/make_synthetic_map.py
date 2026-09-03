@@ -24,8 +24,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Fixed so the fixture is the same on every machine and a failing test means
-# the code changed rather than the draw.
+# Fixed, so a failing test means the code changed and not the draw.
 SEED = 20240902
 
 # Three populations: a compliant matrix, a stiff reinforcement, and contacts

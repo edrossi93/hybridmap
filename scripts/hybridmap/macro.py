@@ -156,7 +156,7 @@ def contrast(table, scale=1.0, column="chord_toe_compensated"):
     Compare exactly two groups: Welch's t, its p, and Hedges g.
 
     Welch rather than Student because the two groups need not have the same
-    variance and there is no reason to assume they do. Hedges g rather than
+    variance and there is no reason to assume they do. Hedges g and not
     Cohen d because the correction matters at these sample sizes: five
     specimens per group is where the uncorrected d is visibly optimistic.
 

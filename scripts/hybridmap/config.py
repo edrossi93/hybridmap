@@ -91,7 +91,7 @@ class MapSpec:
 # What a `read:` block may set, passed straight to pandas.read_csv. Deliberately
 # short. These four cover the exports people actually have to deal with, a
 # semicolon-separated European file with decimal commas and a placeholder for a
-# failed fit, and each one is a statement about the file rather than about the
+# failed fit, and each one is a statement about the file, not about the
 # analysis. Anything longer would be a second configuration language.
 READ_OPTIONS = {"sep", "decimal", "encoding", "na_values"}
 
@@ -144,8 +144,7 @@ class Curves:
         return "force" in self.columns and "displacement" in self.columns
 
 
-# What the geometry block has to give, in millimetres, to turn a force and a
-# displacement into a stress and a strain.
+# All three in millimetres.
 GEOMETRY = ("span", "width", "thickness")
 
 # The chord is a slope in stress-unit per per-cent-strain, so with stress in
@@ -167,7 +166,7 @@ class Substitution:
     One "what if this phase's input were different" question.
 
     A phase modulus is sometimes a choice between two defensible measurements
-    rather than a single number. Asking what the bound would be under the other
+    and not a single number. Asking what the bound would be under the other
     one is a sensitivity, reported alongside the answer, not folded into it.
     """
     phase: str
@@ -242,7 +241,7 @@ def apply_overrides(doc, assignments):
     They are applied before validation, not after, so an override is checked
     exactly as if it had been written into the file. An override that creates a
     key nobody reads is a typo, so a path whose parent does not exist is an
-    error rather than a new branch of the document.
+    error, not a new branch of the document.
     """
     for item in assignments or ():
         if "=" not in item:
@@ -413,7 +412,7 @@ def coverage_warnings(cfg):
     Report modulus intervals no phase claims, and phases no indent can reach.
 
     Not an error. Leaving an interval unclaimed is sometimes deliberate, and
-    the tool should say what it will do rather than refuse. But an unclaimed
+    the tool should say what it will do instead of refusing. But an unclaimed
     interval is also how indents quietly end up unlabelled and drop out of the
     fractions, so it is said out loud.
     """
@@ -631,12 +630,11 @@ def from_document(doc, base, source=None):
     if not isinstance(cuts_raw, dict) or not cuts_raw:
         raise ConfigError("cuts: expected at least one named modulus cut, for "
                           "example  cuts: {split: 15.0}")
-    # Held as a name to value mapping rather than a list, because the sweep and
-    # the phases both refer to a cut by the name the user gave it.
+    # A name to value mapping, not a list: the sweep and the phases both refer
+    # to a cut by the name the user gave it.
     cuts = {str(k): _float(v, f"cuts.{k}") for k, v in cuts_raw.items()}
 
-    # Zones are cut on one of the declared roles, so by_depth is not a
-    # candidate axis even though it sits in the same section.
+    # by_depth sits in the same section but is not a coordinate to cut on.
     zones = _zones(doc.get("zones"),
                    {k: v for k, v in spec.columns.items() if k != "by_depth"})
     phases = _phases(_need(doc, "phases", "config"), cuts, zones)
