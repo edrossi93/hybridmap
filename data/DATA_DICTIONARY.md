@@ -1,6 +1,6 @@
 # Data dictionary
 
-Twelve files: eight CSVs and four JSON summaries. Every column, its unit, its
+Thirteen files: eight CSVs and five JSON summaries. Every column, its unit, its
 range, and what a blank cell means.
 
 Two conventions hold throughout unless a column says otherwise:
@@ -264,3 +264,20 @@ figures in §2.2.
 Compliance is counted per indent rather than summarised, because a class median
 hides how many contacts breach the criterion and a class maximum here is set by
 failed contacts: the largest flax contact depth is 31 µm.
+
+## `mixed_class_deconvolution.json`
+
+Written by `scripts/mixed_class_deconvolution.py`. Reviewer 3 asked whether the
+mixed-volume class survives a change of contact footprint. It does not; what it
+is built out of does, and this is that calculation.
+
+| key | meaning |
+|---|---|
+| `acquisitions` | per acquisition: the zone, the indent count, the two end members, the deconvolved basalt fraction under each mixing rule with its 95 % interval, the class fraction for comparison, and the end-member sweep |
+| `two_class_sum_GPa` | the two-class Voigt sum under each rule, both acquisitions rebuilt on one common pair of end members, with the spread between them |
+| `cross_acquisition_agreement` | the same sweep read the other way: how far the absolute fraction moves with the end members, against how far the two acquisitions move apart |
+| `independent_comparison` | the basalt packing inside the same zone from backscattered-electron imaging, which shares no input with the indentation |
+
+Every indent in the zone is inverted, not only those the rule called
+mixed-volume, so no classification threshold enters the result. That is what
+makes it a test of the objection rather than a restatement of it.

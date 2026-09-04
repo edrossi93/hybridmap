@@ -45,6 +45,7 @@ Eight CSVs and two JSON summaries. The first three are the exported per-indent a
 | `flexural_moduli.csv` | 10 | Per-specimen chord moduli, raw and after ASTM D790 Annex A1.1 toe compensation, plus the modulus over the 0.28-0.43 % window. |
 | `bse_segmentation_tiles.csv` | 91 | One row per imaged tile: zone pixel counts and the fibre/matrix split inside each zone. |
 | `bse_segmentation_summary.json` | - | The constituent volume fractions of Figure 2e, with the aggregation stated. |
+| `mixed_class_deconvolution.json` | - | The mixed-volume class inverted back onto its end members, both acquisitions, with the independent comparison. |
 | `uncertainty_budget.json` | - | The resampled uncertainty on the Voigt bound, drawn from bootstrap replicates. |
 
 Units are in the column names. Moduli and hardness in GPa, positions in µm, depths in nm, loads in mN, phase angles in degrees.
@@ -93,7 +94,7 @@ One caveat on the flax standard deviation: recomputing it from `flexural_moduli.
 
 ## What is in `scripts/`
 
-Seventeen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
+Eighteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
 
 **Start here.**
 
@@ -113,6 +114,7 @@ Seventeen files, in three groups, plus the `hybridmap/` package and the example 
 | `spacing_compliance.py` | Contact depth per indent from load and hardness, against the Phani–Oliver spacing criterion. Writes `data/spacing_compliance.json`. |
 | `make_flexural_moduli.py` | Chord moduli from the bending curves. Reproduces `data/flexural_moduli.csv` exactly. |
 | `table2_intervals.py` | The per-class confidence intervals of Table 2, by the construction its caption declares. |
+| `mixed_class_deconvolution.py` | Inverts every indent in the basalt-rich zone onto the basalt/matrix tie line, under parallel and series mixing, and compares the two acquisitions with each other and with the imaging. Writes `data/mixed_class_deconvolution.json`. |
 
 **Figures.** Each writes the figure it is named for, from the deposited data only.
 
@@ -142,6 +144,7 @@ python clustering_check.py    # ARI across three representations, stability, see
 python uncertainty_budget.py  # the +/- on the bound, by component
 python phase_angle_sensitivity.py  # what the QC threshold does and does not move
 python spacing_compliance.py       # how many indents meet the spacing criterion
+python mixed_class_deconvolution.py  # the class inverted onto its end members
 ```
 
 ### Where the per-indent tables come from

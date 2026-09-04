@@ -1,0 +1,207 @@
+{
+  "seed": 42,
+  "n_bootstrap": 4000,
+  "acquisitions": {
+    "shallow": {
+      "zone": "basalt",
+      "n_indents": 2759,
+      "e_basalt_end_member_GPa": 85.992,
+      "e_matrix_end_member_GPa": 4.66,
+      "phi_linear": 0.3555,
+      "phi_linear_ci95": [
+        0.3438,
+        0.3668
+      ],
+      "phi_compliance": 0.6932,
+      "phi_compliance_ci95": [
+        0.6796,
+        0.7067
+      ],
+      "endpoint_sensitivity": [
+        {
+          "e_basalt": 83.49,
+          "e_matrix": 1.0,
+          "phi_compliance": 0.9102
+        },
+        {
+          "e_basalt": 83.49,
+          "e_matrix": 2.5,
+          "phi_compliance": 0.7889
+        },
+        {
+          "e_basalt": 83.49,
+          "e_matrix": 4.66,
+          "phi_compliance": 0.6943
+        },
+        {
+          "e_basalt": 85.99,
+          "e_matrix": 1.0,
+          "phi_compliance": 0.9099
+        },
+        {
+          "e_basalt": 85.99,
+          "e_matrix": 2.5,
+          "phi_compliance": 0.7882
+        },
+        {
+          "e_basalt": 85.99,
+          "e_matrix": 4.66,
+          "phi_compliance": 0.6932
+        },
+        {
+          "e_basalt": 88.49,
+          "e_matrix": 1.0,
+          "phi_compliance": 0.9096
+        },
+        {
+          "e_basalt": 88.49,
+          "e_matrix": 2.5,
+          "phi_compliance": 0.7876
+        },
+        {
+          "e_basalt": 88.49,
+          "e_matrix": 4.66,
+          "phi_compliance": 0.6922
+        }
+      ],
+      "mixed_class_fraction": 0.5527
+    },
+    "depth": {
+      "zone": "basalt-centre",
+      "n_indents": 435,
+      "e_basalt_end_member_GPa": 49.213,
+      "e_matrix_end_member_GPa": 5.373,
+      "phi_linear": 0.5052,
+      "phi_linear_ci95": [
+        0.4712,
+        0.538
+      ],
+      "phi_compliance": 0.7342,
+      "phi_compliance_ci95": [
+        0.7006,
+        0.7677
+      ],
+      "endpoint_sensitivity": [
+        {
+          "e_basalt": 46.71,
+          "e_matrix": 1.0,
+          "phi_compliance": 0.9307
+        },
+        {
+          "e_basalt": 46.71,
+          "e_matrix": 2.5,
+          "phi_compliance": 0.8408
+        },
+        {
+          "e_basalt": 46.71,
+          "e_matrix": 5.37,
+          "phi_compliance": 0.738
+        },
+        {
+          "e_basalt": 49.21,
+          "e_matrix": 1.0,
+          "phi_compliance": 0.9298
+        },
+        {
+          "e_basalt": 49.21,
+          "e_matrix": 2.5,
+          "phi_compliance": 0.8389
+        },
+        {
+          "e_basalt": 49.21,
+          "e_matrix": 5.37,
+          "phi_compliance": 0.7342
+        },
+        {
+          "e_basalt": 51.71,
+          "e_matrix": 1.0,
+          "phi_compliance": 0.929
+        },
+        {
+          "e_basalt": 51.71,
+          "e_matrix": 2.5,
+          "phi_compliance": 0.837
+        },
+        {
+          "e_basalt": 51.71,
+          "e_matrix": 5.37,
+          "phi_compliance": 0.7305
+        }
+      ],
+      "mixed_class_fraction": 0.4529
+    }
+  },
+  "two_class_sum_GPa": {
+    "end_members_from": "shallow",
+    "e_basalt_GPa": 85.992,
+    "e_matrix_GPa": 4.66,
+    "linear": {
+      "shallow": 33.57,
+      "depth": 45.75,
+      "spread_pct": 30.7
+    },
+    "compliance": {
+      "shallow": 61.04,
+      "depth": 64.37,
+      "spread_pct": 5.3
+    }
+  },
+  "cross_acquisition_agreement": {
+    "matched_end_members": [
+      {
+        "e_matrix_GPa": 1.0,
+        "e_basalt_offset_GPa": -2.5,
+        "phi_shallow": 0.9102,
+        "phi_depth": 0.9307,
+        "gap_pct": 2.2
+      },
+      {
+        "e_matrix_GPa": 1.0,
+        "e_basalt_offset_GPa": -0.0,
+        "phi_shallow": 0.9099,
+        "phi_depth": 0.9298,
+        "gap_pct": 2.2
+      },
+      {
+        "e_matrix_GPa": 1.0,
+        "e_basalt_offset_GPa": 2.5,
+        "phi_shallow": 0.9096,
+        "phi_depth": 0.929,
+        "gap_pct": 2.1
+      },
+      {
+        "e_matrix_GPa": 2.5,
+        "e_basalt_offset_GPa": -2.5,
+        "phi_shallow": 0.7889,
+        "phi_depth": 0.8408,
+        "gap_pct": 6.4
+      },
+      {
+        "e_matrix_GPa": 2.5,
+        "e_basalt_offset_GPa": -0.0,
+        "phi_shallow": 0.7882,
+        "phi_depth": 0.8389,
+        "gap_pct": 6.2
+      },
+      {
+        "e_matrix_GPa": 2.5,
+        "e_basalt_offset_GPa": 2.5,
+        "phi_shallow": 0.7876,
+        "phi_depth": 0.837,
+        "gap_pct": 6.1
+      }
+    ],
+    "phi_span_over_sweep": [
+      0.692,
+      0.931
+    ],
+    "gap_span_pct": [
+      2.1,
+      6.4
+    ]
+  },
+  "independent_comparison": {
+    "in_zone_basalt_packing_from_imaging": 0.6646,
+    "note": "Backscattered-electron segmentation of the same polished section, pooled over 91 fields. Shares no input with the indentation."
+  }
+}

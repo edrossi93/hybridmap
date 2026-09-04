@@ -278,7 +278,8 @@ class Deposit:
         if m:
             self.checks += 1
             words = {"Eight": 8, "Nine": 9, "Ten": 10, "Eleven": 11,
-                     "Twelve": 12}
+                     "Twelve": 12, "Thirteen": 13, "Fourteen": 14,
+                     "Fifteen": 15, "Sixteen": 16}
             claimed = words.get(m.group(1))
             actual = len(self.data_files())
             if claimed != actual:

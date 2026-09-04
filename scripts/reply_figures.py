@@ -180,6 +180,85 @@ def r3_toe(outdir):
     print(f"  R3: {spec} toe intercept {toe:.4f} %, chord modulus {E:.2f} GPa")
 
 
+def r5_deconvolution(outdir):
+    """The mixed class inverted onto the basalt/matrix tie line.
+
+    Panel (a) shows why the class fraction cannot be invariant: the two
+    acquisitions read the same zone on different scales, so a fixed pair of
+    thresholds cuts their modulus distributions in different places. Panel (b)
+    shows what survives the inversion, against the fraction measured on the same
+    section by imaging.
+    """
+    res = json.loads((DATA / "mixed_class_deconvolution.json").read_text())
+    sh, dp = res["acquisitions"]["shallow"], res["acquisitions"]["depth"]
+    imaged = res["independent_comparison"]["in_zone_basalt_packing_from_imaging"]
+
+    s = pd.read_csv(DATA / "classified_shallow.csv")
+    d = pd.read_csv(DATA / "classified_depth_resolved.csv")
+    e_s = s[(s.zone == "basalt") & (s.constituent != "QC/invalid")].E_GPa
+    e_d = d[(d.zone == "basalt-centre") & (d.constituent != "QC/invalid")].E_150
+
+    fs.apply()
+    fig, (ax1, ax2) = plt.subplots(
+        1, 2, figsize=(fs.ONE_HALF, 0.52 * fs.ONE_HALF), layout="constrained")
+    # Room between the panels for the second panel letter, which otherwise
+    # lands on the first panel's right spine.
+    fig.get_layout_engine().set(wspace=0.16)
+
+    bins = np.linspace(0, 110, 56)
+    ax1.hist(e_s, bins=bins, density=True, color=fs.PAPER["basalt"],
+             alpha=0.55, label="fixed-depth map")
+    ax1.hist(e_d, bins=bins, density=True, color=fs.PAPER["matrix"],
+             alpha=0.55, label="depth-resolved, 150 nm")
+    for x, c in ((sh["e_basalt_end_member_GPa"], fs.PAPER["basalt"]),
+                 (dp["e_basalt_end_member_GPa"], fs.PAPER["matrix"])):
+        # Stopped short of the top so the legend above it stays readable.
+        ax1.axvline(x, color=c, lw=1.1, ls=(0, (4, 2)), ymax=0.70)
+    ax1.set_xlabel("Indentation modulus, E (GPa)")
+    ax1.set_ylabel("Probability density")
+    ax1.set_xlim(0, 110)
+    ax1.legend(loc="upper right", fontsize=7.2, handlelength=1.4)
+    ax1.minorticks_on()
+
+    x = np.arange(2)
+    w = 0.34
+    for k, (key, lab, col) in enumerate(
+            (("linear", "linear inversion", fs.WONG["grey"]),
+             ("compliance", "compliance-weighted",
+              fs.PAPER["basalt"]))):
+        vals = [sh[f"phi_{key}"], dp[f"phi_{key}"]]
+        lo = [v - r[f"phi_{key}_ci95"][0]
+              for v, r in zip(vals, (sh, dp))]
+        hi = [r[f"phi_{key}_ci95"][1] - v
+              for v, r in zip(vals, (sh, dp))]
+        ax2.bar(x + (k - 0.5) * w, vals, w, color=col, label=lab,
+                yerr=[lo, hi], capsize=2.5,
+                error_kw=dict(lw=1.0, ecolor="black"))
+    # Named in the legend rather than beside the line: every position along the
+    # line is either over a bar or too narrow for the string.
+    ax2.axhline(imaged, color=fs.WONG["red"], lw=1.3, ls=(0, (5, 2)),
+                label=f"imaged, {imaged:.3f}")
+    ax2.set_xticks(x, ["fixed-depth\nmap", "depth-resolved\nmap"])
+    ax2.tick_params(axis="x", labelsize=8.5)
+    ax2.set_ylabel("Basalt fraction of the zone")
+    # Headroom for the legend, so it clears the tallest bar and its interval
+    # instead of being dropped on top of one.
+    ax2.set_ylim(0, 1.24)
+    ax2.set_yticks(np.arange(0, 1.01, 0.2))
+    ax2.legend(loc="upper left", fontsize=7.2, handlelength=1.4)
+
+    # Set back by hand rather than measured: the second panel's y-axis
+    # label is tall enough that the measured set-back puts the letter on
+    # top of it.
+    fs.panel_label(ax1, "a", dx=-0.175, dy=1.06)
+    fs.panel_label(ax2, "b", dx=-0.215, dy=1.06)
+    fs.save(fig, "Reply_R5_mixed_class_deconvolution", outdir)
+    print("  R5: class fraction %.3f vs %.3f, deconvolved %.3f vs %.3f, "
+          "imaged %.3f" % (sh["mixed_class_fraction"],
+                           dp["mixed_class_fraction"],
+                           sh["phi_compliance"], dp["phi_compliance"], imaged))
+
+
 if __name__ == "__main__":
     import sys
     # Same convention as the paper figure scripts: an optional output directory,
@@ -188,3 +267,4 @@ if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "."
     r2_clt(out)
     r3_toe(out)
+    r5_deconvolution(out)
