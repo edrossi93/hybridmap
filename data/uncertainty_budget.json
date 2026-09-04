@@ -2,15 +2,33 @@
   "voigt_point_estimate": 21.333039614483877,
   "n_draws": 10000,
   "seed": 42,
-  "method": "Class medians drawn from their bootstrap replicates directly, not from a summarised 95 % interval; class fractions drawn from a Dirichlet with concentration equal to the observed counts.",
-  "components_sd_GPa": {
+  "method": "Type A by resampling: class medians drawn from their bootstrap replicates directly, not from a summarised 95 % interval; class fractions drawn from a Dirichlet with concentration equal to the observed counts. Type B by the GUM rectangular convention: half the range of each sensitivity analysis, divided by root three.",
+  "type_a_sd_GPa": {
     "class_medians": 0.2572523822324794,
     "class_fractions": 0.30699350474826137
   },
-  "combined_sd_GPa": 0.39992429267037555,
-  "percentile_95_interval_GPa": [
+  "type_a_combined_sd_GPa": 0.39992429267037555,
+  "type_b_sd_GPa": {
+    "classification_thresholds": 0.17478745836956028,
+    "poisson_ratio": 0.06346372574941067
+  },
+  "type_b_ranges": {
+    "threshold_sweep_GPa": [
+      20.829752495045938,
+      21.435234011889754
+    ],
+    "poisson_specific_voigt_GPa": 21.113194819612684
+  },
+  "combined_sd_GPa": 0.4415904213308908,
+  "share_of_variance": {
+    "class_medians": 0.33937474566997944,
+    "class_fractions": 0.4833025483087122,
+    "classification_thresholds": 0.15666834136762323,
+    "poisson_ratio": 0.02065436465368496
+  },
+  "random_only_percentile_95_interval_GPa": [
     20.542658085540236,
     22.104734026340342
   ],
-  "excluded": "Classification thresholds, the choice of basalt input, and cross-section representativeness. The first two are analysis choices rather than random quantities and are reported as sensitivities in Supplementary Tables S1 and S2; the third cannot be estimated from a single section."
+  "excluded": "The choice of basalt input, which is a discriminated choice on measurement-physics grounds rather than an uncertainty and is reported in Supplementary Table S2; and cross-section representativeness, which cannot be estimated from a single section and is addressed in \u00a74.3."
 }
