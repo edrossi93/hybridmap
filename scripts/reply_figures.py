@@ -37,6 +37,37 @@ PRIOR = [
 RHO_BASALT, RHO_FLAX = 2.67, 1.45      # g/cm3, for the 50/50 mass split
 
 
+def consolidation_decomposition(rows):
+    """Split the modulus difference against the prior hybrids into two factors.
+
+    The comparison is hybrid against hybrid: the flax-only laminate is left out,
+    because it has neither the same reinforcement nor the same architecture and
+    including it would compare this panel with something it is not.
+
+    Two things differ between this panel and those. It carries more fibre, which
+    a textbook calculation would capture, and it realises more of what its own
+    CLT prediction allows, which no tabulated input captures. The product of the
+    two should recover the measured ratio, and how closely it does is the test
+    of whether anything else is going on.
+    """
+    prior = [r for r in rows if not r[5] and "hybrid" in r[0]]
+    ours = [r for r in rows if r[5]]
+    e_prior = sum(r[3] for r in prior) / len(prior)
+    e_ours = sum(r[3] for r in ours) / len(ours)
+    vf_prior = sum(r[1] for r in prior) / len(prior)
+    vf_ours = sum(r[1] for r in ours) / len(ours)
+    real_prior = sum(r[4] for r in prior) / len(prior)
+    real_ours = sum(r[4] for r in ours) / len(ours)
+
+    observed = e_ours / e_prior
+    by_fraction = vf_ours / vf_prior
+    by_consolidation = real_ours / real_prior
+    product = by_fraction * by_consolidation
+    return {"observed": observed, "fibre_volume_fraction": by_fraction,
+            "consolidation_quality": by_consolidation, "product": product,
+            "residual_pct": 100 * abs(product - observed) / observed}
+
+
 def fibre_modulus(kind, E_basalt, E_flax):
     """Rule-of-mixtures fibre modulus for the two fabric types."""
     if kind == "flax":
@@ -111,6 +142,12 @@ def r2_clt(outdir):
               f"ratio {r[4]:.3f}")
     print(f"  R2: ours/prior = {ratios.mean():.2f} ± {ratios.std():.2f} over "
           f"{len(ratios)} constituent combinations, {100 * (ratios > 1).mean():.0f} % above 1")
+    d = consolidation_decomposition(rows)
+    print(f"  R2: measured ratio against the prior hybrids "
+          f"{d['observed']:.2f} = {d['fibre_volume_fraction']:.2f} from fibre "
+          f"volume fraction x {d['consolidation_quality']:.2f} from "
+          f"consolidation quality = {d['product']:.2f}, "
+          f"{d['residual_pct']:.0f} % from the measured value")
 
 
 def r3_toe(outdir):
