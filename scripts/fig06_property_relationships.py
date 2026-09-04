@@ -27,7 +27,7 @@ import figstyle as fs
 DATA = Path(__file__).resolve().parent.parent / "data"
 ORDER = ["flax", "matrix", "mixed-volume", "basalt"]
 LABEL = {"flax": "flax", "matrix": "matrix",
-         "mixed-volume": "basalt-mixed", "basalt": "basalt"}
+         "mixed-volume": "mixed-volume", "basalt": "basalt"}
 E_LOWER, E_UPPER = 15.0, 40.0          # the modulus thresholds of the rule
 LIMS = {"E_150": (0, 100), "H_150": (0, 8), "PA_150": (0, 15)}
 

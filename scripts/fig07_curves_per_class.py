@@ -29,7 +29,7 @@ import figstyle as fs
 DATA = Path(__file__).resolve().parent.parent / "data"
 ORDER = ["flax", "matrix", "mixed-volume", "basalt"]
 LABEL = {"flax": "flax", "matrix": "matrix",
-         "mixed-volume": "basalt-mixed", "basalt": "basalt"}
+         "mixed-volume": "mixed-volume", "basalt": "basalt"}
 GRID = np.arange(70.0, 300.5, 5.0)
 N_SHOWN = 30          # individual curves drawn per panel
 SEED = 42

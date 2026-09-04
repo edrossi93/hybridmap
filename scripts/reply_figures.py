@@ -110,7 +110,7 @@ def r2_clt(outdir):
     ratios = np.array(ratios)
 
     fs.apply()
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(fs.DOUBLE, 0.42 * fs.DOUBLE),
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(fs.DOUBLE, 0.48 * fs.DOUBLE),
                                    gridspec_kw={"width_ratios": [1.6, 1.0]},
                                    layout="constrained")
     y = np.arange(len(rows))[::-1]
@@ -120,14 +120,14 @@ def r2_clt(outdir):
         ax1.text(r[4] + 0.012, yi, f"{r[4]:.2f}", va="center", fontsize=7.4)
     ax1.set_yticks(y)
     ax1.set_yticklabels([f"{r[0]}  ($V_f$ = {r[1]:.3f})" for r in rows], fontsize=7.4)
-    ax1.set_xlabel("Measured modulus / CLT prediction at its own $V_f$")
+    ax1.set_xlabel("Measured / CLT prediction")
     ax1.set_xlim(0, 0.88)
     ax1.minorticks_on()
     ax1.tick_params(axis="y", which="minor", left=False, right=False)
 
     ax2.hist(ratios, bins=18, color=fs.WONG["green"], edgecolor="k", linewidth=0.8)
     ax2.axvline(1.0, color="k", lw=1.0, ls=(0, (4, 3)))
-    ax2.set_xlabel("Ratio, this work / prior")
+    ax2.set_xlabel("Ratio, ours / prior")
     ax2.set_ylabel("Constituent combinations")
     ax2.annotate(f"{ratios.mean():.2f} ± {ratios.std():.2f}\n"
                  f"{100 * (ratios > 1).mean():.0f} % above unity",
