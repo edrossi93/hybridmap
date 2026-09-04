@@ -1,0 +1,35 @@
+{
+  "pitch_short_axis_nm": 2477.0,
+  "criterion": "pitch >= 10 x contact depth",
+  "method": "contact depth from the deposited peak load and hardness, A = P/H with A = 24.5 h_c^2",
+  "rows": [
+    {
+      "class": "flax",
+      "n": 2299,
+      "median_hc_nm": 326.7,
+      "violating_pct": 79.2,
+      "required_pitch_at_median_um": 3.27
+    },
+    {
+      "class": "matrix",
+      "n": 894,
+      "median_hc_nm": 343.1,
+      "violating_pct": 78.4,
+      "required_pitch_at_median_um": 3.43
+    },
+    {
+      "class": "mixed-volume",
+      "n": 1977,
+      "median_hc_nm": 103.7,
+      "violating_pct": 2.3,
+      "required_pitch_at_median_um": 1.04
+    },
+    {
+      "class": "basalt",
+      "n": 380,
+      "median_hc_nm": 54.4,
+      "violating_pct": 0.0,
+      "required_pitch_at_median_um": 0.54
+    }
+  ]
+}

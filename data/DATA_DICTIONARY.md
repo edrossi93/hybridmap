@@ -1,6 +1,6 @@
 # Data dictionary
 
-Eleven files: eight CSVs and three JSON summaries. Every column, its unit, its
+Twelve files: eight CSVs and four JSON summaries. Every column, its unit, its
 range, and what a blank cell means.
 
 Two conventions hold throughout unless a column says otherwise:
@@ -248,3 +248,19 @@ from the slice values held here, which rejects 320 at the same threshold: the
 difference is indents whose phase angle crosses the limit between the slices.
 The sweep is internally consistent and is not an attempt to reproduce the
 published count.
+
+## `spacing_compliance.json`
+
+Written by `scripts/spacing_compliance.py`, and the source of the compliance
+figures in §2.2.
+
+| key | meaning |
+|---|---|
+| `pitch_short_axis_nm` | 2477 nm, the binding axis of the fixed-depth grid |
+| `criterion` | pitch at least ten times the contact depth |
+| `method` | contact depth from peak load and hardness, A = P/H with A = 24.5 h_c² |
+| `rows` | per class: `n`, `median_hc_nm`, `violating_pct`, and the pitch the median would require |
+
+Compliance is counted per indent rather than summarised, because a class median
+hides how many contacts breach the criterion and a class maximum here is set by
+failed contacts: the largest flax contact depth is 31 µm.
