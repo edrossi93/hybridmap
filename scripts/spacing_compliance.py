@@ -23,6 +23,14 @@ Contact depth is reconstructed from the deposited peak load and hardness through
 the Berkovich area function, A = P/H and A = 24.5 h_c^2, rather than stored: the
 export carries load, stiffness, modulus and hardness per indent, and h_c follows
 from two of them.
+
+The reconstruction is an approximation, since it assumes an ideal tip rather
+than a calibrated area function. It can be checked against the instrument's own
+values, which Table 1 of the paper reports as class medians: 41, 78, 306 and
+325 nm for basalt, mixed-volume, flax and matrix. This returns 54, 104, 327 and
+343 nm, high by 5 to 7 % on the two classes that matter here. The compliance
+fractions are therefore slightly conservative, which is the direction to err in
+when the question is whether a criterion is met.
 """
 
 import json
