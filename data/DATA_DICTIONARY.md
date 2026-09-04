@@ -1,6 +1,6 @@
 # Data dictionary
 
-Thirteen files: eight CSVs and five JSON summaries. Every column, its unit, its
+Fourteen files: eight CSVs and six JSON summaries. Every column, its unit, its
 range, and what a blank cell means.
 
 Two conventions hold throughout unless a column says otherwise:
@@ -117,7 +117,7 @@ the file the paper's depth-resolved numbers come from.**
 | `qc_flag_strict` | 0 or 1 | | 1 marks the **433** indents rejected on the strict near-surface phase-angle criterion |
 | `zone` | `basalt-centre`, `flax-bottom`, `flax-top` | | the three architectural bands along y |
 | `constituent` | as above | | |
-| `kmeans_k4` | −1 to 2 | | unsupervised cluster index; **−1 means not assigned**, for indents excluded by QC |
+| `kmeans_k4` | −1 to 3 | | unsupervised cluster index from the k = 4 run of `clustering_check.py`, ordered by median modulus so that 0 is the most compliant cluster; **−1 on the 433 indents the strict phase-angle criterion rejects**, and nowhere else. Rebuilt by `repair_kmeans_column.py`: the submitted column held three labels and a quality mask that matched neither `qc_flag_strict` nor the paper |
 
 ### `E_150` and `E_150nm_GPa` are not the same numbers
 
@@ -281,3 +281,22 @@ is built out of does, and this is that calculation.
 Every indent in the zone is inverted, not only those the rule called
 mixed-volume, so no classification threshold enters the result. That is what
 makes it a test of the objection rather than a restatement of it.
+
+## `spatial_localisation.json`
+
+Written by `scripts/figs_supplementary.py`, and the source of every spatial
+number in §4.1 and of Supplementary Figure S4.
+
+| key | meaning |
+|---|---|
+| `neighbours`, `pool`, `test` | the definitions the statistic depends on: eight nearest neighbours, drawn from every indent in the zone including the quality-rejected ones, one-sided Mann-Whitney U |
+| `median_basalt_neighbour_fraction` | per class, the median share of the eight neighbours that are pure basalt |
+| `median_difference_ci95` | bootstrap interval on the median difference between the mixed-volume and matrix classes |
+| `p_depth_resolved`, `p_max_over_k_3_to_20` | the test at k = 8, and the worst case over the sweep |
+| `edge_band_um`, `p_excluding_edge_bands`, `n_after_edge_exclusion` | the same test with a band excluded at each end of the zone, so that no indent counted can have neighbours outside it |
+| `p_fixed_depth_map`, `n_fixed_depth_zone` | the same test on the other acquisition |
+
+The pool matters and is the reason this file exists: counting only the
+classified indents changes p at k = 8 from 8.5e-11 to 7.4e-11. The published
+value is the one that includes the rejected indents, which is the right choice,
+because a rejected indent still occupies its place on the grid.

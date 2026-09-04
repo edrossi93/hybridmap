@@ -46,6 +46,7 @@ Eight CSVs and two JSON summaries. The first three are the exported per-indent a
 | `bse_segmentation_tiles.csv` | 91 | One row per imaged tile: zone pixel counts and the fibre/matrix split inside each zone. |
 | `bse_segmentation_summary.json` | - | The constituent volume fractions of Figure 2e, with the aggregation stated. |
 | `mixed_class_deconvolution.json` | - | The mixed-volume class inverted back onto its end members, both acquisitions, with the independent comparison. |
+| `spatial_localisation.json` | - | The neighbourhood statistics behind the claim that mixed-volume contacts sit at the phase boundaries. |
 | `uncertainty_budget.json` | - | The resampled uncertainty on the Voigt bound, drawn from bootstrap replicates. |
 
 Units are in the column names. Moduli and hardness in GPa, positions in µm, depths in nm, loads in mN, phase angles in degrees.
@@ -94,7 +95,7 @@ One caveat on the flax standard deviation: recomputing it from `flexural_moduli.
 
 ## What is in `scripts/`
 
-Eighteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
+Twenty files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
 
 **Start here.**
 
@@ -115,6 +116,7 @@ Eighteen files, in three groups, plus the `hybridmap/` package and the example c
 | `make_flexural_moduli.py` | Chord moduli from the bending curves. Reproduces `data/flexural_moduli.csv` exactly. |
 | `table2_intervals.py` | The per-class confidence intervals of Table 2, by the construction its caption declares. |
 | `mixed_class_deconvolution.py` | Inverts every indent in the basalt-rich zone onto the basalt/matrix tie line, under parallel and series mixing, and compares the two acquisitions with each other and with the imaging. Writes `data/mixed_class_deconvolution.json`. |
+| `repair_kmeans_column.py` | Rebuilds `kmeans_k4` in `classified_depth_resolved.csv` from the canonical clustering run. The submitted column held three labels under a name that promises four, and a quality mask that matched neither `qc_flag_strict` nor the paper. |
 
 **Figures.** Each writes the figure it is named for, from the deposited data only.
 
@@ -126,6 +128,7 @@ Eighteen files, in three groups, plus the `hybridmap/` package and the example c
 | `fig07_curves_per_class.py` | Figure 7 |
 | `fig08_rom.py` | Figure 8, the rule-of-mixtures construction |
 | `fig09_flexural.py` | Figure 9, three-point bending |
+| `figs_supplementary.py` | Supplementary Figures S1, S2 and S4, and the spatial statistics of §4.1. Writes `data/spatial_localisation.json`. |
 | `fig_map_coverage.py`, `reply_figures.py` | Figures supporting the response to reviewers rather than the paper |
 
 The backscattered-electron panels of Figures 2 and 5 are not regenerated here.
@@ -145,6 +148,7 @@ python uncertainty_budget.py  # the +/- on the bound, by component
 python phase_angle_sensitivity.py  # what the QC threshold does and does not move
 python spacing_compliance.py       # how many indents meet the spacing criterion
 python mixed_class_deconvolution.py  # the class inverted onto its end members
+python figs_supplementary.py         # Supplementary Figures S1, S2, S4 and their statistics
 ```
 
 ### Where the per-indent tables come from

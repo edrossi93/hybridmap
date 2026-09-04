@@ -1,0 +1,21 @@
+{
+  "neighbours": 8,
+  "pool": "every indent in the zone, including quality-rejected ones",
+  "test": "Mann-Whitney U, one-sided, mixed-volume above matrix",
+  "median_basalt_neighbour_fraction": {
+    "basalt": 0.25,
+    "mixed-volume": 0.125,
+    "matrix": 0.0
+  },
+  "median_difference_ci95": [
+    0.125,
+    0.25
+  ],
+  "p_depth_resolved": 8.50871165417558e-11,
+  "p_max_over_k_3_to_20": 3.1529681339329466e-07,
+  "edge_band_um": 6.0,
+  "p_excluding_edge_bands": 1.2900912914022356e-07,
+  "n_after_edge_exclusion": 373,
+  "p_fixed_depth_map": 1.8730904565459293e-77,
+  "n_fixed_depth_zone": 2760
+}
