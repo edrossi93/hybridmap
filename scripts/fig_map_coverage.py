@@ -129,18 +129,23 @@ def build(outdir):
                                  edgecolor="0.55", linewidth=0.6))
     # Labels live in the margin to the right of the section, not on top of it.
     label_x = view_w + 0.35
-    label_y = [4.05, 2.55, 1.05]
+    label_y = [4.20, 2.45, 0.72]
     for (name, t_ext, p_ext, colour), ly in zip(wins, label_y):
         x0 = 0.5 * (view_w - p_ext)
         y0 = 0.5 * (THICKNESS_MM - t_ext)
         ax_b.add_patch(Rectangle((x0, y0), p_ext, t_ext, facecolor=colour,
                                  edgecolor="k", linewidth=1.1, alpha=0.92))
-        ax_b.annotate(f"{name}\n{t_ext:.2f} mm through thickness "
-                      f"({t_ext / ply:.1f} plies)\n{p_ext:.2f} mm in plane",
-                      xy=(x0 + p_ext, y0 + t_ext * 0.5), xytext=(label_x, ly),
-                      fontsize=7.6, va="center", ha="left",
-                      arrowprops=dict(arrowstyle="-", lw=0.8, color="0.35",
-                                      shrinkA=0, shrinkB=2))
+        # Leader and label are drawn separately rather than as one annotation.
+        # An annotation's bounding box includes its arrow, so the layout check
+        # measured each label as though it stretched back to the footprint it
+        # points at and reported three collisions that are not on the page.
+        ax_b.plot([x0 + p_ext + 0.04, label_x - 0.08],
+                  [y0 + t_ext * 0.5, ly], color="0.35", lw=0.8,
+                  solid_capstyle="butt", zorder=2)
+        ax_b.text(label_x, ly,
+                  f"{name}\n{t_ext:.2f} mm through thickness "
+                  f"({t_ext / ply:.1f} plies)\n{p_ext:.2f} mm in plane",
+                  fontsize=7.0, va="center", ha="left")
     ax_b.set_xlim(0, view_w * 2.05)
     ax_b.set_ylim(0, THICKNESS_MM)
     ax_b.set_xlabel("In-plane, along the span (mm)")

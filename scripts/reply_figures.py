@@ -250,8 +250,8 @@ def r5_deconvolution(outdir):
     # Set back by hand rather than measured: the second panel's y-axis
     # label is tall enough that the measured set-back puts the letter on
     # top of it.
-    fs.panel_label(ax1, "a", dx=-0.175, dy=1.06)
-    fs.panel_label(ax2, "b", dx=-0.215, dy=1.06)
+    fs.panel_label(ax1, "a", dx=-0.175, dy=1.13)
+    fs.panel_label(ax2, "b", dx=-0.215, dy=1.13)
     fs.save(fig, "Reply_R5_mixed_class_deconvolution", outdir)
     print("  R5: class fraction %.3f vs %.3f, deconvolved %.3f vs %.3f, "
           "imaged %.3f" % (sh["mixed_class_fraction"],
