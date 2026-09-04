@@ -146,10 +146,10 @@ def build(outdir):
     for key, hits in report.items():
         if hits:
             print(f"  layout: {key}: {hits}")
-    fig.savefig(str(Path(outdir) / "Fig05_constituent_classification.pdf"))
-    fig.savefig(str(Path(outdir) / "Fig05_constituent_classification.png"), dpi=400)
+    fig.savefig(str(Path(outdir) / "Fig06_constituent_classification.pdf"))
+    fig.savefig(str(Path(outdir) / "Fig06_constituent_classification.png"), dpi=400)
     plt.close(fig)
-    print("  wrote Fig05_constituent_classification.pdf and .png")
+    print("  wrote Fig06_constituent_classification.pdf and .png")
     print(f"  figure {W:.3f} x {H:.3f} in, embed at exactly {W:.3f} in")
     print(f"  panel a {PANEL_A[0]:.3f} x {PANEL_A[1]:.3f} in   (Figure 3 map, 1:1)")
     print(f"  panel b {PANEL_B[0]:.3f} x {PANEL_B[1]:.3f} in   "

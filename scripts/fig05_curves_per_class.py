@@ -140,8 +140,8 @@ def build(outdir):
         if hits:
             print(f"  layout: {key}: {hits}")
 
-    fig.savefig(Path(outdir) / "Fig07_loading_curves_depth_signatures.pdf")
-    fig.savefig(Path(outdir) / "Fig07_loading_curves_depth_signatures.png", dpi=400)
+    fig.savefig(Path(outdir) / "Fig05_loading_curves_depth_signatures.pdf")
+    fig.savefig(Path(outdir) / "Fig05_loading_curves_depth_signatures.png", dpi=400)
     plt.close(fig)
     print(f"  wrote Figure_7, {W:.2f} x {H:.2f} in, embed at exactly {W:.2f} in")
     for cls in ORDER:

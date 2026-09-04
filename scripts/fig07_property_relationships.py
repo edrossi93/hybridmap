@@ -96,8 +96,8 @@ def build(outdir):
         if hits:
             print(f"  layout: {key}: {hits}")
 
-    fig.savefig(Path(outdir) / "Fig06_property_relationships.pdf")
-    fig.savefig(Path(outdir) / "Fig06_property_relationships.png", dpi=400)
+    fig.savefig(Path(outdir) / "Fig07_property_relationships.pdf")
+    fig.savefig(Path(outdir) / "Fig07_property_relationships.png", dpi=400)
     plt.close(fig)
     print(f"  wrote Figure_6, {W:.2f} x {H:.2f} in, embed at exactly {W:.2f} in")
     print(f"  panel width {panel_w:.3f} in   measured overhangs "

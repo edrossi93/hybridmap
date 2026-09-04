@@ -123,9 +123,9 @@ Twenty files, in three groups, plus the `hybridmap/` package and the example con
 | file | figure |
 |---|---|
 | `figstyle.py` | Shared style: sizes, fonts, the constituent colours, the layout check and the save helper. Imported by the rest, not run on its own. |
-| `fig05_classification.py` | Figure 5, classification panels |
-| `fig06_property_relationships.py` | Figure 6 |
-| `fig07_curves_per_class.py` | Figure 7 |
+| `fig06_classification.py` | Figure 5, classification panels |
+| `fig07_property_relationships.py` | Figure 6 |
+| `fig05_curves_per_class.py` | Figure 7 |
 | `fig08_rom.py` | Figure 8, the rule-of-mixtures construction |
 | `fig09_flexural.py` | Figure 9, three-point bending |
 | `figs_supplementary.py` | Supplementary Figures S1, S2 and S4, and the spatial statistics of §4.1. Writes `data/spatial_localisation.json`. |
