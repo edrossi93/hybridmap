@@ -1,6 +1,6 @@
 # Data dictionary
 
-Ten files: eight CSVs and two JSON summaries. Every column, its unit, its
+Eleven files: eight CSVs and three JSON summaries. Every column, its unit, its
 range, and what a blank cell means.
 
 Two conventions hold throughout unless a column says otherwise:
@@ -230,3 +230,21 @@ in the paper were computed at full precision. Recomputing the flax-longitudinal
 standard deviation from this file gives 0.4863, which rounds to 0.49; at full
 precision it is 0.4842, which rounds to the 0.48 the paper reports. Neither is
 wrong.
+
+## `phase_angle_sensitivity.json`
+
+Written by `scripts/phase_angle_sensitivity.py`, and the source of
+Supplementary Table S7.
+
+| key | meaning |
+|---|---|
+| `reference_voigt_GPa` | the Voigt bound from the fixed-depth inputs, 21.33 GPa. The phase-angle criterion cannot move it: the fixed-depth map has no phase-angle channel. |
+| `note` | that fact, stated in the file so it travels with the numbers |
+| `rows` | one entry per threshold. `phase_angle_limit_deg` is the criterion, `rejected` and `rejected_pct` the indents it discards, `E_<class>_GPa` the resulting depth-resolved medians, `alternative_basalt_input_GPa` the basalt median, and `Voigt_with_that_input_GPa` the bound that input gives when substituted into the reference table. |
+
+The first row is the published flag, computed on the full continuous-stiffness
+trace, which rejects 433 indents. The three below recompute the same criterion
+from the slice values held here, which rejects 320 at the same threshold: the
+difference is indents whose phase angle crosses the limit between the slices.
+The sweep is internally consistent and is not an attempt to reproduce the
+published count.

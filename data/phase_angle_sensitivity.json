@@ -1,0 +1,50 @@
+{
+  "reference_voigt_GPa": 21.333039614483877,
+  "note": "The threshold applies only to the depth-resolved acquisition. The reference bound is built from the fixed-depth map, which has no phase-angle channel, so no choice of threshold can move it.",
+  "rows": [
+    {
+      "phase_angle_limit_deg": "15 (published flag, full trace)",
+      "rejected": 433,
+      "rejected_pct": 21.65,
+      "E_flax_GPa": 3.85,
+      "E_matrix_GPa": 5.37,
+      "E_mixed-volume_GPa": 29.28,
+      "E_basalt_GPa": 49.47,
+      "alternative_basalt_input_GPa": 49.47,
+      "Voigt_with_that_input_GPa": 18.83
+    },
+    {
+      "phase_angle_limit_deg": 10.0,
+      "rejected": 507,
+      "rejected_pct": 25.35,
+      "E_flax_GPa": 4.11,
+      "E_matrix_GPa": 6.1,
+      "E_mixed-volume_GPa": 29.64,
+      "E_basalt_GPa": 52.92,
+      "alternative_basalt_input_GPa": 52.92,
+      "Voigt_with_that_input_GPa": 19.07
+    },
+    {
+      "phase_angle_limit_deg": 15.0,
+      "rejected": 320,
+      "rejected_pct": 16.0,
+      "E_flax_GPa": 3.84,
+      "E_matrix_GPa": 5.36,
+      "E_mixed-volume_GPa": 29.57,
+      "E_basalt_GPa": 52.76,
+      "alternative_basalt_input_GPa": 52.76,
+      "Voigt_with_that_input_GPa": 19.06
+    },
+    {
+      "phase_angle_limit_deg": 20.0,
+      "rejected": 219,
+      "rejected_pct": 10.95,
+      "E_flax_GPa": 3.7,
+      "E_matrix_GPa": 5.09,
+      "E_mixed-volume_GPa": 29.64,
+      "E_basalt_GPa": 52.7,
+      "alternative_basalt_input_GPa": 52.7,
+      "Voigt_with_that_input_GPa": 19.05
+    }
+  ]
+}

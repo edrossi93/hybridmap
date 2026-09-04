@@ -93,7 +93,7 @@ One caveat on the flax standard deviation: recomputing it from `flexural_moduli.
 
 ## What is in `scripts/`
 
-Fifteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
+Sixteen files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
 
 **Start here.**
 
@@ -109,6 +109,7 @@ Fifteen files, in three groups, plus the `hybridmap/` package and the example co
 | `rule_of_mixtures.py` | Voigt, Reuss and Hill bounds, threshold sweep, input substitutions. |
 | `clustering_check.py` | k-means and Gaussian-mixture cross-check, ARI against the rule. |
 | `uncertainty_budget.py` | The resampled uncertainty on the Voigt bound. Writes `data/uncertainty_budget.json`. |
+| `phase_angle_sensitivity.py` | Sweeps the phase-angle quality-control threshold at 10, 15 and 20 degrees and reports what it moves. Writes `data/phase_angle_sensitivity.json`. |
 | `make_flexural_moduli.py` | Chord moduli from the bending curves. Reproduces `data/flexural_moduli.csv` exactly. |
 | `table2_intervals.py` | The per-class confidence intervals of Table 2, by the construction its caption declares. |
 
@@ -138,6 +139,7 @@ python classify.py            # reprints the class counts, checks them against t
 python rule_of_mixtures.py    # bounds, zone-weighting check, sensitivity
 python clustering_check.py    # ARI across three representations, stability, seed sweep
 python uncertainty_budget.py  # the +/- on the bound, by component
+python phase_angle_sensitivity.py  # what the QC threshold does and does not move
 ```
 
 ### Where the per-indent tables come from
