@@ -51,7 +51,7 @@ report("Reuss bound", r, 7.50, 0.02)
 report("Voigt with depth-resolved basalt input", substitute(tab, "basalt", 49.47)[0], 18.83, 0.02)
 report("Voigt with bulk PA-11 matrix (1.5 GPa)", substitute(tab, "matrix", 1.5)[0], 20.82, 0.02)
 
-print("\nthreshold sensitivity (Supplementary Table S1)")
+print("\nthreshold sensitivity (Supplementary Table S2)")
 sw = threshold_sweep(raw)
 ref = float(sw[(sw.lower_GPa == 15) & (sw.upper_GPa == 70)].Voigt_GPa.iloc[0])
 report("reference construction", ref, 21.33, 0.02)

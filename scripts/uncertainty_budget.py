@@ -33,9 +33,9 @@ actually spans, so the standard uncertainty is the half-range divided by root
 three:
 
   thresholds  the classification thresholds, swept over the same 3 x 5 grid as
-              Supplementary Table S1. The bound spans 20.83 to 21.44 GPa.
+              Supplementary Table S2. The bound spans 20.83 to 21.44 GPa.
   poisson     the Poisson ratio, uniform 0.30 against the phase-specific values
-              of Supplementary Table S3, which moves the bound to 21.11 GPa.
+              of Supplementary Table S1, which moves the bound to 21.11 GPa.
 
 Using the half-range itself, rather than the half-range over root three, is what
 the superseded budget did. It overstates a bounded choice by a factor of root
@@ -46,7 +46,7 @@ shallow 86.0 GPa or the depth-resolved 49.5 GPa, is not an uncertainty at all:
 it is a discriminated choice with a physical criterion, set out in §2.4 before
 any comparison with the flexural measurement. Folding it in would report a
 decision as noise and would let the interval swallow a disagreement the reader
-should be shown. It is reported as a sensitivity in Supplementary Table S2, and
+should be shown. It is reported as a sensitivity in Supplementary Table S4, and
 the measurement lies inside the predicted bracket under either input.
 
 Cross-section representativeness is outside for a different reason: one section
@@ -82,7 +82,7 @@ def bootstrap_medians(df, n_draws=N_DRAWS, seed=SEED):
     return _unc.bootstrap_medians(df, CLASSES, "E_GPa", n_draws, seed)
 
 
-# Table S3: per-class shift in the median modulus when the uniform Poisson
+# Table S1: per-class shift in the median modulus when the uniform Poisson
 # ratio of 0.30 is replaced by phase-specific values (basalt 0.24, flax 0.30,
 # PA-11 0.42, mixed-volume 0.34 as a Voigt-Reuss-Hill average at f_basalt = 0.5).
 POISSON_SHIFT_PCT = {"flax": 0.0, "matrix": -9.49,
@@ -143,7 +143,7 @@ def main():
         "random_only_percentile_95_interval_GPa": result["interval"],
         "excluded": ("The choice of basalt input, which is a discriminated "
                      "choice on measurement-physics grounds rather than an "
-                     "uncertainty and is reported in Supplementary Table S2; "
+                     "uncertainty and is reported in Supplementary Table S4; "
                      "and cross-section representativeness, which cannot be "
                      "estimated from a single section and is addressed in "
                      "§4.3."),

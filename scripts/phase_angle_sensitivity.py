@@ -17,7 +17,7 @@ depth-resolved acquisition, which is the one carrying a continuous-stiffness
 trace: the fixed-depth map has no phase-angle channel, so the reference Voigt
 bound of 21.33 GPa, built from the fixed-depth medians, is untouched by any
 choice made here. What moves is the depth-resolved class medians, and with them
-the alternative basalt input of Supplementary Table S2 and the bound that input
+the alternative basalt input of Supplementary Table S4 and the bound that input
 produces. Saying so is part of the answer: the threshold cannot influence the
 headline number, and the sweep shows how little it moves the one number it can.
 

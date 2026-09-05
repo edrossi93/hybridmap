@@ -169,7 +169,7 @@ So the reproduction boundary of this deposit is the exported per-indent table. B
 
 **The bounds (Section 3.4).** `rule_of_mixtures.py`. It also verifies that zone weighting and global counting give the same fractions, which the paper asserts and which is worth checking rather than believing.
 
-**Threshold sensitivity (Supplementary Table S1).** `threshold_sweep()` in `rule_of_mixtures.py`. Reference construction at 15 and 70 GPa gives 21.33 GPa; the fifteen threshold pairs span 20.83 to 21.44 GPa, largest deviation 0.50 GPa.
+**Threshold sensitivity (Supplementary Table S2).** `threshold_sweep()` in `rule_of_mixtures.py`. Reference construction at 15 and 70 GPa gives 21.33 GPa; the fifteen threshold pairs span 20.83 to 21.44 GPa, largest deviation 0.50 GPa.
 
 **The unsupervised cross-check (Section 3.3).** `clustering_check.py`. ARI is 0.398 against the rule and 0.678 once the two compliant clusters are merged, and both are the same to four decimals across five random seeds. The comparison is also run on three principal components and on a full-covariance Gaussian mixture, and it does not move much.
 

@@ -67,7 +67,7 @@ X_RESIN = 380.0
 X_ZONE_SPLIT = 730.0
 
 # Compliant/stiff split. Sits in the bimodal gap of the basalt-zone modulus
-# histogram (Supplementary Figure S2a), so it separates polymer-dominated
+# histogram (Supplementary Figure S3a), so it separates polymer-dominated
 # contacts from fibre-bearing ones without cutting through a population.
 E_LOWER = 15.0
 

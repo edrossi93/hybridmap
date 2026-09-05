@@ -58,7 +58,7 @@ def check_zone_weighting(df, classes=CLASSES):
 def threshold_sweep(raw_shallow, lowers=(10, 15, 20), uppers=(60, 65, 70, 75, 80)):
     """
     Redo the classification and the Voigt bound for a grid of thresholds. This
-    is Supplementary Table S1. Note that the table in the first submission was
+    is Supplementary Table S2. Note that the table in the first submission was
     generated from an earlier classification pass and did not match the main
     text; this function regenerates it from the deposited data.
     """
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     measured = {c: g.E_D790_toe_compensated_GPa.mean()
                 for c, g in flex.groupby("configuration")}
     fs = flax_input_sensitivity(tab, measured)
-    print("\nflax-input sensitivity (Supplementary Table S6)")
+    print("\nflax-input sensitivity (Supplementary Table S7)")
     print(f"  {'flax input':>10}  {'source':<32}{'Voigt':>7}"
           f"{'closure basalt':>16}{'closure flax':>14}")
     for _, r in fs.iterrows():

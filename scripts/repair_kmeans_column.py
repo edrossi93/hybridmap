@@ -8,7 +8,7 @@ carried none. It was left over from an earlier pass with a different quality
 mask.
 
 No published number came from the column: the paper's ARI of 0.40 is computed by
-`clustering_check.py`, which reruns the clustering. But Supplementary Figure S1
+`clustering_check.py`, which reruns the clustering. But Supplementary Figure S5
 shows this partition, and a deposit that ships a mislabelled column invites a
 reader to reproduce something the paper never claimed.
 

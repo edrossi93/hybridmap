@@ -30,10 +30,10 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 # median modulus of the pure-axial basalt class in the shallow acquisition
 BASALT_SHALLOW_GPA = 86.0
 
-# Textbook baselines quoted in §4.3, using tabulated constituents and the
+# Tabulated-input baselines quoted in §3.4, using tabulated constituents and the
 # measured fibre volume fraction of 0.649.
-TEXTBOOK_VOIGT = 35.75
-TEXTBOOK_HT = 27.1
+TABULATED_VOIGT = 35.75
+TABULATED_HT = 27.1
 
 ZONE_ORDER = ["flax-bottom", "basalt-centre", "flax-top"]
 # kept short: three category names under a narrow panel run into one another
@@ -128,12 +128,15 @@ def build(outdir):
 
     # ---- panel b ----------------------------------------------------------
     # Vertical bars, as submitted. Reviewer 3 comment 22 asked only for the
-    # textbook-input Voigt to be added beside the measured-input one, so the two
-    # textbook baselines are inserted and nothing else about the panel changes.
+    # tabulated-input Voigt to be added beside the measured-input one, so the two
+    # tabulated baselines are inserted and nothing else about the panel changes.
+    # The bars are labelled with the term the paper uses for that construction,
+    # a Voigt sum built from tabulated constituent moduli, so that the artwork
+    # and the text cannot drift apart again.
     # Hatched bars are predictions, solid bars are measurements.
-    labels = ["Voigt", "Hill", "Reuss", "Voigt (textbook)",
-              "Halpin-Tsai (textbook)", "Basalt-long.", "Flax-long."]
-    values = [v_lam, h_lam, r_lam, TEXTBOOK_VOIGT, TEXTBOOK_HT,
+    labels = ["Voigt", "Hill", "Reuss", "Voigt (tabulated inputs)",
+              "Halpin-Tsai (tabulated inputs)", "Basalt-long.", "Flax-long."]
+    values = [v_lam, h_lam, r_lam, TABULATED_VOIGT, TABULATED_HT,
               meas.loc["basalt_face", "mean"], meas.loc["flax_face", "mean"]]
     errs = [0, 0, 0, 0, 0,
             meas.loc["basalt_face", "std"], meas.loc["flax_face", "std"]]
