@@ -223,12 +223,13 @@ class Deposit:
                       f"{', '.join(phantom)}")
 
         # The README states how many scripts there are; keep that honest too.
-        m = re.search(r"(\w+) files, in three groups", text)
+        m = re.search(r"([\w-]+) files, in three groups", text)
         if m:
             self.checks += 1
             words = {"Twelve": 12, "Thirteen": 13, "Fourteen": 14,
                      "Fifteen": 15, "Sixteen": 16, "Seventeen": 17,
-                     "Eighteen": 18, "Nineteen": 19, "Twenty": 20}
+                     "Eighteen": 18, "Nineteen": 19, "Twenty": 20,
+                     "Twenty-one": 21, "Twenty-two": 22}
             claimed = words.get(m.group(1))
             if claimed is None:
                 self.fail(f"README says '{m.group(1)} files' and I cannot read "
