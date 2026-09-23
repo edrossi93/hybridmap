@@ -34,6 +34,51 @@ checking eight the paper no longer prints, among them the whole-map Voigt sum of
 it, and an overshoot against a 20.1 GPa target from the first submission. Those
 checks are gone. A check against a value the paper does not carry is worse than
 no check, because it reports success.
+
+The same audit has now been run line by line against the seven documents, and the
+count this script reports means one thing only: the number of values printed in
+them that reproduce. What changed in this round.
+
+Four checks compared against quantities that appear in none of the seven
+documents and are gone. The Welch t of the chord modulus, which is nowhere on the
+page, and whose p value is checked instead and pins it. The two moduli over the
+window above the tangent-modulus crossover, 19.91 and 18.48 GPa, which the paper
+does not discuss; `make_flexural_moduli.py` documents the window and the column
+is deposited, so nothing is lost by not claiming them as published. And the
+Hedges g of the strain at break, where Supplementary Table S7 prints n/a, because
+that comparison was not pre-specified.
+
+Two more compared against something real but unpublished and are now reported as
+internal consistency checks rather than as published values: the unmarked
+interface band at 4.0 %, which is stated in the README and in the segmentation
+file's own method note but in no document, and the sum of the Eq. (1) fractions,
+which is an invariant of four printed numbers rather than a fifth printed number.
+
+Nine cells of the depth-resolved column of Table 3 were compared against literals
+carried to more decimals than the table prints: 29.76 where it prints 29.8, 0.203
+where it prints 0.20. Those now compare against the printed figure at the printed
+precision, which is what a reader can check.
+
+One tolerance had been widened by hand, to 0.015 where its neighbours use 0.005,
+so that a computed 0.200 would accept the 0.19 the paper prints. The printed value
+was right and the check was wrong: it differenced two estimates that
+Supplementary Table S3 rounds to two decimals. Differencing them before they are
+rounded gives 0.190, and the tolerance is back to 0.005.
+
+Six blocks of printed values had no check at all and now have one: the areal-mass
+route to the volume fractions, whose densities the manuscript does not print and
+which `areal_mass_fractions.py` therefore has to infer and say so; the exclusion
+test in the Supplementary Figure S3 caption; the spacing test of 2.2 with the
+contact depths of Table 1; the per-class strain-rate sensitivity; the two ASTM
+D790 departures of 2.5 with the rate bound that follows from them; and the
+Timoshenko bracket of 4.3.5.
+
+And three groups of printed values are declared at the end as not reproducible
+from what is deposited, rather than passed over in silence: the void-threshold
+range of 3.4, the two figures Supplementary Table S3 carries from the superseded
+quality mask, and the Timoshenko bracket of 4.3.5 to the digit. Declaring them is
+the point. A reader should not have to discover the boundary of the deposit by
+looking for a check that is not there.
 """
 
 import json
@@ -56,8 +101,20 @@ import phase_angle_sensitivity as _pas                     # noqa: E402
 import border_rejection as _border                         # noqa: E402
 import flexural_comparisons as _fx                         # noqa: E402
 import input_decomposition as _dec                         # noqa: E402
+import areal_mass_fractions as _am                         # noqa: E402
+import flexural_corrections as _flex                       # noqa: E402
+import spacing_compliance as _spacing                      # noqa: E402
 
-checks = []
+# Two lists, because they answer two different questions and only the first is
+# what this deposit promises. `PUBLISHED` holds one entry per value printed in the
+# manuscript, the supplement, the reply or the letters. `INTERNAL` holds checks
+# that hold the deposit against itself: a stored product against the live
+# computation of the same quantity, or an invariant of numbers that are printed.
+# An internal check earns its place by catching a stale file, but none of them is
+# evidence about a published number, so they are counted apart from them and the
+# headline count is the first list alone.
+PUBLISHED = []
+INTERNAL = []
 
 # Half a unit in a figure the paper prints to one decimal, and a hair more. An
 # exact decimal such as 21.65 is stored just below itself, so a half-unit
@@ -73,10 +130,16 @@ checks = []
 ROUNDED = 0.051
 
 
-def report(label, got, published, tol):
-    ok = abs(got - published) <= tol
-    checks.append(ok)
-    print(f"  [{'ok ' if ok else 'DIFF'}] {label:<52} {got:>9.3f}   paper {published}")
+def report(label, got, printed, tol):
+    """A recomputation against a value printed in one of the seven documents.
+
+    `printed` is a literal read off the page, at the precision the page carries.
+    Nothing else belongs in this function: a comparison against a quantity the
+    documents do not carry is not a check on the paper, whatever else it is.
+    """
+    ok = abs(got - printed) <= tol
+    PUBLISHED.append(ok)
+    print(f"  [{'ok ' if ok else 'DIFF'}] {label:<52} {got:>9.3f}   paper {printed}")
 
 
 def report_same(label, got, expected):
@@ -86,14 +149,26 @@ def report_same(label, got, expected):
     the checks that read it.
     """
     ok = abs(got - expected) <= 1e-9
-    checks.append(ok)
+    INTERNAL.append(ok)
     print(f"  [{'ok ' if ok else 'DIFF'}] {label:<52} {got:>9.3f}   "
           f"recomputed here")
 
 
+def report_internal(label, got, expected, tol, against):
+    """A check on the deposit that is not a check on a printed value.
+
+    `against` says what the number on the right is, so that a reader cannot mistake
+    it for something the paper prints.
+    """
+    ok = abs(got - expected) <= tol
+    INTERNAL.append(ok)
+    print(f"  [{'ok ' if ok else 'DIFF'}] {label:<52} {got:>9.3f}   "
+          f"{against}")
+
+
 def report_below(label, got, limit):
     """For a cell the paper prints as an inequality rather than as a value."""
-    checks.append(got < limit)
+    PUBLISHED.append(got < limit)
     print(f"  [{'ok ' if got < limit else 'DIFF'}] {label:<52} {got:>9.2e}   "
           f"paper < {limit}")
 
@@ -155,23 +230,72 @@ report("rejected, per cent", 100 * _dr_all.qc_flag_strict.mean(), 15.2, 0.05)
 # and then the table and the check disagree with each other rather than with the
 # data.
 _dr_ci = _intervals(_dr_all, "E_150").set_index("class")
-for cls, n, E, lo, hi, H in [
-        ("flax", 1120, 3.79, 3.67, 3.94, 0.203),
-        ("matrix", 124, 5.32, 4.65, 6.39, 0.228),
-        ("mixed-volume", 241, 29.76, 27.44, 31.17, 1.868),
-        ("basalt", 211, 53.01, 50.51, 54.53, 4.192)]:
+# Every figure below is the one Table 3 prints, at the precision it prints it.
+# Nine of these cells used to be compared against literals carried to more
+# decimals than the table has: 29.76 against a printed 29.8, 0.203 against a
+# printed 0.20. Each of those extra digits was right, and none of them was on the
+# page, so nine of the values this script reported as published were not. The
+# modulus column of this table does not print to one precision: the two compliant
+# classes are given to two decimals and the two stiff ones to one, because the
+# table follows the significance of the value and not a format string. The
+# tolerance follows the cell, so `tol` is carried per row. Half a unit in the last
+# printed digit, and a hair more, exactly as ROUNDED is for a one-decimal cell.
+for cls, n, E, lo, hi, H, tol in [
+        ("flax", 1120, 3.79, 3.67, 3.94, 0.20, 0.0051),
+        ("matrix", 124, 5.32, 4.65, 6.39, 0.23, 0.0051),
+        ("mixed-volume", 241, 29.8, 27.4, 31.2, 1.87, ROUNDED),
+        ("basalt", 211, 53.0, 50.5, 54.5, 4.19, ROUNDED)]:
     g = _dr_all[_dr_all.constituent == cls]
     report(f"n({cls}), depth-resolved", len(g), n, 0)
-    report(f"median E({cls}) @ 150 nm", float(g.E_150.median()), E, 0.02)
-    report(f"median H({cls}) @ 150 nm", float(g.H_150.median()), H, 0.005)
-    report(f"CI low  E({cls}) @ 150 nm", float(_dr_ci.ci_low_GPa[cls]), lo, 0.02)
-    report(f"CI high E({cls}) @ 150 nm", float(_dr_ci.ci_high_GPa[cls]), hi, 0.02)
+    report(f"median E({cls}) @ 150 nm", float(g.E_150.median()), E, tol)
+    report(f"median H({cls}) @ 150 nm", float(g.H_150.median()), H, 0.0051)
+    report(f"CI low  E({cls}) @ 150 nm", float(_dr_ci.ci_low_GPa[cls]), lo, tol)
+    report(f"CI high E({cls}) @ 150 nm", float(_dr_ci.ci_high_GPa[cls]), hi, tol)
+
+# The two strain-rate sensitivity medians 4.3.2 quotes as the evidence that the
+# compliant classes are separable where the measurement can resolve them. They
+# were printed and unchecked, and the flax one is also what bounds the rate
+# departure of 2.5 below, so it is checked where it is measured.
+_srs = _flex.strain_rate_sensitivity()
+for cls, printed in (("flax", 0.073), ("matrix", 0.059)):
+    report(f"strain-rate sensitivity, {cls}", _srs[cls], printed, 0.0005)
 
 # Supplementary Table S1, which had no script behind it until the census of
 # every printed number found 89.05 GPa with no route to it.
 # Where the rejections fall, which 2.2 reports in two sentences. The border
 # definition is imported rather than repeated: `border_rejection.py` owns it, and
 # `border_effect.py` uses the same one on the other map.
+# The spacing test of 2.2 and the contact depths of Table 1, which had no line
+# here: `spacing_compliance.py` computed them and nothing held them to the page.
+# The two columns come from different places on purpose. Table 1's contact depths
+# are the instrument's own, read from the deposited column; the compliance shares
+# are computed from the reconstruction the same paragraph describes, because a
+# reconstruction is what the deposited load and hardness support.
+print("\nindent spacing and contact depth (2.2, Table 1)")
+_kept_hc, _no_hc = _spacing.reconstruct(sh)
+for cls, depth, hardness in (("basalt", 41, 6.98), ("mixed-volume", 78, 1.94),
+                             ("flax", 308, 0.21), ("matrix", 325, 0.19)):
+    g = sh[sh.constituent == cls]
+    report(f"median contact depth, {cls}, nm",
+           float(g.contact_depth_nm.median()), depth, 0.51)
+    report(f"median hardness, {cls}, GPa", float(g.H_GPa.median()), hardness,
+           0.0051)
+for cls, pct in (("flax", 79.2), ("matrix", 78.4)):
+    report(f"{cls} indents breaching the criterion, per cent",
+           _spacing.violating_pct(_kept_hc, cls), pct, ROUNDED)
+report("mixed-volume contacts meeting it, per cent",
+       100 - _spacing.violating_pct(_kept_hc, "mixed-volume"), 97.7, ROUNDED)
+# 2.2 says the depth is reconstructed for every indent, and it is reconstructed
+# for 5550 of the 5551 classified: indent 8553 carries a hardness of exactly zero,
+# so A = P/H has no value. The product records which indent and why; these two
+# lines hold that record to the live computation rather than to the page, since no
+# document carries either count.
+_sp = json.loads((DATA / "spacing_compliance.json").read_text())
+report_same("spacing test, classified indents",
+            _sp["classified_indents"], len(_kept_hc) + len(_no_hc))
+report_same("spacing test, indents with a contact depth",
+            _sp["indents_with_a_reconstructed_contact_depth"], len(_kept_hc))
+
 print("\nwhere the rejected indents fall (2.2)")
 _edge = _border.rejection_rates(_dr_all, "x_um")
 report("rejected on the two outer rows of the short axis",
@@ -215,12 +339,14 @@ for cls, f in zip(zs.CLASSES, fractions):
     report(f"Eq. (1) fraction, {cls}", float(f),
            {"flax": 0.526, "matrix": 0.117, "mixed-volume": 0.303,
             "basalt": 0.054}[cls], 0.0005)
-report("Eq. (1) fractions, sum", float(fractions.sum()), 1.000, 1e-9)
+report_internal("Eq. (1) fractions, sum", float(fractions.sum()), 1.000, 1e-9,
+                "an invariant of the four printed fractions")
 report("laminate estimate", voigt, 18.50, 0.005)
 report("Hill average", hill, 12.7, 0.05)
 report("Reuss value", reuss, 6.8, 0.05)
 report("estimate with the zones weighted by indent counts",
        zs.at_share(per_zone, medians, w_indents)[1][0], 21.33, 0.005)
+
 
 # Where the sum comes from, class by class. 4.3.4 and 4.3.6 quote these as the
 # reason the flax input matters less than it looks.
@@ -250,6 +376,37 @@ report("compliant contribution, labels interchanged", compliant_swapped,
        3.001, 0.005)
 report("what interchanging the two labels moves",
        compliant - compliant_swapped, 0.018, 0.001)
+
+# The exclusion test in the Supplementary Figure S3 caption, which had no check.
+# Fifty-nine contacts in the flax-rich zone read below 1 GPa; the caption argues
+# they are runaway indents rather than soft material, and reports what removing
+# them would do. The whole caption is checked here, the evidence for the argument
+# included, because the argument is what licenses leaving them in.
+print("\nthe exclusion test of the Supplementary Figure S3 caption")
+_flax_zone = sh[sh.zone == "flax"]
+_runaway = _flax_zone[_flax_zone.E_GPa < 1.0]
+report("flax-rich indents above 15 GPa", int((_flax_zone.E_GPa > 15).sum()),
+       492, 0)
+report("flax-rich contacts below 1 GPa", len(_runaway), 59, 0)
+report("their median contact depth, um",
+       float(_runaway.contact_depth_nm.median()) / 1000, 3.2, 0.051)
+report("median contact depth of the rest of the zone, nm",
+       float(_flax_zone[_flax_zone.E_GPa >= 1.0].contact_depth_nm.median()),
+       274, 0.51)
+report("their median hardness, GPa", float(_runaway.H_GPa.median()), 0.002,
+       0.0005)
+report("median hardness of the rest of the zone, GPa",
+       float(_flax_zone[_flax_zone.E_GPa >= 1.0].H_GPa.median()), 0.252, 0.0005)
+# Both the flax median and the class fractions move when 59 indents leave, so the
+# estimate is rebuilt from the surviving indents rather than by substituting one
+# median into the construction.
+_kept = sh[~((sh.zone == "flax") & (sh.E_GPa < 1.0))]
+report("flax median with them excluded",
+       float(_kept.loc[_kept.constituent == "flax", "E_GPa"].median()), 4.78,
+       0.005)
+_pz_kept, _med_kept, _ = zs.zone_fractions(_kept)
+report("estimate with them excluded",
+       float(zs.at_share(_pz_kept, _med_kept, w_tiles)[1][0]), 18.63, 0.005)
 
 print("\nuncertainty budget (Supplementary Table S5, 2.4)")
 # Read from the deposited product rather than recomputed here: the budget is
@@ -339,9 +496,15 @@ for row, (n, pct, basalt, estimate) in zip(rows_S3, published_S3):
            row["Voigt_with_that_input_GPa"], estimate, 0.005)
 swept = [r["Voigt_with_that_input_GPa"] for r in rows_S3[1:]]
 report("what the 10 to 20 deg sweep moves", max(swept) - min(swept), 0.03, 0.005)
-report("what replacing the superseded mask moved",
-       rows_S3[2]["Voigt_with_that_input_GPa"]
-       - rows_S3[0]["Voigt_with_that_input_GPa"], 0.19, 0.015)
+# 4.3.3 prints 0.19 GPa for this move. The check used to difference the two cells
+# of Supplementary Table S3, which the table rounds to 16.53 and 16.73, so it got
+# 0.200 and the tolerance had been widened from 0.005 to 0.015 to let 0.19 in. A
+# tolerance that exists to make a check pass tests the tolerance. The two
+# estimates unrounded differ by 0.190, which is what the paper prints, so the
+# difference is taken before the rounding and the tolerance is back where its
+# neighbours are.
+report("what replacing the superseded mask moved", _pas.superseded_move(), 0.19,
+       0.005)
 
 print("\ninput substitutions (Supplementary Tables S4 and S8, 3.4)")
 flex = pd.read_csv(DATA / "flexural_moduli.csv")
@@ -436,8 +599,16 @@ print("\nsegmentation of the mosaic (Figure 2, 3.4, Supplementary Table S6)")
 seg = json.loads((DATA / "bse_segmentation_summary.json").read_text())
 report("mosaic area, mm2", seg["area_mm2"], 6.65, 0.005)
 report("imaged tiles", seg["n_tiles"], 91, 0)
-report("unmarked interface band, per cent",
-       100 * seg["zone_area_from_mosaic_mask"]["unmarked"], 4.0, 0.05)
+# No document prints a figure for the unmarked interface band. The 4.0 % is stated
+# in the README and in this file's own method note, so comparing against it holds
+# the note to the array beside it, which is worth doing and is not a check on the
+# paper. It was counted as one until this round.
+report_internal("unmarked interface band, per cent",
+                100 * seg["zone_area_from_mosaic_mask"]["unmarked"], 4.0, 0.05,
+                "the figure the file's own method note states")
+report_internal("the three mosaic zone shares, sum",
+                sum(seg["zone_area_from_mosaic_mask"].values()), 1.0, 1e-9,
+                "they partition the mosaic")
 for cls, published, ci in (("basalt", 24.4, 1.1), ("flax", 39.5, 3.2),
                            ("matrix", 36.1, None)):
     report(f"volume fraction, {cls}", 100 * seg["volume_fraction"][cls],
@@ -451,6 +622,36 @@ report("fibre volume fraction, measured",
 report("basalt packing inside its own zone",
        seg["in_zone_fibre_fraction_pooled_over_tiles"]["basalt_fib"], 0.665,
        0.0005)
+
+# The second route to the same fractions, from the fabric specification, which
+# 3.4, the Figure 2e caption, 4.3.7 and the Conclusions all report and which
+# nothing in this deposit computed until `areal_mass_fractions.py` was written.
+# The agreement, 2.2 percentage points, is quoted in all four places and is the
+# worst of the three phase differences, so it is checked as the maximum it is
+# rather than phase by phase.
+#
+# The densities that route needs are not printed anywhere in the paper. They are
+# inferred in that script from the four values the route is printed as giving, and
+# the script says so and reports what the other density pair in this deposit would
+# give instead. Nothing here is fitted: two densities are fixed by four published
+# figures, and the manuscript has to state the pair it used.
+print("\nthe areal-mass route to the same fractions (3.4, Figure 2e, 4.3.7)")
+_calc = _am.fractions()
+_diffs, _worst = _am.agreement(_calc, _am.imaged())
+for cls, pct in (("basalt", 23.2), ("flax", 41.7), ("matrix", 35.1)):
+    report(f"areal-mass volume fraction, {cls}", 100 * _calc[cls], pct, ROUNDED)
+report("fibre volume fraction, calculated", _calc["fibre"], 0.649, 0.0005)
+report("the two routes, percentage points apart on the fibre fraction",
+       100 * (_calc["fibre"] - _am.imaged()["fibre"]), 1.0, 0.05)
+report("worst disagreement with the imaging, percentage points", _worst, 2.2,
+       ROUNDED)
+# The Halpin-Tsai baseline of Figure 8 is drawn at the fibre volume fraction of
+# this route, rounded as the paper prints it. Holding the figure's input to the
+# route keeps the panel and the paragraph on one derivation.
+from fig08_rom import HT_V_FIBRE as _ht_v                        # noqa: E402
+report_internal("the fibre fraction Figure 8 draws its baseline at", _ht_v,
+                round(_calc["fibre"], 3), 1e-12,
+                "the route above, at the printed precision")
 
 val = json.loads((DATA / "bse_validation_metrics.json").read_text())
 for zone, phases_only, all_three in (("basalt zone", 96.0, 82.8),
@@ -521,10 +722,13 @@ bulk_depth = [e for e in acq["depth"]["endpoint_sensitivity"]
               if e["e_matrix"] == 1.0 and e["e_basalt"] == 53.14][0]
 report("depth-resolved fraction at a bulk matrix end member",
        bulk_depth["phi_compliance"], 0.94, 0.005)
+# 4.3.6 prints this span to the unit, "within 3 to 9 %", so that is what the two
+# lines compare against. They used to compare against 3.2 and 9.1, which are what
+# the deposited product carries and are nowhere on the page.
 report("gap between the acquisitions across that sweep, low",
-       dec["cross_acquisition_agreement"]["gap_span_pct"][0], 3.2, 0.05)
+       dec["cross_acquisition_agreement"]["gap_span_pct"][0], 3, 0.5)
 report("gap between the acquisitions across that sweep, high",
-       dec["cross_acquisition_agreement"]["gap_span_pct"][1], 9.1, 0.05)
+       dec["cross_acquisition_agreement"]["gap_span_pct"][1], 9, 0.5)
 report("mixed-volume share of the basalt zone, load-controlled",
        100 * acq["shallow"]["mixed_class_fraction"], 55, 0.5)
 report("mixed-volume share of the basalt zone, depth-resolved",
@@ -533,8 +737,11 @@ report("mixed-volume share of the basalt zone, depth-resolved",
 print("\nunsupervised cross-check")
 dr = pd.read_csv(DATA / "classified_depth_resolved.csv")
 c = cluster_run(dr)
+# 3.3 carries the first of these to four decimals, 0.4080, where it reports the
+# seed sweep, and the second to two, 0.65, everywhere it appears. The check used
+# to compare the second against 0.652, which is in this README and in no document.
 report("ARI, rule vs k-means (k = 4)", c["ARI"], 0.408, 0.005)
-report("ARI*, compliant clusters merged", c["ARI_star"], 0.652, 0.005)
+report("ARI*, compliant clusters merged", c["ARI_star"], 0.65, 0.0051)
 
 print("\nthree-point bending (3.4, Supplementary Table S7)")
 # Read the replicates rather than restating summary statistics. An earlier
@@ -551,6 +758,11 @@ a_all = spec[spec.configuration == "basalt_face"]
 f_all = spec[spec.configuration == "flax_face"]
 report("specimens per configuration", len(a_all), 5, 0)
 
+# The Hedges g of the strain at break is None rather than a number, because
+# Supplementary Table S7 prints n/a in that cell: the comparison was not
+# pre-specified, so the table reports the two means and declines the effect size.
+# A check against the 8.79 the data give would have been a check against nothing
+# on the page, and was one until this round.
 for label, column, ba, bs, fa, fsd, g_pub in [
         ("chord modulus", "chord_GPa", 18.85, 0.54, 19.66, 0.49, -1.42),
         ("peak tangent modulus", "peak_tangent_GPa", 20.01, 0.55, 20.75, 0.24,
@@ -559,16 +771,19 @@ for label, column, ba, bs, fa, fsd, g_pub in [
         ("softening to 0.55 % strain", "softening_pct", 8.40, 0.29, 34.55, 2.38,
          -13.92),
         ("strain at break", "strain_at_break_pct", 1.29, 0.08, 0.72, 0.03,
-         8.79)]:
+         None)]:
     x, y = a_all[column], f_all[column]
     report(f"{label}, basalt-longitudinal mean", x.mean(), ba, 0.01)
     report(f"{label}, basalt-longitudinal SD", x.std(ddof=1), bs, 0.005)
     report(f"{label}, flax-longitudinal mean", y.mean(), fa, 0.01)
     report(f"{label}, flax-longitudinal SD", y.std(ddof=1), fsd, 0.005)
-    report(f"{label}, Hedges g", _fx.compare(x, y)["hedges_g"], g_pub, 0.005)
+    if g_pub is not None:
+        report(f"{label}, Hedges g", _fx.compare(x, y)["hedges_g"], g_pub, 0.005)
 
+# No document prints a t statistic, here or anywhere. The p value below is the
+# published quantity and it pins t at five specimens per configuration, so the
+# line that compared t against -2.487 verified nothing a reader could look up.
 chord = _fx.compare(a_all.chord_GPa, f_all.chord_GPa)
-report("chord modulus, Welch t", chord["t"], -2.487, 0.001)
 report("chord modulus, Welch p uncorrected", chord["p"], 0.0380, 0.0001)
 report("the stiffness difference", -chord["difference"], 0.81, 0.005)
 report("that difference, per cent of the flax-longitudinal mean",
@@ -617,16 +832,92 @@ for label, members in families.items():
         report_below("Holm p on the softening, same family",
                      corrected["softening to 0.55 % strain (%)"], 0.0001)
 
-# The window above the tangent-modulus crossover reverses the ranking. This is
-# the reason the orientation effect in the first submission did not survive
-# re-analysis, so it is checked here rather than left as a remark in the text.
-aw = flex.loc[flex.configuration == "basalt_face", "E_window_0p28_0p43_GPa"]
-fw = flex.loc[flex.configuration == "flax_face", "E_window_0p28_0p43_GPa"]
-report("modulus above the crossover, basalt-longitudinal", aw.mean(), 19.91, 0.01)
-report("modulus above the crossover, flax-longitudinal", fw.mean(), 18.48, 0.01)
+# Two lines used to sit here, the mean modulus over the window above the
+# tangent-modulus crossover in each configuration, compared against 19.91 and
+# 18.48 GPa. Neither figure is in any of the seven documents, and neither is the
+# crossover: the paper does not report that the ranking reverses above it. The
+# window itself is deposited as `E_window_0p28_0p43_GPa` and the data dictionary
+# and `make_flexural_moduli.py` both document what it is, so a reader who wants
+# the comparison has it. It is not a published value and is no longer reported as
+# one. The 18.48 is the sharper warning of the two: it is also a cell of
+# Supplementary Table S2, for an unrelated quantity, so a search of the documents
+# finds it and a careless audit calls it published.
+
+print("\nASTM D790 departures and the bound that follows (2.5)")
+# All four follow from the specimen geometry and the standard, and none of them
+# had a script. The rate bound also needs the strain-rate sensitivity, which is
+# measured and is checked above where it is measured.
+report("overhang per end, mm", _flex.overhang_mm(), 3.20, 0.005)
+report("overhang the standard requires, mm", _flex.required_overhang_mm(), 7.36,
+       0.005)
+report("crosshead rate the standard computes, mm/min",
+       _flex.d790_rate_mm_per_min(), 1.96, 0.005)
+report("by how much the rate used exceeds it, per cent", _flex.rate_excess_pct(),
+       27, 0.5)
+report("bound on the reported modulus from that departure, per cent",
+       _flex.rate_bound_pct(), 1.8, ROUNDED)
+
+print("\nTimoshenko shear correction (4.3.5)")
+# The assumed shear modulus is the paper's, 1.5 to 3.0 GPa, and nothing in this
+# deposit measures it, so these four lines are checks on arithmetic over an
+# assumption rather than on a measurement. They are reported as published values
+# because the bracket and the widened gaps are printed, and the assumption they
+# rest on is printed beside them. What is not printed is the shear coefficient,
+# and the bracket cannot be reproduced without it: the value used here, 6/5 for a
+# rectangular section, is stated in `flexural_corrections.py` and the manuscript
+# should state it too.
+_means = _flex.measured_means()
+_low, _high = _flex.bracket(_means)
+report("correction at the stiff end of the assumed shear modulus", _low, 3, 0.5)
+report("correction at the compliant end", _high, 7, 0.5)
+# The gaps 4.3.5 prints next are computed from the bracket as that paragraph
+# prints it, to the unit, and not from the exact 3.0 and 6.5 %: the exact
+# correction gives 5.0 and 13.2 %, and 13.2 is not what the page says. Both
+# chains are printed by `flexural_corrections.py`, and the label here says which
+# one is being checked.
+_printed_low, _printed_high = _flex.PRINTED_BRACKET_PCT
+report("widened gap at the printed low end of the bracket",
+       _flex.gap_pct(min(_means.values()), voigt, _printed_low), 5, 0.5)
+report("widened gap at the printed high end",
+       _flex.gap_pct(max(_means.values()), voigt, _printed_high), 14, 0.5)
+
+# Printed, and not reproducible from what is deposited. Named here rather than
+# left out, because the absence of a check is invisible and this deposit's whole
+# claim is that a reader does not have to take anything on trust. Each line says
+# what is missing and where the missing thing is.
+print("\nprinted values this deposit cannot reproduce: four of them, and one "
+      "bracket it can\nreproduce only under an assumption the paper does not "
+      "state")
+for where, what, why in [
+    ("3.4", "dark-feature area from 12.9 % to 2.7 % across the threshold range",
+     "computed on the backscattered-electron pixels, which are several gigabytes "
+     "of tile images and are not deposited; the deposit carries the segmentation "
+     "at the threshold used, not the sweep"),
+    ("2.2, Supplementary Table S3",
+     "433 indents rejected by the superseded quality mask, and the 49.47 GPa "
+     "basalt median that goes with it",
+     "recorded from the previous submission. No rule applied to the deposited "
+     "phase-angle values reproduces that set, and `phase_angle_sensitivity.py` "
+     "carries both as recorded values. The two lines above that compare them "
+     "against the table confirm the transcription and not the measurement"),
+    ("4.3.5", "the 3 to 7 % Timoshenko bracket, to the digit",
+     "the through-thickness shear modulus is assumed rather than measured, and "
+     "the shear coefficient is not stated. The checks above use 6/5 for a "
+     "rectangular section and the exact inversion, which gives 3.0 to 6.5 %; the "
+     "first-order form would give 2.9 to 6.1 % and would not round to the "
+     "printed bracket"),
+]:
+    print(f"  [--  ] {where}: {what}")
+    print(f"         {why}")
 
 print("\n" + "-" * 72)
-print(f"{sum(checks)} of {len(checks)} values reproduce")
-if not all(checks):
+print(f"{sum(INTERNAL)} of {len(INTERNAL)} internal consistency checks agree. "
+      f"They hold the deposit")
+print("against itself, a stored product against the live computation of the same "
+      "quantity or")
+print("an invariant of numbers that are printed, and none of them is a published "
+      "value.")
+print(f"{sum(PUBLISHED)} of {len(PUBLISHED)} values reproduce")
+if not (all(PUBLISHED) and all(INTERNAL)):
     print("Values marked DIFF need looking at before the deposit is released.")
     sys.exit(1)

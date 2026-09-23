@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import figstyle as fs
 import zone_share as zs
+import areal_mass_fractions
 from rule_of_mixtures import bounds, class_table, CLASSES
 
 DATA = Path(__file__).resolve().parent.parent / "data"
@@ -45,7 +46,11 @@ TABULATED_VOIGT = 35.75
 HT_E_BASALT = 80.0
 HT_E_FLAX = 60.0
 HT_E_MATRIX = 1.5
-HT_V_FIBRE = 0.649
+# Derived rather than written down: `areal_mass_fractions.py` owns that route and
+# names its inputs, and this was a literal with nothing behind it. Rounded to the
+# three decimals §3.4 prints, which is the number the panel was drawn from, so the
+# bar does not move by a hundredth of a per cent of fibre.
+HT_V_FIBRE = round(areal_mass_fractions.fibre_volume_fraction(), 3)
 # Reinforcement geometry factor for transverse loading of continuous circular
 # fibres, which is the conventional value and the only one the paper's inputs
 # support: no aspect ratio is measured here, and the paper claims none.

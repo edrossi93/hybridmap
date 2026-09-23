@@ -2,6 +2,18 @@
   "pitch_short_axis_nm": 2477.0,
   "criterion": "pitch >= 10 x contact depth",
   "method": "contact depth from the deposited peak load and hardness, A = P/H with A = 24.5 h_c^2",
+  "classified_indents": 5551,
+  "indents_with_a_reconstructed_contact_depth": 5550,
+  "indents_without_one": [
+    {
+      "indent_id": 8553,
+      "class": "flax",
+      "zone": "flax",
+      "H_GPa": 0.0,
+      "stored_contact_depth_nm": 21174.3051,
+      "reason": "hardness of exactly 0.000 GPa, so A = P/H is infinite and no contact depth follows from it; a runaway contact, left in the class because the map carries no quality filter"
+    }
+  ],
   "rows": [
     {
       "class": "flax",

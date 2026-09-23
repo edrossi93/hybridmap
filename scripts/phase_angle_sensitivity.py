@@ -89,6 +89,25 @@ def estimate_with_basalt(per_zone, medians, w_basalt, basalt_GPa):
     return float(zs.at_share(per_zone, swapped, w_basalt)[1][0])
 
 
+def superseded_move(basalt_at_limit=None):
+    """How far replacing the superseded mask with the stated rule moved the estimate.
+
+    Unrounded, which matters. The table prints the two estimates to two decimals,
+    16.53 and 16.73, and differencing those gives 0.20 where the paper says 0.19.
+    The 0.19 is the difference of the two estimates themselves; the 0.20 is an
+    artefact of subtracting after rounding. Anything comparing this move against
+    the page has to take it from here rather than from the table cells.
+    """
+    depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
+    if basalt_at_limit is None:
+        kept = depth[depth.qc_flag_strict == 0]
+        basalt_at_limit = float(kept.loc[kept.constituent == "basalt",
+                                         "E_150"].median())
+    per_zone, medians, w = reference_construction()
+    return (estimate_with_basalt(per_zone, medians, w, basalt_at_limit)
+            - estimate_with_basalt(per_zone, medians, w, SUPERSEDED_BASALT_GPA))
+
+
 def sweep():
     """One row per limit, in the order Supplementary Table S3 prints them."""
     depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
@@ -168,8 +187,10 @@ def main():
           f"indents and gives {at15['Voigt_with_that_input_GPa']:.2f} GPa, "
           f"against {rows[0]['rejected']} and "
           f"{rows[0]['Voigt_with_that_input_GPa']:.2f} GPa under the "
-          f"superseded mask, a move of "
-          f"{at15['Voigt_with_that_input_GPa'] - rows[0]['Voigt_with_that_input_GPa']:.2f} GPa")
+          f"superseded mask, a move of {superseded_move():.2f} GPa")
+    print("  that move is taken before the two estimates are rounded into the "
+          "table, which is")
+    print("  why it reads 0.19 and not the 0.20 the printed cells would give")
 
     path = DATA / "phase_angle_sensitivity.json"
     path.write_text(json.dumps({

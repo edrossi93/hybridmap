@@ -157,14 +157,20 @@ It separates the constituents by chemistry rather than by architecture:
 
 | class | median |
 |---|---|
-| pure-axial basalt | 0.019 |
-| mixed-volume | 0.025 |
-| PA-11 matrix | 0.058 |
+| pure-axial basalt | 0.021 |
+| mixed-volume | 0.026 |
+| PA-11 matrix | 0.059 |
 | flax | 0.073 |
 
 Near zero on the mineral fibre, several times higher on the two organic
 constituents, as viscoelasticity predicts. About 1 % of values are slightly
 negative: noise on near-rate-independent contacts.
+
+Three of those four medians were wrong here until this round, by a thousandth
+each: 0.019, 0.025 and 0.058, against the 0.021, 0.026 and 0.059 the column gives.
+The flax and matrix figures are the two §4.3.2 prints, so they are now checked by
+`reproduce_paper_values.py` rather than only written down, and the flax one also
+bounds the rate departure of §2.5.
 
 ## `flexural_curves.csv` - 8371 rows
 
@@ -442,11 +448,24 @@ figures in §2.2.
 | `pitch_short_axis_nm` | 2477 nm, the binding axis of the load-controlled grid |
 | `criterion` | pitch at least ten times the contact depth |
 | `method` | contact depth from peak load and hardness, A = P/H with A = 24.5 h_c² |
+| `classified_indents` | 5551, the classified indents of the load-controlled map |
+| `indents_with_a_reconstructed_contact_depth` | 5550. One indent has none, and the next key says which |
+| `indents_without_one` | one record per indent the reconstruction cannot reach: identifier, class, zone, its hardness, its stored contact depth, and why |
 | `rows` | per class: `n`, `median_hc_nm`, `violating_pct`, and the pitch the median would require |
 
 Compliance is counted per indent rather than summarised, because a class median
 hides how many contacts breach the criterion and a class maximum here is set by
 failed contacts: the largest flax contact depth is 31 µm.
+
+One of the 5551 classified indents is missing from the test, and §2.2 says the
+contact depth is reconstructed for every indent, so the file names it. Indent
+8553, the last of the acquisition, is classified flax and carries a hardness of
+exactly 0.000 GPa, so A = P/H is infinite and no depth follows from it. Its stored
+contact depth is 21.17 µm and its modulus 0.03 GPa: a runaway contact, the extreme
+of the population of 59 that the Supplementary Figure S3 caption reports below
+1 GPa. The load-controlled map carries no quality filter, so it stays in the class
+and in every count the paper reports, and it enters no spacing test because there
+is no depth to test.
 
 ## `mixed_class_deconvolution.json`
 
