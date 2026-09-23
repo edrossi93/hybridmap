@@ -20,7 +20,24 @@ A file that is in neither list fails the gate, so a new file cannot be added
 quietly. A derived file that changes when its own script is re-run fails too,
 which catches a stale product before a reader does.
 
-Run: python provenance_check.py
+That last sentence was false until this round, which is worth recording because
+it is the failure this file exists to prevent, committed by this file. `rebuild`
+ran every generator, looked only at the exit status, and then wrote the manifest
+from the files as they stood afterwards. So a product whose bytes had drifted
+was re-recorded under its new hash, `rebuild` returned 0, and the fast check
+then compared the file against that new hash and passed for ever. The
+byte-identity promised above was tested nowhere. `record` did the same without
+even running the scripts.
+
+Both are now held to one rule: a hash is written to the manifest only when the
+script reproduced the file byte for byte and that is the hash the manifest
+already carried, or when someone passed `--accept-changes` to record bytes that
+were not proved. So a plain run of this tool cannot change what any file is
+held to. It either confirms the manifest or fails.
+
+Run: python provenance_check.py            the fast check, against the manifest
+     python provenance_check.py --rebuild  re-run every generator and compare
+     --accept-changes, with --rebuild or --record, records unproved bytes
 """
 
 import hashlib
@@ -78,59 +95,232 @@ DERIVED = {
 
 MANIFEST = DATA / "PROVENANCE.json"
 
+# A hash in the manifest asserts that these are the bytes the deposit means to
+# publish. For a product the assertion is earned by re-running its script and
+# finding the file unchanged. Where that evidence is missing, because the script
+# was not run or because the file is a measurement with no script at all, this
+# flag is how a person states that they are recording the bytes anyway. It is
+# spelled out on the command line so that accepting drift is a decision someone
+# takes and can be found afterwards in a shell history, rather than the silent
+# side effect of running the tool that it used to be.
+ACCEPT = "--accept-changes"
+FLAGS = {"--rebuild", "--record", ACCEPT}
+
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def record():
+def held():
+    """The hashes the manifest carries at this moment, empty if there is none."""
+    if not MANIFEST.exists():
+        return {"derived": {}, "primary": {}}
+    manifest = json.loads(MANIFEST.read_text())
+    return {kind: dict(manifest.get(kind, {})) for kind in
+            ("derived", "primary")}
+
+
+def write_manifest(hashes):
+    """Serialise the given hashes, in declaration order.
+
+    Declaration order rather than sorted order, because that is the order the
+    published file has and a reordering would read as a change to every file in
+    it for anyone diffing this deposit against the copy they already have.
+    """
+    manifest = {"derived": {n: hashes["derived"][n] for n in DERIVED
+                            if n in hashes["derived"]},
+                "primary": {n: hashes["primary"][n] for n in PRIMARY
+                            if n in hashes["primary"]}}
+    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", newline="\n")
+    return manifest
+
+
+def record(accept):
     """Write the manifest from the files as they stand, running nothing.
 
     For when the generators have just been run by hand, one at a time. The
     slow path is `--rebuild`; this is the same bookkeeping without the wait.
+
+    Running nothing means proving nothing. This path cannot tell a product that
+    still reproduces from one that has drifted, so on its own it launders
+    exactly what the gate exists to catch, and it is the shorter and more
+    tempting command of the two. It therefore refuses unless the acceptance flag
+    is given: the person passing it is the only evidence there is.
     """
-    manifest = {"derived": {n: digest(DATA / n) for n in DERIVED
-                            if (DATA / n).exists()},
-                "primary": {n: digest(DATA / n) for n in PRIMARY
-                            if (DATA / n).exists()}}
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", newline="\n")
+    if not accept:
+        print("  --record writes the manifest from whatever is on disk without "
+              "running a single")
+        print("  generator, so it cannot tell a product that still reproduces "
+              "from one that has")
+        print(f"  drifted. Use --rebuild to earn the hashes, or "
+              f"--record {ACCEPT} to record")
+        print("  them unproved on your own authority.")
+        return 1
+
+    hashes = {kind: {n: digest(DATA / n) for n in names if (DATA / n).exists()}
+              for kind, names in (("derived", DERIVED), ("primary", PRIMARY))}
+    manifest = write_manifest(hashes)
     print(f"  recorded {len(manifest['derived'])} products and "
           f"{len(manifest['primary'])} measurements")
+    print(f"  no script was run: every hash above is unproved and recorded "
+          f"because {ACCEPT} was given")
     return 0
 
 
-def rebuild():
-    """Run every generator, then record what each produced.
+def rebuild(accept):
+    """Re-run every generator and hold its product to the bytes it had before.
 
     Separate from the default check because it is slow: the budget alone
     resamples tens of thousands of times. Run it whenever an input or a script
     changes; the fast check then holds the result to account.
+
+    The before-and-after comparison here is the only place the deposit's central
+    promise is tested. See the module docstring for the shape of the defect this
+    replaces.
+
+    One rule governs what reaches the manifest. A hash is written without the
+    acceptance flag only when the script reproduced the file byte for byte and
+    that is the hash the manifest already carried. Everything else is unproved:
+    a product whose bytes moved when its script ran, a product that reproduces
+    but no longer matches the record, a file the manifest has never held, a
+    measurement whose bytes moved. An unproved file keeps whatever hash it
+    already had, and minting a new one for it takes the flag.
+
+    The consequence worth knowing is that a plain run cannot alter what any file
+    is held to. It either confirms the manifest or fails. That is what stops the
+    tool laundering by repetition: the second identical run of a red rebuild is
+    just as red as the first, because the drifted bytes on disk are still not
+    the bytes the record names.
     """
+    hashes = {"derived": {}, "primary": {}}
     problems = {}
+    unproved = {}
+    # Read before anything is written. With no manifest at all there is no
+    # earlier claim about any file, so the first run on a deposit has to be
+    # allowed to establish one; after that the record is the reference.
+    bootstrap = not MANIFEST.exists()
+    was = held()
+
+    def keep(kind, name, why, label):
+        """Refuse to mint a hash, and leave any earlier one standing.
+
+        Leaving it standing rather than dropping it matters: the earlier hash is
+        the evidence, a failing run should not destroy it, and the fast check
+        then reports what the file was held to instead of only that it is no
+        longer held to anything.
+        """
+        unproved[name] = why
+        if name in was[kind]:
+            hashes[kind][name] = was[kind][name]
+        print(f"  {label}")
+
     for name, script in sorted(DERIVED.items()):
+        path = DATA / name
+        before = digest(path) if path.exists() else None
         run = subprocess.run([sys.executable, str(HERE / script)],
                              capture_output=True, text=True, cwd=HERE)
         if run.returncode != 0:
             tail = (run.stderr.strip().splitlines() or ["no message"])[-1]
             problems[name] = f"{script} exits {run.returncode}: {tail}"
+            if name in was["derived"]:
+                hashes["derived"][name] = was["derived"][name]
             print(f"  FAILED  {script}: {tail}")
+            continue
+        if not path.exists():
+            problems[name] = f"{script} exits 0 and writes no {name}"
+            print(f"  FAILED  {script}: exits 0 and writes no {name}")
+            continue
+
+        after = digest(path)
+        recorded = was["derived"].get(name)
+        if before is None:
+            keep("derived", name,
+                 f"{name} was not on disk beforehand, so there were no bytes "
+                 f"for {script} to reproduce",
+                 f"NEW     {name}: nothing to compare it against")
+        elif after != before:
+            keep("derived", name,
+                 f"re-running {script} changed {name}: {before[:12]} became "
+                 f"{after[:12]}",
+                 f"CHANGED {name}: {before[:12]} became {after[:12]}")
+        elif bootstrap or recorded == after:
+            hashes["derived"][name] = after
+            print(f"  same    {name}")
+        elif recorded is None:
+            keep("derived", name,
+                 f"{script} reproduces {name}, but the manifest has never held "
+                 f"a hash for it",
+                 f"UNHELD  {name}: reproduces, but was never recorded")
         else:
-            print(f"  rebuilt {name}")
-    manifest = {"derived": {n: digest(DATA / n) for n in DERIVED
-                            if (DATA / n).exists() and n not in problems},
-                "primary": {n: digest(DATA / n) for n in PRIMARY
-                            if (DATA / n).exists()}}
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", newline="\n")
+            keep("derived", name,
+                 f"{script} reproduces {name}, but at {after[:12]}, and the "
+                 f"manifest names {recorded[:12]}",
+                 f"MOVED   {name}: reproduces at {after[:12]}, recorded as "
+                 f"{recorded[:12]}")
+
+    # A measurement has no script, so re-running is not available as evidence
+    # and the only thing to hold it to is the hash the manifest already carries.
+    # Rewriting that hash unasked would launder a changed measurement exactly as
+    # the products used to be laundered, and a measurement is the one kind of
+    # file in here that nothing can reconstruct.
+    for name in PRIMARY:
+        path = DATA / name
+        if not path.exists():
+            continue
+        now = digest(path)
+        recorded = was["primary"].get(name)
+        if bootstrap or recorded == now:
+            hashes["primary"][name] = now
+        elif recorded is None:
+            keep("primary", name,
+                 f"{name} is a measurement and the manifest has never held a "
+                 f"hash for it, so there is nothing to check its bytes against",
+                 f"UNHELD  {name}: no recorded hash to check it against")
+        else:
+            keep("primary", name,
+                 f"{name} is a measurement and its bytes no longer match the "
+                 f"manifest: {recorded[:12]} is now {now[:12]}",
+                 f"CHANGED {name}: {recorded[:12]} is now {now[:12]}")
+
+    if accept:
+        for name in unproved:
+            kind = "derived" if name in DERIVED else "primary"
+            hashes[kind][name] = digest(DATA / name)
+
+    manifest = write_manifest(hashes)
     print(f"\n  manifest written for {len(manifest['derived'])} products and "
           f"{len(manifest['primary'])} measurements")
-    return 1 if problems else 0
+    landed = (f"recorded because {ACCEPT} was given" if accept
+              else "not recorded")
+    for name in sorted(unproved):
+        print(f"  {unproved[name]}; {landed}")
+    for name in sorted(problems):
+        print(f"  {problems[name]}; its product is not re-recorded")
+    if unproved and not accept:
+        print(f"  re-run with {ACCEPT} to record the bytes above as the new "
+              f"baseline; that is a decision, not a default")
+    return 1 if problems or (unproved and not accept) else 0
 
 
 def main():
+    # An unrecognised flag is a usage error and not a pass. A mistyped
+    # --accept-change would otherwise be dropped in silence and the person who
+    # typed it would believe they had accepted something.
+    unknown = sorted(a for a in sys.argv[1:] if a not in FLAGS)
+    if unknown:
+        print(f"  unrecognised argument(s): {', '.join(unknown)}")
+        print(f"  usage: provenance_check.py [--rebuild | --record] [{ACCEPT}]")
+        return 2
+
+    accept = ACCEPT in sys.argv
     if "--rebuild" in sys.argv:
-        return rebuild()
+        return rebuild(accept)
     if "--record" in sys.argv:
-        return record()
+        return record(accept)
+    if accept:
+        print(f"  {ACCEPT} does nothing on its own: the default check reads the "
+              f"manifest and never writes it")
+        return 2
 
     problems = []
     present = {p.name for p in DATA.iterdir() if p.is_file()}
@@ -147,17 +337,35 @@ def main():
         print("\n".join("  " + p for p in problems))
         return 1
 
-    manifest = json.loads(MANIFEST.read_text())
-    for kind in ("derived", "primary"):
-        for name, recorded in manifest[kind].items():
+    # Walk the declared files, not the manifest entries. Iterating the manifest
+    # meant the set being checked was whatever the last build had managed to
+    # record, so a product left out of it, which is precisely the case that
+    # needs reporting, was not checked at all: it was silently not in the loop.
+    # A file declared, present, and unrecorded is therefore a failure here.
+    manifest = held()
+    for kind, declarations in (("derived", DERIVED), ("primary", PRIMARY)):
+        noun = "product" if kind == "derived" else "measurement"
+        for name in sorted(declarations):
             path = DATA / name
             if not path.exists():
-                problems.append(f"{name} was recorded and is now missing")
+                continue                      # reported by the loop above
+            recorded = manifest[kind].get(name)
+            if recorded is None:
+                problems.append(f"{name} is in data/ and is declared a {noun}, "
+                                f"but the manifest holds no hash for it: it is "
+                                f"being published unchecked. Run --rebuild")
             elif digest(path) != recorded:
                 who = (f"{DERIVED[name]} is the only thing that may write it"
                        if kind == "derived" else "it is a measurement record")
                 problems.append(f"{name} has changed since it was recorded; "
                                 f"{who}")
+
+    # A hash for something no longer declared, or recorded under the wrong kind.
+    for kind, declarations in (("derived", DERIVED), ("primary", PRIMARY)):
+        noun = "product" if kind == "derived" else "measurement"
+        for name in sorted(set(manifest[kind]) - set(declarations)):
+            problems.append(f"the manifest records {name} as a {noun}, which is "
+                            f"no longer declared as one")
 
     n = len(manifest["derived"]) + len(manifest["primary"])
     print(f"  {n} files, {len(manifest['primary'])} measurements and "

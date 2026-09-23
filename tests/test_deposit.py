@@ -143,7 +143,10 @@ class Deposit:
                           f"it has {actual}")
 
         # Dictionary headings look like:  ## `shallow_map.csv` - 8553 rows
-        for m in re.finditer(r"^##\s+`([\w.]+\.csv)`\s*[-—]\s*([\d,]+)\s*rows",
+        # The dash class accepts an em-dash so that a heading written with one
+        # is still read and still has its row count checked, rather than being
+        # skipped as unrecognised while the house-style check reports it.
+        for m in re.finditer(r"^##\s+`([\w.]+\.csv)`\s*[-—]\s*([\d,]+)\s*rows",  # house-style: em-dash literal
                              self.text(self.dictionary), re.M):
             name, claimed = m.group(1), int(m.group(2).replace(",", ""))
             actual = self.rows_of(name)
@@ -243,16 +246,23 @@ class Deposit:
                       f"{', '.join(phantom)}")
 
         # The README states how many scripts there are; keep that honest too.
+        #
+        # A missing sentence is a failure, not a pass. Under `if m:` a reworded
+        # README silently took this count out of the suite, and a check that
+        # quietly tests nothing reads from the outside exactly like a check that
+        # passes. This is the same correction check_reproduce_count already
+        # carries, applied to the anchor it shares.
         m = re.search(r"([\w-]+) files, in three groups", text)
-        if m:
-            self.checks += 1
-            claimed = NUMBER_WORDS.get(m.group(1))
-            if claimed is None:
-                self.fail(f"README says '{m.group(1)} files' and I cannot read "
-                          f"that as a number")
-            elif claimed != len(present):
-                self.fail(f"README says {m.group(1).lower()} scripts; "
-                          f"there are {len(present)}")
+        self.checks += 1
+        if m is None:
+            self.fail("the README no longer says how many script files there "
+                      "are, so nothing holds that count to scripts/")
+        elif NUMBER_WORDS.get(m.group(1)) is None:
+            self.fail(f"README says '{m.group(1)} files' and I cannot read "
+                      f"that as a number")
+        elif NUMBER_WORDS[m.group(1)] != len(present):
+            self.fail(f"README says {m.group(1).lower()} scripts; "
+                      f"there are {len(present)}")
 
     def check_modules(self):
         """
@@ -291,17 +301,26 @@ class Deposit:
                           f"section")
 
         # And the count the dictionary opens with.
-        m = re.search(r"^(\w+) files:", self.text(self.dictionary), re.M)
-        if m:
-            self.checks += 1
-            if m.group(1) not in NUMBER_WORDS:
-                self.fail(f"dictionary opens with '{m.group(1)} files', a "
-                          f"number this check cannot read")
-            claimed = NUMBER_WORDS.get(m.group(1))
-            actual = len(self.data_files())
-            if claimed != actual:
-                self.fail(f"dictionary opens with '{m.group(1)} files'; "
-                          f"data/ holds {actual}")
+        #
+        # `[\w-]+`, not `\w+`. The dictionary opens "Twenty-one files:" and \w
+        # does not match a hyphen, so this pattern found nothing, `if m:` then
+        # skipped the check without a word, and the stated count had never once
+        # been compared against data/. Two failures compounding: a pattern that
+        # could not read the number words this suite is built around, and a skip
+        # that made the silence look like a pass. The sibling check in
+        # check_scripts had the character class right, which is what made the
+        # difference visible.
+        m = re.search(r"^([\w-]+) files:", self.text(self.dictionary), re.M)
+        self.checks += 1
+        if m is None:
+            self.fail("the data dictionary no longer opens with a count of the "
+                      "files it documents, so nothing holds that count to data/")
+        elif m.group(1) not in NUMBER_WORDS:
+            self.fail(f"dictionary opens with '{m.group(1)} files', a "
+                      f"number this check cannot read")
+        elif NUMBER_WORDS[m.group(1)] != len(self.data_files()):
+            self.fail(f"dictionary opens with '{m.group(1)} files'; "
+                      f"data/ holds {len(self.data_files())}")
 
     def check_reproduce_count(self):
         """
@@ -457,6 +476,26 @@ class Deposit:
             self.fail(f"{missing} is in pyproject.toml but not in "
                       f"requirements.txt")
 
+    # The one legitimate em-dash in the deposit is inside a pattern that has to
+    # contain one in order to match it. Such a line says so by carrying this
+    # marker after a hash, where it reads as a comment on the line rather than
+    # as part of the data, so the exemption is a claim somebody made and a
+    # reviewer can see who made it and where.
+    #
+    # The exemption used to be `"re." not in line`, aimed at the two pattern
+    # lines that happen to call the re module. But "re." is a substring of
+    # ordinary English: "measure.", "Figure.", "structure.", "before." and
+    # "more." all contain it, so a sentence ending in any of those words carried
+    # an em-dash straight past this check. An exemption has to name what it
+    # exempts; that one described it by coincidence, and the coincidence was
+    # commoner than the thing it meant to describe.
+    EM_DASH_MARKER = "house-style: em-dash literal"
+
+    def marks_em_dash(self, line):
+        """Whether the line claims, in a comment, that it needs an em-dash."""
+        _, _, comment = line.partition("#")
+        return self.EM_DASH_MARKER in comment
+
     def check_house_style(self):
         """
         No em-dashes, anywhere that ships.
@@ -470,11 +509,21 @@ class Deposit:
                                         ".json"}):
             self.checks += 1
             for i, line in enumerate(self.text(path).splitlines(), 1):
-                # The one legitimate use is a pattern that has to match an
-                # em-dash in order to reject it.
-                if "—" in line and "re." not in line:
+                # Tested once and held in a name, so that this check needs the
+                # literal on one line only and the exempt set stays as small as
+                # it can be.
+                dashed = "—" in line  # house-style: em-dash literal
+                marked = self.marks_em_dash(line)
+                if dashed and not marked:
                     self.fail(f"{path.relative_to(self.root)}:{i} uses an "
                               f"em-dash; use a comma, a colon or a full stop")
+                # A marker on a line with no em-dash on it is a standing
+                # exemption nobody needs, and whatever is written on that line
+                # next inherits it. Exemptions expire with what they exempt.
+                elif marked and not dashed:
+                    self.fail(f"{path.relative_to(self.root)}:{i} carries the "
+                              f"em-dash marker with no em-dash on the line; "
+                              f"drop the marker")
 
     def check_imports_declared(self):
         """
