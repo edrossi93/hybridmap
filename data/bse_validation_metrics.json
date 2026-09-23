@@ -1,0 +1,96 @@
+{
+  "basalt zone": {
+    "zone": "basalt zone",
+    "n_fields": 16,
+    "labelled_pixels": 72935,
+    "accuracy_pct": 82.83128813326935,
+    "model": "ExtraTrees, 150 trees, min_samples_leaf 4, leave-one-field-out",
+    "reference": "operator painted labels, not an independent measurement",
+    "classes": {
+      "basalt": {
+        "labelled_pixels": 33834,
+        "fields": 9,
+        "recall_pct": 90.6,
+        "precision_pct": 92.5
+      },
+      "matrix": {
+        "labelled_pixels": 18465,
+        "fields": 6,
+        "recall_pct": 74.4,
+        "precision_pct": 77.6
+      },
+      "void": {
+        "labelled_pixels": 20636,
+        "fields": 12,
+        "recall_pct": 77.7,
+        "precision_pct": 72.5
+      }
+    },
+    "confusion_true_by_predicted": {
+      "basalt": {
+        "basalt": 30647,
+        "matrix": 711,
+        "void": 2476
+      },
+      "matrix": {
+        "basalt": 1126,
+        "matrix": 13734,
+        "void": 3605
+      },
+      "void": {
+        "basalt": 1356,
+        "matrix": 3248,
+        "void": 16032
+      }
+    },
+    "accuracy_pct_phases_only": 96.0,
+    "note_phases_only": "accuracy over the two solid phases, with void-labelled and void-predicted pixels set aside, which is the denominator the reported volume fractions use"
+  },
+  "flax zone": {
+    "zone": "flax zone",
+    "n_fields": 21,
+    "labelled_pixels": 143620,
+    "accuracy_pct": 88.07269182565103,
+    "model": "ExtraTrees, 150 trees, min_samples_leaf 4, leave-one-field-out",
+    "reference": "operator painted labels, not an independent measurement",
+    "classes": {
+      "flax": {
+        "labelled_pixels": 44000,
+        "fields": 11,
+        "recall_pct": 94.2,
+        "precision_pct": 94.7
+      },
+      "matrix": {
+        "labelled_pixels": 32493,
+        "fields": 13,
+        "recall_pct": 78.1,
+        "precision_pct": 79.3
+      },
+      "void": {
+        "labelled_pixels": 67127,
+        "fields": 20,
+        "recall_pct": 88.9,
+        "precision_pct": 87.9
+      }
+    },
+    "confusion_true_by_predicted": {
+      "flax": {
+        "flax": 41464,
+        "matrix": 635,
+        "void": 1901
+      },
+      "matrix": {
+        "flax": 825,
+        "matrix": 25382,
+        "void": 6286
+      },
+      "void": {
+        "flax": 1473,
+        "matrix": 6010,
+        "void": 59644
+      }
+    },
+    "accuracy_pct_phases_only": 97.9,
+    "note_phases_only": "accuracy over the two solid phases, with void-labelled and void-predicted pixels set aside, which is the denominator the reported volume fractions use"
+  }
+}

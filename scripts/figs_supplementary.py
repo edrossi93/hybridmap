@@ -2,7 +2,7 @@
 
 The three of them were still the artwork submitted with the first version, and
 their labels had not followed the paper. S1's legend read "basalt-mixed" and
-"linen", S2's panel titles called the fixed-depth map a "3D acquisition", and S4
+"linen", S2's panel titles called the load-controlled map a "3D acquisition", and S4
 carried "basalt mixed" in its legend and "mixed-mode" in a panel title. All three
 names were retired in this revision, and the reply tells the reviewer that the
 class is called mixed-volume "in the manuscript, the supplement and the figures".
@@ -81,9 +81,9 @@ def s1(outdir):
     ari, ari_star = r["ARI"], r["ARI_star"]
     fs.panel_label(ax1, "a", dx=-0.30, dy=1.10)
     fs.panel_label(ax2, "b", dx=-0.30, dy=1.10)
-    fs.save(fig, "FigS1_rule_vs_kmeans", outdir)
+    fs.save(fig, "FigS5_rule_vs_kmeans", outdir)
     print(f"  S1: ARI {ari:.3f}, ARI* after merging the compliant pair "
-          f"{ari_star:.3f}  (caption says 0.40 and 0.68)")
+          f"{ari_star:.3f}  (caption says 0.40 and 0.65)")
 
 
 def s2(outdir):
@@ -96,27 +96,36 @@ def s2(outdir):
                              layout="constrained")
     for ax, (zone, title, logy) in zip(axes, zones):
         e = d.loc[d.zone == zone, "E_GPa"].dropna()
-        top = 130 if logy else 25
-        ax.hist(e[e <= top], bins=45, color="0.72", edgecolor="k", linewidth=0.6)
+        # Both panels run to 130 GPa and both are logarithmic in count.
+        # Reviewer 3 pointed out that the flax panel used to stop at 25 GPa,
+        # which hid the 492 indents above 15 GPa: on a linear count axis they
+        # are invisible beside the compliant peak, and on a truncated modulus
+        # axis they are not drawn at all. The stiff tail of the flax-rich zone
+        # is the mixed-volume population, and it is the point of the figure.
+        top, logy = 130, True
+        ax.hist(e[e <= top], bins=60, color="0.72", edgecolor="k",
+                linewidth=0.5)
         ax.axvline(E_LOWER, color=fs.PAPER["mixed-volume"], lw=1.8,
                    ls=(0, (5, 2)), label="15 GPa, compliant / mixed-volume")
-        if logy:
-            ax.set_yscale("log")
-            ax.axvline(E_UPPER_SHALLOW, color=fs.PAPER["basalt"], lw=1.8,
-                       ls=(0, (5, 2)),
-                       label="70 GPa, mixed-volume / pure-axial basalt")
+        ax.set_yscale("log")
+        ax.axvline(E_UPPER_SHALLOW, color=fs.PAPER["basalt"], lw=1.8,
+                   ls=(0, (5, 2)),
+                   label="70 GPa, mixed-volume / pure-axial basalt")
         ax.set_xlim(0, top)
         ax.set_xlabel("Indentation modulus, E (GPa)")
         ax.set_ylabel("Count")
-        ax.set_title(f"{title}, fixed-depth map (n = {len(d[d.zone == zone])})",
+        ax.set_title(f"{title}, load-controlled map (n = {len(d[d.zone == zone])})",
                      fontsize=8.6)
         ax.legend(loc="upper right", fontsize=7.2, handlelength=1.6)
         ax.minorticks_on()
     fs.panel_label(axes[0], "a", dx=-0.16, dy=1.12)
     fs.panel_label(axes[1], "b", dx=-0.16, dy=1.12)
-    fs.save(fig, "FigS2_threshold_histograms", outdir)
+    fs.save(fig, "FigS3_threshold_histograms", outdir)
     for zone, *_ in zones:
-        print(f"  S2: {zone}-rich zone n = {len(d[d.zone == zone])}")
+        sub = d[d.zone == zone]
+        print(f"  S2: {zone}-rich zone n = {len(sub)}, "
+              f"{int((sub.E_GPa < 1).sum())} below 1 GPa, "
+              f"{int((sub.E_GPa > 15).sum())} above 15 GPa")
 
 
 def s3(outdir):
@@ -165,7 +174,7 @@ def s3(outdir):
         ax.minorticks_on()
     for ax, letter in zip(axes, "abc"):
         fs.panel_label(ax, letter, dx=-0.30, dy=1.16)
-    fs.save(fig, "FigS3_cluster_diagnostics", outdir)
+    fs.save(fig, "FigS4_cluster_diagnostics", outdir)
     print(f"  S3: silhouette peaks at k = {ks[int(np.argmax(sil))]}, "
           f"BIC falls monotonically: {all(np.diff(bic) < 0)}")
 
@@ -251,12 +260,12 @@ def s4(outdir):
     stats_out = spatial_statistics(d, sub, zone, f8, ps, ks)
     for ax, letter, dx in ((ax1, "a", -0.14), (ax2, "b", -0.30), (ax3, "c", -0.24)):
         fs.panel_label(ax, letter, dx=dx, dy=1.14)
-    fs.save(fig, "FigS4_mixed_volume_localisation", outdir)
+    fs.save(fig, "FigS6_mixed_volume_localisation", outdir)
     print(f"  S4: counts basalt {int((sub.constituent=='basalt').sum())}, "
           f"mixed-volume {int((sub.constituent=='mixed-volume').sum())}, "
           f"matrix {int((sub.constituent=='matrix').sum())}, QC {len(qc)}")
     print(f"  S4: p at k = {KNN} is {p8:.2e}; largest p over k = 3 to 20 is "
-          f"{max(ps):.1e}  (the paper says 8.5e-11 and all below 1e-6)")
+          f"{max(ps):.1e}  (the paper says 2.3e-12 and all below 1e-9)")
 
 
 def spatial_statistics(d, sub, zone, f8, ps, ks):
@@ -264,7 +273,7 @@ def spatial_statistics(d, sub, zone, f8, ps, ks):
 
     The manuscript quotes four of these and none of them could be reproduced
     from the deposit before: the p at k = 8, the stability across k, the p after
-    excluding a band at each edge of the zone, and the p on the fixed-depth map.
+    excluding a band at each edge of the zone, and the p on the load-controlled map.
     The definitions are here so that the numbers mean something a reader can
     check, rather than being reported and taken on trust.
     """
@@ -305,14 +314,14 @@ def spatial_statistics(d, sub, zone, f8, ps, ks):
         "edge_band_um": EDGE_UM,
         "p_excluding_edge_bands": float(p_edge),
         "n_after_edge_exclusion": int(len(inner)),
-        "p_fixed_depth_map": float(p_shallow),
-        "n_fixed_depth_zone": int(len(szone)),
+        "p_load_controlled_map": float(p_shallow),
+        "n_load_controlled_zone": int(len(szone)),
     }
     (DATA / "spatial_localisation.json").write_text(json.dumps(out, indent=2) + "\n")
     print(f"  S4: medians {out['median_basalt_neighbour_fraction']}, "
           f"CI {out['median_difference_ci95']}")
     print(f"  S4: p after excluding {EDGE_UM} µm at each end "
-          f"{p_edge:.2e} (n = {len(inner)}); on the fixed-depth map "
+          f"{p_edge:.2e} (n = {len(inner)}); on the load-controlled map "
           f"{p_shallow:.2e} (n = {len(szone)})")
     return out
 

@@ -1,0 +1,46 @@
+{
+  "indenter": {
+    "E_GPa": 1141.0,
+    "nu": 0.07
+  },
+  "nu_uniform": 0.3,
+  "per_class": [
+    {
+      "class": "flax",
+      "median_Er_GPa": 5.14555,
+      "E_uniform_nu_GPa": 4.703558135486283,
+      "E_phase_specific_GPa": 4.703558135486283,
+      "nu_phase_specific": 0.3,
+      "shift_pct": 0.0
+    },
+    {
+      "class": "matrix",
+      "median_Er_GPa": 5.09805,
+      "E_uniform_nu_GPa": 4.6599444810250565,
+      "E_phase_specific_GPa": 4.217505796233227,
+      "nu_phase_specific": 0.42,
+      "shift_pct": -9.494505494505495
+    },
+    {
+      "class": "mixed-volume",
+      "median_Er_GPa": 38.0251,
+      "E_uniform_nu_GPa": 35.789729332570914,
+      "E_phase_specific_GPa": 34.78289738651177,
+      "nu_phase_specific": 0.34,
+      "shift_pct": -2.8131868131868303
+    },
+    {
+      "class": "basalt",
+      "median_Er_GPa": 87.2965,
+      "E_uniform_nu_GPa": 85.98628366748356,
+      "E_phase_specific_GPa": 89.04777332773243,
+      "nu_phase_specific": 0.24,
+      "shift_pct": 3.5604395604395624
+    }
+  ],
+  "laminate_estimate_GPa": {
+    "uniform": 18.497243977069772,
+    "phase_specific": 18.304464060954338,
+    "shift_pct": 1.0422088628685162
+  }
+}

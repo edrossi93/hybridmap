@@ -73,7 +73,7 @@ def windows():
     d_t, d_p = extent(depth)
     return [("Backscattered-electron mosaic", MOSAIC_H_MM, MOSAIC_W_MM,
              fs.PAPER["basalt"]),
-            ("Fixed-depth map", s_t, s_p, fs.PAPER["mixed-volume"]),
+            ("Load-controlled map", s_t, s_p, fs.PAPER["mixed-volume"]),
             ("Depth-resolved map", d_t, d_p, fs.PAPER["matrix"])]
 
 

@@ -1,50 +1,51 @@
 {
-  "reference_voigt_GPa": 21.333039614483877,
-  "note": "The threshold applies only to the depth-resolved acquisition. The reference bound is built from the fixed-depth map, which has no phase-angle channel, so no choice of threshold can move it.",
+  "reference_voigt_GPa": 18.49789655529072,
+  "note": "The limit applies only to the depth-resolved acquisition, which is the one carrying a continuous-stiffness trace. The reference estimate is built on the load-controlled map and the imaged zone share, and the load-controlled map has no phase-angle channel, so no choice of limit can move it. What moves is the depth-resolved basalt median and the alternative input of Supplementary Table S4.",
+  "criterion": "reject when the magnitude of the corrected phase angle exceeds the limit at any of the three analysis depths, or when one of those depths has no valid window",
   "rows": [
     {
-      "phase_angle_limit_deg": "15 (published flag, full trace)",
+      "phase_angle_limit_deg": "15 (superseded flag, not reproducible)",
       "rejected": 433,
       "rejected_pct": 21.65,
-      "E_flax_GPa": 3.85,
-      "E_matrix_GPa": 5.37,
-      "E_mixed-volume_GPa": 29.28,
-      "E_basalt_GPa": 49.47,
       "alternative_basalt_input_GPa": 49.47,
-      "Voigt_with_that_input_GPa": 18.83
+      "Voigt_with_that_input_GPa": 16.53,
+      "source": "recorded from the previous submission; the count and the median are not reproducible from this deposit, the estimate is computed from the median"
     },
     {
       "phase_angle_limit_deg": 10.0,
-      "rejected": 507,
-      "rejected_pct": 25.35,
-      "E_flax_GPa": 4.11,
-      "E_matrix_GPa": 6.1,
-      "E_mixed-volume_GPa": 29.64,
-      "E_basalt_GPa": 52.92,
-      "alternative_basalt_input_GPa": 52.92,
-      "Voigt_with_that_input_GPa": 19.07
+      "rejected": 473,
+      "rejected_pct": 23.65,
+      "E_flax_GPa": 4.01,
+      "E_matrix_GPa": 6.02,
+      "E_mixed-volume_GPa": 29.91,
+      "E_basalt_GPa": 53.14,
+      "alternative_basalt_input_GPa": 53.14,
+      "Voigt_with_that_input_GPa": 16.73,
+      "source": "recomputed from the deposited slice values"
     },
     {
       "phase_angle_limit_deg": 15.0,
-      "rejected": 320,
-      "rejected_pct": 16.0,
-      "E_flax_GPa": 3.84,
-      "E_matrix_GPa": 5.36,
-      "E_mixed-volume_GPa": 29.57,
-      "E_basalt_GPa": 52.76,
-      "alternative_basalt_input_GPa": 52.76,
-      "Voigt_with_that_input_GPa": 19.06
+      "rejected": 304,
+      "rejected_pct": 15.2,
+      "E_flax_GPa": 3.79,
+      "E_matrix_GPa": 5.32,
+      "E_mixed-volume_GPa": 29.76,
+      "E_basalt_GPa": 53.01,
+      "alternative_basalt_input_GPa": 53.01,
+      "Voigt_with_that_input_GPa": 16.73,
+      "source": "recomputed from the deposited slice values"
     },
     {
       "phase_angle_limit_deg": 20.0,
-      "rejected": 219,
-      "rejected_pct": 10.95,
-      "E_flax_GPa": 3.7,
-      "E_matrix_GPa": 5.09,
-      "E_mixed-volume_GPa": 29.64,
-      "E_basalt_GPa": 52.7,
-      "alternative_basalt_input_GPa": 52.7,
-      "Voigt_with_that_input_GPa": 19.05
+      "rejected": 217,
+      "rejected_pct": 10.85,
+      "E_flax_GPa": 3.66,
+      "E_matrix_GPa": 5.1,
+      "E_mixed-volume_GPa": 29.83,
+      "E_basalt_GPa": 52.63,
+      "alternative_basalt_input_GPa": 52.63,
+      "Voigt_with_that_input_GPa": 16.7,
+      "source": "recomputed from the deposited slice values"
     }
   ]
 }

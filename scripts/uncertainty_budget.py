@@ -1,177 +1,289 @@
 """
-Uncertainty on the laminate Voigt bound, by resampling rather than by
+Uncertainty on the laminate Voigt-type estimate, by resampling rather than by
 first-order propagation.
 
-The resampling is in `hybridmap.uncertainty`. What is here is our four classes,
-our seed, and the prose that says which sources this budget covers and which it
-deliberately does not.
+The construction has two levels and they are measured by different instruments:
 
-Reviewer 3 comment 9 objected to the original procedure: each class median was
-drawn from its 95 % bootstrap confidence interval, which throws away the shape
-of the bootstrap distribution and misrepresents the tails. The fix he asked for
-is to draw from the bootstrap replicates themselves, which is what this does.
+    within a zone   class fractions and class median moduli, from the indents
+    between zones   the share of the two architectural zones, from the operator
+                    tow marking of the backscattered-electron mosaic
 
-Two sources are propagated together:
+The second level is new in this revision. Previously the zone share came from
+the indent counts, which describe the window that happened to be mapped rather
+than the section. Reviewer 3 asked in his second report for the zone share to
+appear in this budget; once it is computed it turns out to be the largest term
+in it, which is why the estimate is now built on the mosaic share. See
+`zone_share.py` for that measurement and for how far the figure moves.
 
-  medians     resample indents within each class with replacement, take the
-              median of each resample. This is the bootstrap distribution, used
-              directly, not summarised into an interval first.
-  fractions   Dirichlet draw with concentration parameters equal to the
-              observed class counts, which is the posterior for multinomial
-              proportions under a uniform prior.
+Three sources are propagated together, in one Monte Carlo rather than as
+independent terms added afterwards, so that their correlations are carried:
 
-Those two are Type A in the sense of the GUM: they are evaluated from the
-statistical spread of the data, and their standard deviations mean what a
-standard deviation usually means.
+  medians     class median moduli, from the resampled indents
+  fractions   class fractions inside each zone, from the same resample
+  zone share  resampled over the 91 mosaic tiles
 
-Two further terms are not random quantities but are still uncertainty, and the
-first version of this budget left them out entirely. Reviewer 3's objection was
-that the quoted interval covered too little, so omitting them answered the wrong
-half of his comment. They are included here as Type B contributions, each
-evaluated as a rectangular distribution over the range the sensitivity analysis
-actually spans, so the standard uncertainty is the half-range divided by root
-three:
+The indent resampling is a **spatial block bootstrap**, not a draw over
+individual indents. Reviewer 3's comment 3(c) is correct that a Dirichlet on
+the raw counts treats neighbouring indents as independent observations, which
+at a 5.1 x 2.5 um pitch on 10 to 20 um fibres they are not: adjacent contacts
+frequently sample the same fibre or the same matrix pocket. The blocks here are
+contiguous groups of grid columns spanning the full short axis of the map, four
+columns wide, about 20 um, or one fibre diameter. Blocks are resampled with
+replacement within each zone. `BLOCK_COLS` is swept in the reported output so
+that the choice can be seen rather than trusted.
 
-  thresholds  the classification thresholds, swept over the same 3 x 5 grid as
-              Supplementary Table S2. The bound spans 20.83 to 21.44 GPa.
-  poisson     the Poisson ratio, uniform 0.30 against the phase-specific values
-              of Supplementary Table S1, which moves the bound to 21.11 GPa.
+Two further terms are not random quantities but are still uncertainty. They are
+included as Type B contributions in the sense of the GUM, each evaluated as a
+rectangular distribution over the range its sensitivity analysis spans, so the
+standard uncertainty is the half-range divided by root three:
 
-Using the half-range itself, rather than the half-range over root three, is what
-the superseded budget did. It overstates a bounded choice by a factor of root
-three and is why that budget read 0.43 GPa with the threshold term dominant.
+  thresholds  the classification thresholds, over the same 3 x 5 grid as
+              Supplementary Table S2, recomputed at the mosaic zone share
+  poisson     the uniform Poisson ratio of 0.30 against the phase-specific
+              values of Supplementary Table S1
 
 One term stays outside the budget on purpose. Which basalt input to use, the
-shallow 86.0 GPa or the depth-resolved 49.5 GPa, is not an uncertainty at all:
-it is a discriminated choice with a physical criterion, set out in §2.4 before
-any comparison with the flexural measurement. Folding it in would report a
-decision as noise and would let the interval swallow a disagreement the reader
-should be shown. It is reported as a sensitivity in Supplementary Table S4, and
-the measurement lies inside the predicted bracket under either input.
+shallow 86.0 GPa or the depth-resolved 49.5 GPa, is a discriminated choice on
+measurement-physics grounds rather than an uncertainty, and folding it in would
+report a decision as noise. It is reported as a sensitivity instead.
 
-Cross-section representativeness is outside for a different reason: one section
-cannot estimate it. That is said in §4.3 rather than costed here.
+Run: python uncertainty_budget.py
 """
 
 import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 DATA = HERE.parent / "data"
 
-from hybridmap import uncertainty as _unc                      # noqa: E402
-from rule_of_mixtures import CLASSES, MEDIAN_COL, class_table  # noqa: E402
+import classify as _cls                                        # noqa: E402
+import zone_share as _zs                                       # noqa: E402
+from hybridmap.mixtures import bounds                           # noqa: E402
+from rule_of_mixtures import CLASSES, MEDIAN_COL, class_table   # noqa: E402
 
-# Fixed so the quoted +/- is the same number every time the script is run. The
-# same value is used in clustering_check.py; there is nothing special about 42
-# beyond it being written down.
 SEED = 42
+N_DRAWS = 6_000
 
-# Ten thousand replicates. The standard deviation of the combined draw is stable
-# in the third decimal of a GPa from about two thousand onwards, so this is
-# comfortably past convergence and still runs in a few seconds.
-N_DRAWS = 10_000
+# The per-term standard deviations only need three figures, and each costs a
+# full resampling pass of its own, so they run shorter than the combined draw.
+FROZEN_DRAWS = 2_000
+
+# Four grid columns, 5.0959 um apart, so about 20 um: one fibre diameter, the
+# length over which adjacent contacts stop being independent samples.
+BLOCK_COLS = 4
+BLOCK_SWEEP = (2, 4, 8)
+
+# The per-class shift when the uniform Poisson ratio of 0.30 is replaced by
+# phase-specific values used to be written here as four percentages copied from
+# Supplementary Table S1. They are derivable, so they are derived:
+# poisson_sensitivity.py inverts the Oliver-Pharr relation on the deposited
+# reduced modulus at each nu. Two routes to one quantity disagreed in the
+# fourth decimal, which was enough to move the printed value across a rounding
+# boundary, and a hard-coded table cannot be checked against anything.
+
+RECTANGULAR = 3 ** 0.5
 
 
-def bootstrap_medians(df, n_draws=N_DRAWS, seed=SEED):
-    """One column of median replicates per class, drawn independently."""
-    return _unc.bootstrap_medians(df, CLASSES, "E_GPa", n_draws, seed)
+def blocks(shallow, block_cols):
+    """Row indices grouped into contiguous column blocks, per zone."""
+    out = {}
+    for zone, sub in shallow.groupby("zone"):
+        cols = np.sort(sub.col.unique())
+        which = {c: i // block_cols for i, c in enumerate(cols)}
+        key = sub.col.map(which).to_numpy()
+        out[zone] = [np.flatnonzero(key == b) + sub.index[0] * 0
+                     for b in np.unique(key)]
+        # index positions within the original frame, not label offsets
+        out[zone] = [sub.index.to_numpy()[key == b] for b in np.unique(key)]
+    return out
 
 
-# Table S1: per-class shift in the median modulus when the uniform Poisson
-# ratio of 0.30 is replaced by phase-specific values (basalt 0.24, flax 0.30,
-# PA-11 0.42, mixed-volume 0.34 as a Voigt-Reuss-Hill average at f_basalt = 0.5).
-POISSON_SHIFT_PCT = {"flax": 0.0, "matrix": -9.49,
-                     "mixed-volume": -2.81, "basalt": +3.56}
+def one_draw(shallow, blk, rng, tiles):
+    """One resampled estimate: blocks within each zone, tiles for the share."""
+    frames = {}
+    for zone, bs in blk.items():
+        pick = rng.integers(0, len(bs), len(bs))
+        frames[zone] = shallow.loc[np.concatenate([bs[i] for i in pick])]
+    pooled = pd.concat(frames.values())
 
-RECTANGULAR = 3 ** 0.5      # half-range -> standard uncertainty, GUM Type B
+    medians, fracs = {}, {}
+    for c in CLASSES:
+        v = pooled.loc[pooled.constituent == c, "E_GPa"].to_numpy()
+        medians[c] = np.median(v) if v.size else np.nan
+    for zone, f in frames.items():
+        counts = f[f.constituent.isin(CLASSES)].constituent.value_counts()
+        fracs[zone] = {c: float(counts.get(c, 0)) / counts.sum()
+                       for c in CLASSES}
+
+    i = rng.integers(0, len(tiles), len(tiles))
+    b, fl = tiles.n_basaltzone.values[i].sum(), tiles.n_flaxzone.values[i].sum()
+    w = b / (b + fl)
+
+    f = np.array([w * fracs["basalt"][c] + (1 - w) * fracs["flax"][c]
+                  for c in CLASSES])
+    return float((f * np.array([medians[c] for c in CLASSES])).sum()), w
 
 
-def type_b_terms(raw_shallow, table, point):
-    """The two bounded analysis choices, as rectangular standard uncertainties."""
-    from rule_of_mixtures import bounds, threshold_sweep
+def frozen(shallow, blk, tiles, rng, vary, point):
+    """The same draw with only one source allowed to move.
 
-    sweep = threshold_sweep(raw_shallow)["Voigt_GPa"]
-    thresholds = (sweep.max() - sweep.min()) / 2 / RECTANGULAR
+    Reporting a share of variance for each term means each term has to be
+    evaluated on its own, which for a correlated Monte Carlo means freezing
+    the other two at their measured values rather than subtracting variances.
+    """
+    per_zone, medians, _ = _zs.zone_fractions(shallow)
+    w0 = tiles.n_basaltzone.sum() / (tiles.n_basaltzone.sum()
+                                     + tiles.n_flaxzone.sum())
+    out = []
+    for _ in range(FROZEN_DRAWS):
+        m, fr, w = dict(medians), {z: dict(v) for z, v in per_zone.items()}, w0
+        if vary in ("medians", "fractions"):
+            frames = {}
+            for zone, bs in blk.items():
+                pick = rng.integers(0, len(bs), len(bs))
+                frames[zone] = shallow.loc[
+                    np.concatenate([bs[i] for i in pick])]
+            if vary == "medians":
+                pooled = pd.concat(frames.values())
+                for c in CLASSES:
+                    v = pooled.loc[pooled.constituent == c,
+                                   "E_GPa"].to_numpy()
+                    if v.size:
+                        m[c] = float(np.median(v))
+            else:
+                for zone, f in frames.items():
+                    counts = f[f.constituent.isin(CLASSES)
+                               ].constituent.value_counts()
+                    fr[zone] = {c: float(counts.get(c, 0)) / counts.sum()
+                                for c in CLASSES}
+        else:
+            i = rng.integers(0, len(tiles), len(tiles))
+            b, fl = (tiles.n_basaltzone.values[i].sum(),
+                     tiles.n_flaxzone.values[i].sum())
+            w = b / (b + fl)
+        f = np.array([w * fr["basalt"][c] + (1 - w) * fr["flax"][c]
+                      for c in CLASSES])
+        out.append(float((f * np.array([m[c] for c in CLASSES])).sum()))
+    return float(np.std(out))
 
-    shifted = [e * (1 + POISSON_SHIFT_PCT[c] / 100.0)
-               for c, e in zip(table["class"], table[MEDIAN_COL])]
-    poisson_point = bounds(table.fraction, pd.Series(shifted))[0]
-    poisson = abs(poisson_point - point) / 2 / RECTANGULAR
 
-    return ({"classification_thresholds": float(thresholds),
-             "poisson_ratio": float(poisson)},
-            {"threshold_sweep_GPa": [float(sweep.min()), float(sweep.max())],
-             "poisson_specific_voigt_GPa": float(poisson_point)})
+def threshold_term(shallow_raw, tiles, point):
+    """Type B: the classification thresholds, at the mosaic zone share."""
+    w = tiles.n_basaltzone.sum() / (tiles.n_basaltzone.sum()
+                                    + tiles.n_flaxzone.sum())
+    d = shallow_raw[shallow_raw.x_um >= _cls.X_RESIN].copy()
+    d["zone"] = _cls.assign_zone(d.x_um.values).values
+    vals = []
+    for lower in (10, 15, 20):
+        for upper in (60, 65, 70, 75, 80):
+            lab = _cls.classify(d.E_GPa.values, d.zone.values,
+                                e_lower=lower, e_upper=upper).values
+            f = d.assign(constituent=lab)
+            med = {c: f.loc[f.constituent == c, "E_GPa"].median()
+                   for c in CLASSES}
+            fr = {}
+            for zone, sub in f.groupby("zone"):
+                counts = sub[sub.constituent.isin(CLASSES)
+                             ].constituent.value_counts()
+                fr[zone] = {c: float(counts.get(c, 0)) / max(counts.sum(), 1)
+                            for c in CLASSES}
+            if any(np.isnan(med[c]) for c in CLASSES):
+                continue
+            frac = np.array([w * fr["basalt"][c] + (1 - w) * fr["flax"][c]
+                             for c in CLASSES])
+            vals.append(float((frac * np.array([med[c]
+                                                for c in CLASSES])).sum()))
+    return (max(vals) - min(vals)) / 2 / RECTANGULAR, [min(vals), max(vals)]
 
 
 def main():
     shallow = pd.read_csv(DATA / "classified_shallow.csv")
     raw = pd.read_csv(DATA / "shallow_map.csv")
-    table = class_table(shallow)
+    tiles = pd.read_csv(DATA / "bse_segmentation_tiles.csv")
 
-    reps = bootstrap_medians(shallow)
-    result = _unc.budget(table, reps, CLASSES, seed=SEED, n_draws=N_DRAWS,
-                         median_col=MEDIAN_COL)
+    per_zone, medians, w_indents = _zs.zone_fractions(shallow)
+    w_mosaic = tiles.n_basaltzone.sum() / (tiles.n_basaltzone.sum()
+                                           + tiles.n_flaxzone.sum())
+    _, (point, hill, reuss) = _zs.at_share(per_zone, medians, w_mosaic)
+    _, (window_point, _, _) = _zs.at_share(per_zone, medians, w_indents)
 
-    type_a = result["components_sd"]
-    type_b, ranges = type_b_terms(raw, table, result["point"])
-    combined = sum(v ** 2 for v in
-                   list(type_a.values()) + list(type_b.values())) ** 0.5
+    blk = blocks(shallow, BLOCK_COLS)
+    print(f"  blocks per zone: "
+          f"{ {z: len(b) for z, b in blk.items()} }, {BLOCK_COLS} columns each")
+
+    rng = np.random.default_rng(SEED)
+    draws = [one_draw(shallow, blk, rng, tiles)[0] for _ in range(N_DRAWS)]
+    combined_a = float(np.std(draws))
+
+    type_a = {}
+    for vary in ("medians", "fractions", "zone_share"):
+        type_a[vary] = frozen(shallow, blk, tiles,
+                              np.random.default_rng(SEED), vary, point)
+
+    thr, thr_range = threshold_term(raw, tiles, point)
+    import poisson_sensitivity as _poi
+    poisson_med = {r["class"]: r["E_phase_specific_GPa"]
+                   for _, r in _poi.table().iterrows()}
+    _, (poisson_point, _, _) = _zs.at_share(per_zone, poisson_med, w_mosaic)
+    poi = abs(poisson_point - point) / 2 / RECTANGULAR
+    type_b = {"classification_thresholds": thr, "poisson_ratio": poi}
+
+    combined = (combined_a ** 2 + sum(v ** 2 for v in type_b.values())) ** 0.5
+
+    sweep = {}
+    for bc in BLOCK_SWEEP:
+        r = np.random.default_rng(SEED)
+        b2 = blocks(shallow, bc)
+        sweep[bc] = float(np.std([one_draw(shallow, b2, r, tiles)[0]
+                                  for _ in range(1000)]))
 
     budget = {
-        "voigt_point_estimate": result["point"],
-        "n_draws": N_DRAWS,
-        "seed": SEED,
-        "method": ("Type A by resampling: class medians drawn from their "
-                   "bootstrap replicates directly, not from a summarised 95 % "
-                   "interval; class fractions drawn from a Dirichlet with "
-                   "concentration equal to the observed counts. Type B by the "
-                   "GUM rectangular convention: half the range of each "
-                   "sensitivity analysis, divided by root three."),
+        "construction": ("class fractions and medians from the indents, zone "
+                         "share from the mosaic tow marking"),
+        "voigt_point_estimate": point,
+        "hill": hill, "reuss": reuss,
+        "voigt_at_indent_count_zone_share": window_point,
+        "w_basalt_mosaic": float(w_mosaic),
+        "w_basalt_indent_counts": float(w_indents),
+        "n_draws": N_DRAWS, "seed": SEED,
+        "block_columns": BLOCK_COLS,
+        "block_size_sensitivity_sd_GPa": sweep,
         "type_a_sd_GPa": type_a,
-        "type_a_combined_sd_GPa": result["combined_sd"],
+        "type_a_combined_sd_GPa": combined_a,
         "type_b_sd_GPa": type_b,
-        "type_b_ranges": ranges,
+        "type_b_ranges": {"threshold_sweep_GPa": thr_range,
+                          "poisson_specific_voigt_GPa": poisson_point},
         "combined_sd_GPa": combined,
-        "share_of_variance": {k: v ** 2 / combined ** 2 for k, v in
-                              list(type_a.items()) + list(type_b.items())},
-        "random_only_percentile_95_interval_GPa": result["interval"],
-        "excluded": ("The choice of basalt input, which is a discriminated "
-                     "choice on measurement-physics grounds rather than an "
-                     "uncertainty and is reported in Supplementary Table S4; "
-                     "and cross-section representativeness, which cannot be "
-                     "estimated from a single section and is addressed in "
-                     "§4.3."),
+        "percentile_95_interval_GPa": [float(np.percentile(draws, 2.5)),
+                                       float(np.percentile(draws, 97.5))],
+        "excluded": ("The choice of basalt input, a discriminated choice "
+                     "reported as a sensitivity rather than as noise."),
     }
-
     out = DATA / "uncertainty_budget.json"
-    # Newlines pinned to "\n" rather than the platform default, so running
-    # this on Windows does not rewrite every line of a file that has not
-    # changed and leave a diff that looks like a result moved.
     out.write_text(json.dumps(budget, indent=2) + "\n",
                    encoding="utf8", newline="\n")
 
-    print(f"Voigt point estimate            {result['point']:.3f} GPa\n")
-    print("  Type A, evaluated by resampling")
+    print(f"\n  zone share  mosaic {w_mosaic:.4f}   indent counts "
+          f"{w_indents:.4f}")
+    print(f"  Voigt-type estimate            {point:.3f} GPa "
+          f"(window-weighted {window_point:.3f})")
+    print(f"  Hill {hill:.3f}   Reuss {reuss:.3f}\n")
+    print("  Type A, one source at a time, spatial block bootstrap")
     for k, v in type_a.items():
-        print(f"    {k:<28} ± {v:.3f}   {100 * v ** 2 / combined ** 2:4.1f} %")
-    print(f"    {'subtotal':<28} ± {result['combined_sd']:.3f}\n")
+        print(f"    {k:<28} ± {v:.3f}")
+    print(f"    {'all three together':<28} ± {combined_a:.3f}\n")
     print("  Type B, rectangular over the sensitivity range")
     for k, v in type_b.items():
-        print(f"    {k:<28} ± {v:.3f}   {100 * v ** 2 / combined ** 2:4.1f} %")
-    print(f"\n  combined                      ± {combined:.3f}")
-    print(f"  reported as                     {result['point']:.2f} "
-          f"± {combined:.2f} GPa")
-    lo, hi = budget["random_only_percentile_95_interval_GPa"]
-    print(f"\n  random-only 95 % interval     {lo:.2f} to {hi:.2f} GPa")
-    skew = float(pd.Series(result["draws"]).skew())
-    print(f"  skew {skew:+.3f}, so that interval is "
-          f"{'not ' if abs(skew) > 0.1 else ''}symmetric")
+        print(f"    {k:<28} ± {v:.3f}")
+    print(f"\n  combined                       ± {combined:.3f}")
+    print(f"  reported as                      {point:.2f} ± {combined:.2f} GPa")
+    print(f"\n  block-size sensitivity (1000 draws): "
+          + ", ".join(f"{k} cols ± {v:.3f}" for k, v in sweep.items()))
     print(f"\nwritten to {out.relative_to(HERE.parent)}")
 
 

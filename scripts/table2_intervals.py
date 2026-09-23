@@ -1,8 +1,12 @@
 """
-The per-class confidence intervals of Table 2, recomputed from the deposited
+The per-class confidence intervals of Table 3, recomputed from the deposited
 tables.
 
-Table 2's caption declares the construction: "95 % bootstrap confidence
+The file keeps its name from the round in which that table was numbered 2. The
+table it reproduces is the one carrying the per-class medians, counts and
+intervals.
+
+Table 3's caption declares the construction: "95 % bootstrap confidence
 intervals on the medians (10^4 resamplings, seed 42)". That is a complete
 recipe, so it should be runnable, and until this script existed it was the one
 column of the paper that no deposited code produced. The medians beside it come
@@ -40,9 +44,10 @@ from rule_of_mixtures import CLASSES                           # noqa: E402
 N_DRAWS = 10_000
 SEED = 42
 
-# Each acquisition, with the column its median is taken from. The shallow map
-# is measured at fixed depth; the depth-resolved column is the 150 nm slice,
-# which is the depth Table 2 reports.
+# Each acquisition, with the column its median is taken from. The shallow map is
+# load-controlled and returns one modulus per indent, so its column is that
+# modulus; the depth-resolved column is the 150 nm slice, which is the depth
+# Table 3 reports.
 ACQUISITIONS = [
     ("shallow", "classified_shallow.csv", "E_GPa"),
     ("depth-resolved", "classified_depth_resolved.csv", "E_150"),

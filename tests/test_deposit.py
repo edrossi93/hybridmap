@@ -41,6 +41,21 @@ DISTRIBUTIONS = {"sklearn": "scikit-learn", "PIL": "pillow",
                  "yaml": "pyyaml"}
 
 
+# The counts in the README and the dictionary are spelled out, because that is
+# how they read on the page. Both checks used to carry their own short list and
+# both lists ran out as the deposit grew, which made the checks stop checking
+# rather than fail: an unknown word gave None, and None never equals a count.
+# One list, long enough to have room, and an unreadable word is now a failure.
+NUMBER_WORDS = {w: n for n, w in enumerate(
+    ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+     "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+     "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one",
+     "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six",
+     "twenty-seven", "twenty-eight", "twenty-nine", "thirty", "thirty-one",
+     "thirty-two", "thirty-three", "thirty-four", "thirty-five"))}
+NUMBER_WORDS.update({w.capitalize(): n for w, n in list(NUMBER_WORDS.items())})
+
+
 class Deposit:
     """
     The checks, over one deposit directory.
@@ -226,11 +241,7 @@ class Deposit:
         m = re.search(r"([\w-]+) files, in three groups", text)
         if m:
             self.checks += 1
-            words = {"Twelve": 12, "Thirteen": 13, "Fourteen": 14,
-                     "Fifteen": 15, "Sixteen": 16, "Seventeen": 17,
-                     "Eighteen": 18, "Nineteen": 19, "Twenty": 20,
-                     "Twenty-one": 21, "Twenty-two": 22}
-            claimed = words.get(m.group(1))
+            claimed = NUMBER_WORDS.get(m.group(1))
             if claimed is None:
                 self.fail(f"README says '{m.group(1)} files' and I cannot read "
                           f"that as a number")
@@ -278,10 +289,10 @@ class Deposit:
         m = re.search(r"^(\w+) files:", self.text(self.dictionary), re.M)
         if m:
             self.checks += 1
-            words = {"Eight": 8, "Nine": 9, "Ten": 10, "Eleven": 11,
-                     "Twelve": 12, "Thirteen": 13, "Fourteen": 14,
-                     "Fifteen": 15, "Sixteen": 16}
-            claimed = words.get(m.group(1))
+            if m.group(1) not in NUMBER_WORDS:
+                self.fail(f"dictionary opens with '{m.group(1)} files', a "
+                          f"number this check cannot read")
+            claimed = NUMBER_WORDS.get(m.group(1))
             actual = len(self.data_files())
             if claimed != actual:
                 self.fail(f"dictionary opens with '{m.group(1)} files'; "

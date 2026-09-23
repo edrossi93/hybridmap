@@ -1,34 +1,40 @@
 {
-  "voigt_point_estimate": 21.333039614483877,
-  "n_draws": 10000,
+  "construction": "class fractions and medians from the indents, zone share from the mosaic tow marking",
+  "voigt_point_estimate": 18.49789655529072,
+  "hill": 12.673195624095058,
+  "reuss": 6.848494692899399,
+  "voigt_at_indent_count_zone_share": 21.333039614483873,
+  "w_basalt_mosaic": 0.3619503972551353,
+  "w_basalt_indent_counts": 0.4970275626013331,
+  "n_draws": 6000,
   "seed": 42,
-  "method": "Type A by resampling: class medians drawn from their bootstrap replicates directly, not from a summarised 95 % interval; class fractions drawn from a Dirichlet with concentration equal to the observed counts. Type B by the GUM rectangular convention: half the range of each sensitivity analysis, divided by root three.",
-  "type_a_sd_GPa": {
-    "class_medians": 0.2572523822324794,
-    "class_fractions": 0.30699350474826137
+  "block_columns": 4,
+  "block_size_sensitivity_sd_GPa": {
+    "2": 1.2078991726407746,
+    "4": 1.3844811157523422,
+    "8": 1.6816459733744245
   },
-  "type_a_combined_sd_GPa": 0.39992429267037555,
+  "type_a_sd_GPa": {
+    "medians": 0.3447033473873429,
+    "fractions": 1.0799863403032977,
+    "zone_share": 0.6114360335998388
+  },
+  "type_a_combined_sd_GPa": 1.418874941161959,
   "type_b_sd_GPa": {
-    "classification_thresholds": 0.17478745836956028,
-    "poisson_ratio": 0.06346372574941067
+    "classification_thresholds": 0.24268484222473222,
+    "poisson_ratio": 0.05583915133756523
   },
   "type_b_ranges": {
     "threshold_sweep_GPa": [
-      20.829752495045938,
-      21.435234011889754
+      17.998337389541977,
+      18.839022343462123
     ],
-    "poisson_specific_voigt_GPa": 21.113194819612684
+    "poisson_specific_voigt_GPa": 18.304464060954338
   },
-  "combined_sd_GPa": 0.4415904213308908,
-  "share_of_variance": {
-    "class_medians": 0.33937474566997944,
-    "class_fractions": 0.4833025483087122,
-    "classification_thresholds": 0.15666834136762323,
-    "poisson_ratio": 0.02065436465368496
-  },
-  "random_only_percentile_95_interval_GPa": [
-    20.542658085540236,
-    22.104734026340342
+  "combined_sd_GPa": 1.440562404800672,
+  "percentile_95_interval_GPa": [
+    15.776416346459103,
+    21.341067729300747
   ],
-  "excluded": "The choice of basalt input, which is a discriminated choice on measurement-physics grounds rather than an uncertainty and is reported in Supplementary Table S4; and cross-section representativeness, which cannot be estimated from a single section and is addressed in \u00a74.3."
+  "excluded": "The choice of basalt input, a discriminated choice reported as a sensitivity rather than as noise."
 }

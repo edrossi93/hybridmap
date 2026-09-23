@@ -123,7 +123,7 @@ def build(outdir):
     ax_c = place(LEFT, y, PANEL_W, BAR_H)
     names = [n for n, _ in CLASSES]
     x = np.arange(len(names))
-    for k, (df, label, hatch) in enumerate([(shallow, "fixed-depth survey", ""),
+    for k, (df, label, hatch) in enumerate([(shallow, "load-controlled survey", ""),
                                             (depth, "depth-resolved survey", "//")]):
         d = df[df.constituent.isin(names)]
         frac = [100 * (d.constituent == n).mean() for n in names]

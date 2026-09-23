@@ -5,7 +5,12 @@ title: >-
   flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a
   rule of mixtures
 type: dataset
-license: MIT
+# Two licences, because the deposit is two things. CFF 1.2 takes a list here,
+# and the pair matches LICENSE at the root, which covers scripts/ and tests/,
+# and data/LICENSE, which covers the measurements.
+license:
+  - MIT
+  - CC-BY-4.0
 authors:
   - given-names: Edoardo
     family-names: Rossi

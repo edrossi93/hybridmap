@@ -7,7 +7,7 @@ reported medians, which understates the shortfall, and the reply told him it
 reported maxima, which it did not.
 
 A maximum is the wrong statistic here, for a reason worth stating. The largest
-flax contact depth in the fixed-depth map is 31 µm, which is a failed contact
+flax contact depth in the load-controlled map is 31 µm, which is a failed contact
 rather than a deep one, so a raw maximum needs a rejection rule and the rule
 then becomes another parameter to argue about. What the reviewer actually asked
 for is a demonstration of compliance, and that can be given directly: count how
@@ -15,7 +15,7 @@ many indents in each class individually satisfy pitch >= 10 h_c.
 
 The answer is unflattering and is the point of reporting it. Four indents in
 five in the two compliant classes violate the criterion on the short axis of the
-fixed-depth map; the two stiff classes essentially never do. So the spacing
+load-controlled map; the two stiff classes essentially never do. So the spacing
 question is confined to flax and matrix, which is also where the border test
 finds no evidence of an interaction.
 
@@ -43,7 +43,7 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 DATA = HERE.parent / "data"
 
-# Short axis of the fixed-depth grid, in nm. The long axis is 5.096 µm and
+# Short axis of the load-controlled grid, in nm. The long axis is 5.096 µm and
 # satisfies the criterion for every class, so the short axis is the binding one.
 PITCH_SHORT_NM = 2477.0
 BERKOVICH = 24.5          # A = 24.5 h_c^2 for an ideal Berkovich tip
@@ -75,7 +75,7 @@ def main():
         })
 
     out = pd.DataFrame(rows)
-    print(f"fixed-depth map, short-axis pitch {PITCH_SHORT_NM / 1000:.2f} µm, "
+    print(f"load-controlled map, short-axis pitch {PITCH_SHORT_NM / 1000:.2f} µm, "
           f"so an indent complies when h_c < {limit:.0f} nm\n")
     print(out.to_string(index=False))
     compliant = [r for r in rows if r["class"] in ("flax", "matrix")]

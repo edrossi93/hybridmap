@@ -207,7 +207,7 @@ def r5_deconvolution(outdir):
 
     bins = np.linspace(0, 110, 56)
     ax1.hist(e_s, bins=bins, density=True, color=fs.PAPER["basalt"],
-             alpha=0.55, label="fixed-depth map")
+             alpha=0.55, label="load-controlled map")
     ax1.hist(e_d, bins=bins, density=True, color=fs.PAPER["matrix"],
              alpha=0.55, label="depth-resolved, 150 nm")
     for x, c in ((sh["e_basalt_end_member_GPa"], fs.PAPER["basalt"]),
@@ -238,7 +238,7 @@ def r5_deconvolution(outdir):
     # line is either over a bar or too narrow for the string.
     ax2.axhline(imaged, color=fs.WONG["red"], lw=1.3, ls=(0, (5, 2)),
                 label=f"imaged, {imaged:.3f}")
-    ax2.set_xticks(x, ["fixed-depth\nmap", "depth-resolved\nmap"])
+    ax2.set_xticks(x, ["load-controlled\nmap", "depth-resolved\nmap"])
     ax2.tick_params(axis="x", labelsize=8.5)
     ax2.set_ylabel("Basalt fraction of the zone")
     # Headroom for the legend, so it clears the tallest bar and its interval

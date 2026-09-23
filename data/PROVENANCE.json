@@ -1,0 +1,28 @@
+{
+  "derived": {
+    "classified_shallow.csv": "44888b0df6c73996dacfe199709de3cf486a94d5d1d914dbc015473350283629",
+    "classified_depth_resolved.csv": "a9154c1585aa508fb5cf2c49b882947a361246fc07cbcfcccd88b86810302c7c",
+    "flexural_moduli.csv": "b8b4ca2b53eab51de59cb7b5e110526f999bf8e2eeb123da90dabf87c938fecc",
+    "uncertainty_budget.json": "55f06428341ccef618af07bc4467b921a2bf632feee8f24501f93daf8823561f",
+    "phase_angle_sensitivity.json": "eaaa133b73c482ce2082abec0568ff80ad1e8df1a8e25fc490499d5279b3d9b3",
+    "spacing_compliance.json": "9b50fcdd4553159b603d142a9fe1e9a911b624d44329851e206157922e4d6b77",
+    "mixed_class_deconvolution.json": "3be3e82eba949e66431c6df4fe0f22462a8f0e42faeadce6b6f5e99928122f22",
+    "spatial_localisation.json": "1fcb03399d8075f9c0e17eff1e30f6b427c8dbc02e3a5283b8792f2b1a9c0f22",
+    "zone_share_sensitivity.json": "ea5c73cd5e8dd158cc7508fd809362bd75da516d7e9c7a728a950268b15614e9",
+    "poisson_sensitivity.json": "d36e81aefeb6e2b1650fe4ab687d9d2ad74a5393e4687e9b5085f91377fde293",
+    "flexural_comparisons.json": "ecf33b2bdf558c09b5c0b4d02614dcafd3e0fdf3069989e6af5237a3fb36e340",
+    "basalt_input_sweep.json": "6dd9398801a84fbb9405481fd79364a87437ac8db481f04052737cbafbf5d218"
+  },
+  "primary": {
+    "shallow_map.csv": "01d3fa536b400f2201afca8207e86926c6a4605cc0198cfbdadaccc5fee24976",
+    "depth_resolved_indents.csv": "909525ea2c3249e43bba5dc73dfe6c88dae885c74bb9500df97e8b1b73e98165",
+    "depth_resolved_curves.csv": "947cadf8e557fa30384bf34836687e82839caf64a7075be9a3c16ec027cae392",
+    "flexural_curves.csv": "c78df8e53a834971ababe1b01814e128aa9e728f07580fa01ec91af678d05189",
+    "bse_segmentation_tiles.csv": "09f170e8e3f3248f528de400103875011abb399f00940202a7f74074b5aefd98",
+    "bse_segmentation_summary.json": "26d8fea9afd2695560ff6ac789be359394fc5ae67c2dede26c5ddbc5b56d1400",
+    "zone_mask_rle.json": "d315b4085b9855b52084cafd22560f96692e5c5bd06cbf356854c33ea75e9b34",
+    "bse_validation_metrics.json": "6fa1683607ecd44d1f9069057d38ea92190c1daea39249e3024bf2eb2a8e4aa3",
+    "DATA_DICTIONARY.md": "591d4ea197d3ad3680d96761ec8c91bed8064963190ddc63ea179cd64b6251ef",
+    "LICENSE": "230ca33bbb6f23e98cfdb831d5d45e277cc64160a7ae046c6ca91609c3adfbe4"
+  }
+}

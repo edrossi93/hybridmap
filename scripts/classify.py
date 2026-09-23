@@ -154,11 +154,13 @@ def classify_depth_resolved(df, zone_col="zone"):
     d["constituent"] = classify(d.E_150.values, zone,
                                 e_upper=E_UPPER_DEPTH).values
 
-    # The paper rejects 433 of the 2000 indents on the strict near-surface
-    # phase-angle criterion. That flag is stored per indent, so use it when it
-    # is present and recompute it only when it is not: phase_angle_qc() applies
-    # the same thresholds but to the three slice values alone, and on a handful
-    # of indents the full trace disagrees with the slices.
+    # The paper rejects 304 of the 2000 indents on the phase-angle criterion.
+    # make_classified_depth.py is where that decision is taken and stored, so
+    # use the stored flag whenever it is there. The fallback below is for a
+    # frame that arrives without it and is not a second opinion about it:
+    # phase_angle_qc() applies the same 15 degree limit to the same three slice
+    # values but lets an indent with a missing slice through, so it rejects 288
+    # where the stated rule rejects 304.
     if "qc_flag_strict" in d:
         rejected = d.qc_flag_strict.astype(bool)
     else:
@@ -176,9 +178,16 @@ if __name__ == "__main__":
     counts = got.constituent.value_counts()
     print(counts.to_string())
 
-    # Cross-check against the labels used in the paper
-    ref = pd.read_csv(data / "classified_shallow.csv")
-    merged = got.merge(ref[["indent_id", "constituent"]], on="indent_id",
-                       suffixes=("_here", "_paper"))
-    agree = (merged.constituent_here == merged.constituent_paper).mean()
-    print(f"\nagreement with the deposited labels: {100 * agree:.2f} %")
+    # Write it. Until round 3 this block only compared the labels against a
+    # deposited file that nothing produced, so a disagreement could be read
+    # and shrugged at. The file is a product now, and this is what makes it
+    # one.
+    out = data / "classified_shallow.csv"
+    if out.exists():
+        ref = pd.read_csv(out)
+        merged = got.merge(ref[["indent_id", "constituent"]], on="indent_id",
+                           suffixes=("_here", "_before"))
+        agree = (merged.constituent_here == merged.constituent_before).mean()
+        print(f"\nagreement with the previous file: {100 * agree:.2f} %")
+    got.to_csv(out, index=False, lineterminator="\n")
+    print(f"written: {out.name}")

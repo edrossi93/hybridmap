@@ -1,0 +1,184 @@
+{
+  "per_specimen": [
+    {
+      "configuration": "basalt_face",
+      "specimen_id": "16Hybr_Bas_Long_1",
+      "peak_tangent_GPa": 20.389836749622358,
+      "softening_pct": 8.599666783996536,
+      "strength_MPa": 183.7802,
+      "strain_at_break_pct": 1.37159,
+      "chord_GPa": 19.22
+    },
+    {
+      "configuration": "basalt_face",
+      "specimen_id": "16Hybr_Bas_Long_2",
+      "peak_tangent_GPa": 19.96492145733017,
+      "softening_pct": 8.418849430362748,
+      "strength_MPa": 181.2129,
+      "strain_at_break_pct": 1.200381,
+      "chord_GPa": 18.8
+    },
+    {
+      "configuration": "basalt_face",
+      "specimen_id": "16Hybr_Bas_Long_3",
+      "peak_tangent_GPa": 19.753060238178065,
+      "softening_pct": 8.279583848460772,
+      "strength_MPa": 180.1276,
+      "strain_at_break_pct": 1.307922,
+      "chord_GPa": 18.59
+    },
+    {
+      "configuration": "basalt_face",
+      "specimen_id": "16Hybr_Bas_Long_4",
+      "peak_tangent_GPa": 19.276810659614334,
+      "softening_pct": 7.990295280636813,
+      "strength_MPa": 177.4853,
+      "strain_at_break_pct": 1.228103,
+      "chord_GPa": 18.12
+    },
+    {
+      "configuration": "basalt_face",
+      "specimen_id": "16Hybr_Bas_Long_5",
+      "peak_tangent_GPa": 20.680517014428148,
+      "softening_pct": 8.72451454437405,
+      "strength_MPa": 185.7852,
+      "strain_at_break_pct": 1.365136,
+      "chord_GPa": 19.51
+    },
+    {
+      "configuration": "flax_face",
+      "specimen_id": "16Hybr_Flax_Long_1",
+      "peak_tangent_GPa": 21.08468947424852,
+      "softening_pct": 30.864072908473496,
+      "strength_MPa": 121.4518,
+      "strain_at_break_pct": 0.719651,
+      "chord_GPa": 20.42
+    },
+    {
+      "configuration": "flax_face",
+      "specimen_id": "16Hybr_Flax_Long_2",
+      "peak_tangent_GPa": 20.62909750403776,
+      "softening_pct": 34.72877530933772,
+      "strength_MPa": 118.3299,
+      "strain_at_break_pct": 0.735877,
+      "chord_GPa": 19.26
+    },
+    {
+      "configuration": "flax_face",
+      "specimen_id": "16Hybr_Flax_Long_3",
+      "peak_tangent_GPa": 20.89395410604674,
+      "softening_pct": 34.90924454862114,
+      "strength_MPa": 119.3544,
+      "strain_at_break_pct": 0.730123,
+      "chord_GPa": 19.52
+    },
+    {
+      "configuration": "flax_face",
+      "specimen_id": "16Hybr_Flax_Long_4",
+      "peak_tangent_GPa": 20.62909750403776,
+      "softening_pct": 34.72877530933772,
+      "strength_MPa": 118.3299,
+      "strain_at_break_pct": 0.733277,
+      "chord_GPa": 19.26
+    },
+    {
+      "configuration": "flax_face",
+      "specimen_id": "16Hybr_Flax_Long_5",
+      "peak_tangent_GPa": 20.49540459638573,
+      "softening_pct": 37.53811073053704,
+      "strength_MPa": 110.2805,
+      "strain_at_break_pct": 0.661109,
+      "chord_GPa": 19.83
+    }
+  ],
+  "comparisons": {
+    "chord modulus (GPa)": {
+      "p": 0.038029721487944194,
+      "t": -2.4869803703652815,
+      "hedges_g": -1.4206879294292614,
+      "difference": -0.8099999999999987,
+      "ci95": [
+        -1.5625879492413395,
+        -0.05741205075865785
+      ],
+      "basalt_mean": 18.848000000000003,
+      "basalt_sd": 0.5420977771583277,
+      "flax_mean": 19.658,
+      "flax_sd": 0.4863332190998266
+    },
+    "peak tangent modulus (GPa)": {
+      "p": 0.03688088022311282,
+      "t": -2.746513309134141,
+      "hedges_g": -1.5689461616983271,
+      "difference": -0.7334194131166853,
+      "ci95": [
+        -1.4028212350846658,
+        -0.06401759114870476
+      ],
+      "basalt_mean": 20.013029223834614,
+      "basalt_sd": 0.547594710320879,
+      "flax_mean": 20.7464486369513,
+      "flax_sd": 0.23808108625227947
+    },
+    "flexural strength (MPa)": {
+      "p": 1.098174096904358e-08,
+      "t": 26.85722409250147,
+      "hedges_g": 15.34219350536706,
+      "difference": 64.12894000000003,
+      "ci95": [
+        58.55082338823403,
+        69.70705661176603
+      ],
+      "basalt_mean": 181.67824000000002,
+      "basalt_sd": 3.2205251067178513,
+      "flax_mean": 117.54929999999999,
+      "flax_sd": 4.258580116071552
+    },
+    "softening to 0.55 % strain (%)": {
+      "p": 1.3193773879712774e-05,
+      "t": -24.367267670870863,
+      "hedges_g": -13.919805506182367,
+      "difference": -26.15121378369524,
+      "ci95": [
+        -29.098237994401067,
+        -23.204189572989414
+      ],
+      "basalt_mean": 8.402581977566184,
+      "basalt_sd": 0.28629376903193415,
+      "flax_mean": 34.553795761261426,
+      "flax_sd": 2.3826335267489984
+    },
+    "strain at break (%)": {
+      "p": 1.4315857443404303e-05,
+      "t": 15.382403812194964,
+      "hedges_g": 8.787200607611647,
+      "difference": 0.5786189999999999,
+      "ci95": [
+        0.4833127848345797,
+        0.6739252151654201
+      ],
+      "basalt_mean": 1.2946263999999998,
+      "basalt_sd": 0.07806940912611038,
+      "flax_mean": 0.7160074,
+      "flax_sd": 0.03130255738434164
+    }
+  },
+  "families": {
+    "as reported: four comparisons": {
+      "chord modulus (GPa)": 0.07376176044622564,
+      "peak tangent modulus (GPa)": 0.07376176044622564,
+      "flexural strength (MPa)": 4.392696387617432e-08,
+      "softening to 0.55 % strain (%)": 3.958132163913832e-05
+    },
+    "stiffness as one comparison: three": {
+      "chord modulus (GPa)": 0.038029721487944194,
+      "flexural strength (MPa)": 3.294522290713074e-08,
+      "softening to 0.55 % strain (%)": 2.638754775942555e-05
+    },
+    "the original family: three": {
+      "chord modulus (GPa)": 0.038029721487944194,
+      "flexural strength (MPa)": 3.294522290713074e-08,
+      "strain at break (%)": 2.8631714886808605e-05
+    }
+  }
+}

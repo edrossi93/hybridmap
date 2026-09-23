@@ -93,6 +93,13 @@ def substitute(table, cls, new_modulus):
 # measures is none of them: it is the compliant response of the flax-rich tow
 # as consolidated, with lumen, middle lamella and impregnating matrix inside
 # the probed volume.
+#
+# The third value needs settling before the next round. Supplementary Table S8
+# prints 45.30 GPa for the same row, and §4.3.4 says "about 45 GPa along the
+# fibre axis", so the table and this list read the same source differently. The
+# published estimates in Table S8 follow from 45.30 and are checked against it in
+# reproduce_paper_values.py. Nothing here is changed until the authors say which
+# reading of the source is the right one.
 FLAX_INPUTS = [
     (14.0, "immature Gn cell-wall layer"),
     (18.0, "mature G cell-wall layer"),
@@ -141,8 +148,16 @@ if __name__ == "__main__":
     print(f"zone-weighted          {np.round(z, 5)}")
     print(f"identical              {np.allclose(g, z)}")
 
-    print(f"\nbasalt input swapped to the depth-resolved value (49.47 GPa): "
-          f"Voigt {substitute(tab, 'basalt', 49.47)[0]:.2f} GPa")
+    # Read the depth-resolved basalt median from the data rather than typing it
+    # in. The literal that used to sit here, 49.47 GPa, was the median under a
+    # quality mask that has since been replaced.
+    _dr = pd.read_csv(data / "classified_depth_resolved.csv")
+    basalt_depth = float(_dr.loc[(_dr.qc_flag_strict == 0)
+                                 & (_dr.constituent == "basalt"),
+                                 "E_150"].median())
+    print(f"\nbasalt input swapped to the depth-resolved value "
+          f"({basalt_depth:.2f} GPa): "
+          f"Voigt {substitute(tab, 'basalt', basalt_depth)[0]:.2f} GPa")
     for Em in (1.0, 1.2, 1.5):
         print(f"matrix set to bulk PA-11 {Em} GPa: "
               f"Voigt {substitute(tab, 'matrix', Em)[0]:.2f} GPa")
@@ -151,13 +166,14 @@ if __name__ == "__main__":
     measured = {c: g.E_D790_toe_compensated_GPa.mean()
                 for c, g in flex.groupby("configuration")}
     fs = flax_input_sensitivity(tab, measured)
-    print("\nflax-input sensitivity (Supplementary Table S7)")
+    print("\nflax-input sensitivity (Supplementary Table S8, at the whole-map "
+          "fractions rather than the two-level construction)")
     print(f"  {'flax input':>10}  {'source':<32}{'Voigt':>7}"
           f"{'closure basalt':>16}{'closure flax':>14}")
     for _, r in fs.iterrows():
         print(f"  {r.flax_input_GPa:>10.2f}  {r.source:<32}{r.Voigt_GPa:>7.2f}"
               f"{100 * r.closure_basalt_face:>15.1f}%{100 * r.closure_flax_face:>13.1f}%")
-    print("  the bound stays above both measurements for every input")
+    print("  the sum stays above both measurements for every input")
 
     raw = pd.read_csv(data / "shallow_map.csv")
     sweep = threshold_sweep(raw)

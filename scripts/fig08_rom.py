@@ -9,10 +9,13 @@ in the shallow map, where the fibres are not depressed by substrate compliance.
 The zone-averaged modulus actually measured is marked so the reader can see
 which bound lands closest.
 
-Panel (b) is the laminate-scale construction from the shallow map. The two
-measured flexural moduli are drawn across it with their standard deviations,
-and the gap to the Voigt bound is annotated as a fraction of the bound, the
-same definition used in the text.
+Panel (b) is the laminate-scale construction from the shallow map. It has two
+levels: the class fractions and medians inside each zone come from the indents,
+and the share the two zones occupy comes from the imaging of the same section.
+A second Voigt bar shows what the indent counts give instead, which describes
+the window that was mapped rather than the section; the difference between the
+two bars is the zone-share term of the uncertainty budget. The two measured
+flexural moduli are drawn beside them with their standard deviations.
 """
 import sys
 from pathlib import Path
@@ -23,6 +26,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import figstyle as fs
+import zone_share as zs
 from rule_of_mixtures import bounds, class_table, CLASSES
 
 DATA = Path(__file__).resolve().parent.parent / "data"
@@ -33,12 +37,74 @@ BASALT_SHALLOW_GPA = 86.0
 # Tabulated-input baselines quoted in §3.4, using tabulated constituents and the
 # measured fibre volume fraction of 0.649.
 TABULATED_VOIGT = 35.75
+
+# The Halpin-Tsai baseline as the manuscript prints it. This one is a literal
+# taken from the text rather than a value this deposit derives, and it is kept
+# that way deliberately: halpin_tsai_balanced() below rebuilds it from the inputs
+# §3.4 names and returns 27.23 GPa, not 27.1. Every run of this script prints
+# both, so whoever builds the figure sees the disagreement rather than inheriting
+# it. Changing the literal here would put the figure at odds with the text, and
+# 27.1 cannot be recovered from the stated inputs under any convention tried:
+# reaching it needs a fibre volume fraction of 0.646, a fibre modulus of
+# 69.6 GPa or a matrix modulus of 1.45 GPa in place of the values the paper
+# states. The authors decide which of the two moves.
 TABULATED_HT = 27.1
+
+# The tabulated constituent inputs of §3.4. Basalt and flax are the upper
+# midpoints of the ranges cited in the Introduction, the matrix is the bulk
+# PA-11 value, and the fibre volume fraction is the one calculated from the
+# fabric areal mass and the constituent densities.
+HT_E_BASALT = 80.0
+HT_E_FLAX = 60.0
+HT_E_MATRIX = 1.5
+HT_V_FIBRE = 0.649
+# Reinforcement geometry factor for transverse loading of continuous circular
+# fibres, which is the conventional value and the only one the paper's inputs
+# support: no aspect ratio is measured here, and the paper claims none.
+HT_XI = 2.0
+
+# Standard uncertainty on the section-weighted estimate, from
+# uncertainty_budget.py. Drawn on the first bar so that the figure carries the
+# same interval the text quotes.
+BUDGET_SD = 1.44
 
 ZONE_ORDER = ["flax-bottom", "basalt-centre", "flax-top"]
 # kept short: three category names under a narrow panel run into one another
 ZONE_LABEL = {"flax-bottom": "bottom", "basalt-centre": "centre",
               "flax-top": "top"}
+
+
+def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
+                         e_matrix=HT_E_MATRIX, v_fibre=HT_V_FIBRE, xi=HT_XI):
+    """The Halpin-Tsai baseline of §3.4, derived rather than asserted.
+
+    A balanced 0/90 average of a single lamina: the longitudinal direction is
+    the iso-strain sum, the transverse direction is the Halpin-Tsai estimate,
+    and the average of the two is what a balanced fabric of the same constituents
+    would give. The two fibre types enter through one fibre modulus, the mean of
+    the two tabulated values, because the tabulated route has no measurement that
+    would split them by volume and the fabric specification gives the split by
+    mass.
+
+    Prints every input, because the point of the function is that the baseline
+    has inputs at all. Returns the longitudinal, transverse and averaged moduli
+    in GPa.
+    """
+    e_fibre = 0.5 * (e_basalt + e_flax)
+    ratio = e_fibre / e_matrix
+    eta = (ratio - 1.0) / (ratio + xi)
+    longitudinal = v_fibre * e_fibre + (1.0 - v_fibre) * e_matrix
+    transverse = e_matrix * (1.0 + xi * eta * v_fibre) / (1.0 - eta * v_fibre)
+    balanced = 0.5 * (longitudinal + transverse)
+
+    print(f"  Halpin-Tsai inputs: basalt {e_basalt:.1f}, flax {e_flax:.1f}, "
+          f"fibre mean {e_fibre:.1f}, matrix {e_matrix:.2f} GPa, "
+          f"v_fibre {v_fibre:.3f}, xi {xi:.1f}")
+    print(f"  longitudinal {longitudinal:.2f}, transverse {transverse:.2f}, "
+          f"balanced 0/90 average {balanced:.2f} GPa")
+    print(f"  the manuscript and this figure print {TABULATED_HT:.1f} GPa, "
+          f"a difference of {balanced - TABULATED_HT:+.2f} GPa")
+    return longitudinal, transverse, balanced
 
 
 def zone_table(depth, modulus_col="E_150"):
@@ -81,7 +147,16 @@ def build(outdir):
 
     zt = zone_table(depth)
     tab = class_table(shallow)
-    v_lam, h_lam, r_lam = bounds(tab.fraction, tab.E_median_GPa)
+
+    # The laminate construction, weighted two ways. The section weighting is
+    # the one the paper reports; the window weighting is kept beside it so the
+    # reader can see how much of the figure the placement of the map decides.
+    tiles = pd.read_csv(DATA / "bse_segmentation_tiles.csv")
+    per_zone, medians, w_window = zs.zone_fractions(shallow)
+    w_section = (tiles.n_basaltzone.sum()
+                 / (tiles.n_basaltzone.sum() + tiles.n_flaxzone.sum()))
+    _, (v_lam, h_lam, r_lam) = zs.at_share(per_zone, medians, w_section)
+    _, (v_window, _, _) = zs.at_share(per_zone, medians, w_window)
     meas = (moduli.groupby("configuration")["E_D790_toe_compensated_GPa"]
             .agg(["mean", "std"]))
 
@@ -134,16 +209,17 @@ def build(outdir):
     # a Voigt sum built from tabulated constituent moduli, so that the artwork
     # and the text cannot drift apart again.
     # Hatched bars are predictions, solid bars are measurements.
-    labels = ["Voigt", "Hill", "Reuss", "Voigt (tabulated inputs)",
-              "Halpin-Tsai (tabulated inputs)", "Basalt-long.", "Flax-long."]
-    values = [v_lam, h_lam, r_lam, TABULATED_VOIGT, TABULATED_HT,
+    labels = ["Voigt", "Voigt (window-weighted)", "Hill", "Reuss",
+              "Voigt (tabulated inputs)", "Halpin-Tsai (tabulated inputs)",
+              "Basalt-long.", "Flax-long."]
+    values = [v_lam, v_window, h_lam, r_lam, TABULATED_VOIGT, TABULATED_HT,
               meas.loc["basalt_face", "mean"], meas.loc["flax_face", "mean"]]
-    errs = [0, 0, 0, 0, 0,
+    errs = [BUDGET_SD, 0, 0, 0, 0, 0,
             meas.loc["basalt_face", "std"], meas.loc["flax_face", "std"]]
-    cols = [fs.PAPER["voigt"], fs.PAPER["hill"], fs.PAPER["reuss"],
-            fs.PAPER["corrected"], fs.PAPER["corrected"],
+    cols = [fs.PAPER["voigt"], fs.PAPER["voigt"], fs.PAPER["hill"],
+            fs.PAPER["reuss"], fs.PAPER["corrected"], fs.PAPER["corrected"],
             fs.PAPER["basalt"], fs.PAPER["flax"]]
-    hatch = ["//", "//", "//", "//", "//", "", ""]
+    hatch = ["//", "xx", "//", "//", "//", "//", "", ""]
 
     xb = np.arange(len(labels))
     ax_b.bar(xb, values, 0.66, yerr=errs, capsize=4, color=cols, edgecolor="k",
@@ -154,7 +230,7 @@ def build(outdir):
         ax_b.text(xi, val + e + 0.8, f"{val:.1f}", ha="center", va="bottom",
                   fontsize=9, fontweight="bold")
     # the rule separates the predictions on the left from the measurements
-    ax_b.axvline(4.5, color="0.35", lw=1.4, ls=(0, (5, 3)))
+    ax_b.axvline(5.5, color="0.35", lw=1.4, ls=(0, (5, 3)))
 
     ax_b.set_xticks(xb)
     # Rotated to vertical. At 45 degrees the diagonals of neighbouring labels
@@ -178,11 +254,15 @@ def build(outdir):
     plt.close(fig)
     print(f"  wrote Figure_8, {W:.2f} x {H:.2f} in, embed at exactly {W:.2f} in")
 
+    halpin_tsai_balanced()
+
     print(zt.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
-    print(f"  laminate: Voigt {v_lam:.2f}  Hill {h_lam:.2f}  Reuss {r_lam:.2f} GPa")
+    print(f"  laminate, section-weighted: Voigt {v_lam:.2f}  Hill {h_lam:.2f}"
+          f"  Reuss {r_lam:.2f} GPa   (window-weighted Voigt {v_window:.2f})")
     for cfg in ("basalt_face", "flax_face"):
         m = meas.loc[cfg, "mean"]
-        print(f"  {cfg}: {m:.2f} GPa, {100 * (v_lam - m) / v_lam:.1f} % below Voigt")
+        print(f"  {cfg}: {m:.2f} GPa, {100 * (m - v_lam) / v_lam:+.1f} % "
+              f"relative to the estimate")
 
 
 if __name__ == "__main__":

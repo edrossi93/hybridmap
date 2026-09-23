@@ -1,6 +1,6 @@
 # Data dictionary
 
-Fourteen files: eight CSVs and six JSON summaries. Every column, its unit, its
+Twenty-one files: eight CSVs and thirteen JSON summaries. Every column, its unit, its
 range, and what a blank cell means.
 
 Two conventions hold throughout unless a column says otherwise:
@@ -30,7 +30,7 @@ In the backscattered-electron mosaic of Figure 2 the thickness direction is
 
 ## `shallow_map.csv` - 8553 rows
 
-Every indent of the fixed-depth high-speed acquisition, including the ~3000 that
+Every indent of the load-controlled high-speed acquisition, including the ~3000 that
 landed on the embedding resin.
 
 | column | unit | range | notes |
@@ -80,25 +80,40 @@ from 50 to 300 nm, roughly 51 points each.
 | `S2_over_P_GPa` | GPa | −1738 to 2.1×10⁶ | |
 
 **Nothing here is quality-filtered.** Use `qc_flag_strict` in
-`classified_depth_resolved.csv` to reject the 433 indents the paper excludes.
+`classified_depth_resolved.csv` to reject the 304 indents the paper excludes.
 
-## `depth_resolved_slices.csv` - 2000 rows
+## `depth_resolved_indents.csv` - 2000 rows
 
-The same acquisition reduced to three depths. Each value is the mean of the CSM
-response over a **± 10 nm window** centred on the target depth, per Supplementary
-Note S1.
+**The primary record of the depth-resolved acquisition.** One row per indent,
+carrying its position and the slice values read from the instrument trace at
+100, 150 and 200 nm. Each value is the mean of the CSM response over a
+**20 nm window** centred on the target depth, requiring at least three valid
+points inside the window, per Supplementary Note S1.
 
-There are **no position columns here**. Join on `indent_id` to
-`classified_depth_resolved.csv` if you need coordinates or labels.
+Nothing in the deposit produces this file; everything else about the
+depth-resolved map is produced from it. `make_classified_depth.py` reads it and
+writes `classified_depth_resolved.csv`, which is this file plus the zone, the
+class, the quality flag and the cluster index.
 
-| column | unit | blanks |
-|---|---|---|
-| `indent_id` | - | key to `classified_depth_resolved.csv`, 1–2000 |
-| `E_100nm_GPa`, `H_100nm_GPa`, `PA_100nm_deg` | GPa, GPa, ° | 9 |
-| `E_150nm_GPa`, `H_150nm_GPa`, `PA_150nm_deg` | GPa, GPa, ° | 15 |
-| `E_200nm_GPa`, `H_200nm_GPa`, `PA_200nm_deg` | GPa, GPa, ° | 11 |
+It replaces `depth_resolved_slices.csv`, which held the same quantity computed a
+second way, as a window mean over a resampled 5 nm grid. Two files holding one
+quantity under two conventions is how the superseded quality mask survived two
+rounds: whichever number was checked, the other one was available to explain it
+away. There is one now.
 
-**These are not the values the paper reports.** See the note below.
+| column | unit | range | blanks |
+|---|---|---|---|
+| `indent_id` | - | 1-2000 | key to `classified_depth_resolved.csv` |
+| `x_um` | µm | 0-57 | in plane |
+| `y_um` | µm | 0-297 | **through the thickness** |
+| `E_100`, `H_100`, `PA_100` | GPa, GPa, ° | | 9 each |
+| `E_150`, `H_150`, `PA_150` | GPa, GPa, ° | | 15 each |
+| `E_200`, `H_200`, `PA_200` | GPa, GPa, ° | | 11 each |
+| `SRS` | dimensionless | -0.218 to 0.430 | 3 |
+
+A blank is an indent whose trace had no valid window at that depth. The three
+depths fail together on an indent whose contact never established, which is why
+the counts come in threes.
 
 ## `classified_depth_resolved.csv` - 2000 rows
 
@@ -114,30 +129,24 @@ the file the paper's depth-resolved numbers come from.**
 | `H_100`, `H_150`, `H_200` | GPa | 0.004–5.7 | 107, 61 and 46 blanks |
 | `PA_100`, `PA_150`, `PA_200` | ° | 0.01–74.6 | 17, 46 and 26 blanks |
 | `SRS` | dimensionless | −0.218 to 0.430 | see below |
-| `qc_flag_strict` | 0 or 1 | | 1 marks the **433** indents rejected on the strict near-surface phase-angle criterion |
+| `qc_flag_strict` | 0 or 1 | | 1 marks the **304** indents rejected by the phase-angle criterion: the corrected phase angle exceeds 15° in magnitude at one of the three depths, or that depth has no valid window |
 | `zone` | `basalt-centre`, `flax-bottom`, `flax-top` | | the three architectural bands along y |
 | `constituent` | as above | | |
-| `kmeans_k4` | −1 to 3 | | unsupervised cluster index from the k = 4 run of `clustering_check.py`, ordered by median modulus so that 0 is the most compliant cluster; **−1 on the 433 indents the strict phase-angle criterion rejects**, and nowhere else. Rebuilt by `repair_kmeans_column.py`: the submitted column held three labels and a quality mask that matched neither `qc_flag_strict` nor the paper |
+| `kmeans_k4` | −1 to 3 | | unsupervised cluster index from the k = 4 run of `clustering_check.py`, ordered by median modulus so that 0 is the most compliant cluster; **−1 on the 304 indents the phase-angle criterion rejects**, and nowhere else. Rebuilt by `clustering_check.py` on the regenerated classification: the submitted column held three labels under a name that promises four, and a quality mask that matched neither `qc_flag_strict` nor the paper |
 
-### `E_150` and `E_150nm_GPa` are not the same numbers
+### One slice value, not two
 
-They are the same *quantity* computed by two passes of the pipeline. `E_150` is
-taken from the raw instrument trace; `E_150nm_GPa` is the ± 10 nm window mean
-over the resampled 5 nm grid. They correlate at **0.9997** and differ by a
-median of 0.02 GPa.
+Earlier versions of this deposit carried the slice values twice: `E_150` from
+the instrument trace and `E_150nm_GPa` from a resampled grid. They agreed to
+0.9997 and differed by up to 0.5 GPa on the two stiff classes, which is small
+against the class separation but large enough that a reader recomputing could
+not tell which number the paper meant.
 
-The difference is largest where E(z) is steepest:
-
-| class | difference in the class median |
-|---|---|
-| flax, matrix | **0.00 GPa** |
-| mixed-volume | 0.52 |
-| pure-axial basalt | 0.34 |
-
-**The paper uses `E_150`.** Carried through the Voigt sum the basalt difference
-is worth 0.02 GPa on a bound of 21.33, so the choice does not affect any
-reported result, but a reader recomputing from the slices file will see the
-third decimal move and should know why.
+The second convention is gone. `E_150` here is the same column as `E_150` in
+`depth_resolved_indents.csv`, value for value, and it is what the paper reports.
+If you want the resampled-grid version, `depth_resolved_curves.csv` holds the
+full traces and you can compute it yourself; expect the stiff classes to land
+about 2 % low.
 
 ### `SRS`
 
@@ -212,42 +221,213 @@ tile file.
 
 ## `uncertainty_budget.json`
 
-The ± 0.40 GPa on the Voigt bound: class medians drawn from bootstrap
-replicates, class fractions from a Dirichlet with the observed counts. Written
-by `uncertainty_budget.py`.
+The ± 1.4406 GPa on the laminate estimate of 18.4979 GPa, term by term. Written
+by `uncertainty_budget.py`, and the source of Supplementary Table S5.
 
-The budget covers the two quantities that are random under resampling. It
-**excludes** the classification thresholds and the basalt input, which are
-analysis choices reported as sensitivities in Supplementary Tables S1 and S2,
-and cross-section representativeness, which one section cannot bound.
+| key | meaning |
+|---|---|
+| `voigt_point_estimate`, `hill`, `reuss` | the estimate and the two other mixing limits, at the imaged zone share |
+| `voigt_at_indent_count_zone_share` | the same sum with the zones weighted by indent counts instead, 21.3330, which describes the window that was mapped |
+| `w_basalt_mosaic`, `w_basalt_indent_counts` | the two zone shares behind those two numbers, 0.3620 and 0.4970 |
+| `type_a_sd_GPa` | the three sampling terms, each with the other two frozen: `fractions` 1.0800, `zone_share` 0.6114, `medians` 0.3447 |
+| `type_a_combined_sd_GPa` | the same three together in one resampling, 1.4189, which is smaller than their sum because they are correlated |
+| `type_b_sd_GPa` | the two bounded analysis choices as rectangular distributions: `classification_thresholds` 0.2427 and `poisson_ratio` 0.0558 |
+| `type_b_ranges` | the ranges those two are taken over: the threshold grid, 17.998 to 18.839 GPa, and the phase-specific Poisson estimate, 18.3045 GPa |
+| `combined_sd_GPa` | the Type A terms and the two Type B terms in quadrature, 1.4406 |
+| `percentile_95_interval_GPa` | 15.776 to 21.341, from the draws rather than from a coverage factor |
+| `block_size_sensitivity_sd_GPa` | the combined sampling term at 2, 4 and 8 grid columns, 1.21 to 1.68 GPa, so the block width can be seen rather than trusted |
+| `n_draws`, `seed`, `block_columns` | 6000 draws, seed 42, blocks four grid columns wide |
+| `excluded` | the one term left out on purpose, and why |
+
+The indent resampling is a **spatial block bootstrap**, not a draw over
+individual indents: contacts 2.5 µm apart on fibres 10 to 20 µm across are not
+independent samples, so blocks of four grid columns, about 20 µm, are resampled
+with replacement inside each zone. The zone share is resampled over the 91
+mosaic tiles beside them, in the same pass, so that the correlation between the
+three sampling terms is carried rather than assumed away.
+
+The classification thresholds are **in** this budget, as its largest Type B
+term. What stays out is the choice of basalt input, which is a discriminated
+choice on contact mechanics and is reported as the sensitivity of
+Supplementary Table S4 instead, and cross-section representativeness, which one
+section cannot bound.
 
 ---
 
+## The JSON summaries
+
+The eleven files below were added when the analysis they record was added. Each
+is written by one script and read by the manuscript or the supplement, except
+`zone_mask_rle.json` and `bse_validation_metrics.json`, which are measurements
+nothing here produces. None of the eleven is edited by hand.
+
+## `PROVENANCE.json`
+
+Written by `provenance_check.py --record`. The manifest of the deposit: for
+every file in `data/`, whether it is a **measurement** (nothing here produces
+it) or a **product** (a named script does), the producing script for a product,
+and a SHA-256 of the bytes.
+
+| key | meaning |
+|---|---|
+| `primary` | file name to SHA-256, for the ten measurements |
+| `derived` | file name to SHA-256, for the twelve products |
+
+Which script writes which product is declared in `provenance_check.py` rather
+than repeated in the manifest, so the two cannot disagree about it.
+
+Run `provenance_check.py` to compare the manifest against what is on disk. It
+fails if a file has changed without the manifest being re-recorded, which is the
+point: a derived table that no longer matches its script is the failure mode
+this deposit had.
+
+## `zone_mask_rle.json`
+
+The architectural zone of every pixel of the backscattered-electron mosaic,
+run-length encoded so the mask travels as text rather than as an image.
+
+| key | meaning |
+|---|---|
+| `width`, `height` | mosaic size in pixels |
+| `um_per_px` | scale, µm per pixel |
+| `classes` | the two zone names, in label order |
+| `note` | the label convention, 1 for the flax zone and 2 for the basalt zone with 0 unmarked, and that the mask is laid out on the nominal tile grid |
+| `mask_rle` | alternating run lengths, starting on class 0 |
+| `provenance` | whose marking it is and when it was exported |
+
+Decode by repeating each class index for its run length and reshaping to
+(`height`, `width`). The lengths sum to `width * height`; if they do not, the
+file is truncated.
+
+## `zone_share_sensitivity.json`
+
+How much of the section each zone occupies, and how that answer depends on where
+you look. This is the term the published construction left out: it weighted the
+zones by how many indents landed in each, which describes the window that was
+mapped rather than the section.
+
+| key | meaning |
+|---|---|
+| `w_basalt_indent_counts` | basalt-zone share implied by indent counts, 0.497 |
+| `w_basalt_mosaic` | basalt-zone share of the section, 0.362, from the tile counts in `bse_segmentation_tiles.csv`. **This is the one the estimate uses.** |
+| `w_basalt_downsampled_mask` | the same marking read from `zone_mask_rle.json`, 0.367. Downsampling redraws the zone boundary and moves the share by half a point; the mask is used only for the sliding window below |
+| `windows` | per acquisition, the share seen by a window of that size slid across the mosaic: its range, its median, and the extremes |
+
+The gap between the first two numbers is why the estimate moved from 21.33 to
+18.50 GPa.
+
+## `basalt_input_sweep.json`
+
+The basalt input under every classification cut in the swept range, for both
+acquisitions, so that the choice of cut can be seen rather than argued.
+
+| key | meaning |
+|---|---|
+| `shallow` | one entry per upper cut from 60 to 80 GPa: the cut, the class size, the class median |
+| `depth_resolved` | the same at the phase-angle limits of Supplementary Table S3 |
+| `note` | what the sweep shows, in one sentence |
+
+This is the evidence behind a withdrawal. The shallow class is the tail above
+the cut, so its median follows the cut, from 76.70 GPa at 60 to 93.07 at 80,
+and the published range for bare basalt fibre, 70 to 95 GPa, contains all of
+them. Agreement with that range was therefore built in and is no longer offered
+as evidence.
+
+## `flexural_comparisons.json`
+
+Every planned comparison between the two bending configurations, with the
+correction applied to the family it belongs to.
+
+| key | meaning |
+|---|---|
+| `per_specimen` | ten rows, one per specimen: configuration, chord modulus, peak tangent modulus, strength, softening, strain at break |
+| `comparisons` | per quantity: the two means, Welch t, uncorrected p, Hedges g |
+| `families` | the same p values under three Holm groupings |
+
+The three families are reported because the conclusion depends on which one is
+used: the stiffness comparison corrects to 0.0738 in the family as
+pre-specified and to 0.0380 in either alternative. The manuscript reports the
+difference itself, about 4 %, rather than a verdict that moves with the
+grouping.
+
+## `poisson_sensitivity.json`
+
+Supplementary Table S1, and the only route to it. The instrument measures a
+reduced modulus, which does not depend on the Poisson ratio assumed for the
+specimen; the specimen modulus does. Both columns of that table follow from
+`Er_GPa` by inverting the Oliver-Pharr relation at each value of nu.
+
+| key | meaning |
+|---|---|
+| `indenter` | the diamond constants the inversion uses, E = 1141 GPa and nu = 0.07 |
+| `nu_uniform` | the convention the paper adopts, 0.30 |
+| `per_class` | one entry per class: the median reduced modulus, the median specimen modulus under each convention, the phase-specific nu and the shift between them |
+| `laminate_estimate_GPa` | the estimate under each convention, at the fractions Eq. (1) uses, and the shift |
+
+The four percentages in this file used to be copied by hand into
+`uncertainty_budget.py`. Two routes to one quantity disagreed in the fourth
+decimal, which was enough to move the printed estimate across a rounding
+boundary; the budget now calls this script.
+
+## `bse_validation_metrics.json`
+
+Accuracy of the texture classifier inside the marked zones, scored against the
+operator's hand-painted fields by leaving one field out at a time. One block per
+zone. **A primary input**: rebuilding it needs the tile images and the painted
+fields, which are not deposited. It is the source of Supplementary Table S6.
+
+| key | meaning |
+|---|---|
+| `n_fields` | painted fields in that zone, 16 in the basalt zone and 21 in the flax zone |
+| `labelled_pixels` | hand-labelled pixels in that zone, which is the denominator |
+| `accuracy_pct` | accuracy over all three classes including void, 82.8 % and 88.1 % |
+| `accuracy_pct_phases_only` | accuracy over the two solid phases with void set aside, 96.0 % and 97.9 %, which is the denominator the reported volume fractions use |
+| `note_phases_only` | that distinction, stated in the file so it travels with the numbers |
+| `classes` | per class: `labelled_pixels`, `fields`, `precision_pct` and `recall_pct`, which are the cells of Supplementary Table S6 |
+| `confusion_true_by_predicted` | the full matrix, true class by predicted class, in pixels |
+| `model` | the classifier and the validation scheme |
+| `reference` | what it was scored against, which is an operator's reading and not an independent measurement |
+
+Two denominators are in the file and the paper uses one of them, so both are
+named here. Void is a label the classifier has to assign and no reported
+fraction uses it as a denominator, which is why the phases-only figure is the
+one quoted beside the volume fractions; the all-three figure is the one a reader
+opening the file first sees. The confusion is between matrix and void rather
+than between the two solid phases: in the flax zone, matrix is called void on
+19.3 % of its labelled pixels and flax on 2.5 % of them.
+
 ## A note on precision
 
-The flexural moduli are stored rounded to two decimals; the summary statistics
-in the paper were computed at full precision. Recomputing the flax-longitudinal
-standard deviation from this file gives 0.4863, which rounds to 0.49; at full
-precision it is 0.4842, which rounds to the 0.48 the paper reports. Neither is
-wrong.
+The flexural moduli are stored rounded to two decimals. Recomputing the
+flax-longitudinal standard deviation from this file gives 0.4863, which rounds to
+the 0.49 the paper reports; from the unrounded values it is 0.4842, which would
+round to 0.48. Neither is wrong, and the paper prints the one this file supports
+so that the deposit and the page agree.
 
 ## `phase_angle_sensitivity.json`
 
 Written by `scripts/phase_angle_sensitivity.py`, and the source of
-Supplementary Table S7.
+Supplementary Table S3.
 
 | key | meaning |
 |---|---|
-| `reference_voigt_GPa` | the Voigt bound from the fixed-depth inputs, 21.33 GPa. The phase-angle criterion cannot move it: the fixed-depth map has no phase-angle channel. |
+| `reference_voigt_GPa` | the laminate estimate, 18.4979 GPa, built on the load-controlled medians and the imaged zone share. The phase-angle limit cannot move it: the load-controlled map has no phase-angle channel. |
 | `note` | that fact, stated in the file so it travels with the numbers |
-| `rows` | one entry per threshold. `phase_angle_limit_deg` is the criterion, `rejected` and `rejected_pct` the indents it discards, `E_<class>_GPa` the resulting depth-resolved medians, `alternative_basalt_input_GPa` the basalt median, and `Voigt_with_that_input_GPa` the bound that input gives when substituted into the reference table. |
+| `criterion` | the rule being swept, in the words the Methods use |
+| `rows` | one entry per limit. `phase_angle_limit_deg` is the limit, `rejected` and `rejected_pct` the indents it discards, `E_<class>_GPa` the resulting depth-resolved medians, `alternative_basalt_input_GPa` the basalt median among them, `Voigt_with_that_input_GPa` the estimate that median gives when substituted for the basalt input, and `source` whether the row was recomputed here or recorded from the previous submission |
 
-The first row is the published flag, computed on the full continuous-stiffness
-trace, which rejects 433 indents. The three below recompute the same criterion
-from the slice values held here, which rejects 320 at the same threshold: the
-difference is indents whose phase angle crosses the limit between the slices.
-The sweep is internally consistent and is not an attempt to reproduce the
-published count.
+The criterion is the one the Methods state: reject an indent when the magnitude
+of its corrected phase angle exceeds the limit at any of the three analysis
+depths, or when one of those depths has no valid window. At 15° it rejects 304
+indents, and the script checks that its own answer agrees with `qc_flag_strict`
+indent by indent rather than assuming it.
+
+The first row is the quality mask of the previous submission, which rejected 433
+indents and left a basalt median of 49.47 GPa. Nothing in this deposit
+reproduces that set, so those two figures are **recorded** rather than computed
+and the row says so in its `source`; only the estimate they imply is computed.
+The row is here because the manuscript reports the move from that mask to this
+one, which is worth 0.19 GPa on the alternative estimate.
 
 ## `spacing_compliance.json`
 
@@ -256,7 +436,7 @@ figures in §2.2.
 
 | key | meaning |
 |---|---|
-| `pitch_short_axis_nm` | 2477 nm, the binding axis of the fixed-depth grid |
+| `pitch_short_axis_nm` | 2477 nm, the binding axis of the load-controlled grid |
 | `criterion` | pitch at least ten times the contact depth |
 | `method` | contact depth from peak load and hardness, A = P/H with A = 24.5 h_c² |
 | `rows` | per class: `n`, `median_hc_nm`, `violating_pct`, and the pitch the median would require |
@@ -294,7 +474,7 @@ number in §4.1 and of Supplementary Figure S4.
 | `median_difference_ci95` | bootstrap interval on the median difference between the mixed-volume and matrix classes |
 | `p_depth_resolved`, `p_max_over_k_3_to_20` | the test at k = 8, and the worst case over the sweep |
 | `edge_band_um`, `p_excluding_edge_bands`, `n_after_edge_exclusion` | the same test with a band excluded at each end of the zone, so that no indent counted can have neighbours outside it |
-| `p_fixed_depth_map`, `n_fixed_depth_zone` | the same test on the other acquisition |
+| `p_load_controlled_map`, `n_load_controlled_zone` | the same test on the other acquisition, the load-controlled map |
 
 The pool matters and is the reason this file exists: counting only the
 classified indents changes p at k = 8 from 8.5e-11 to 7.4e-11. The published

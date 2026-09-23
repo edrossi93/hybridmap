@@ -1,6 +1,6 @@
 """Do indents on the edge of the grid read differently from those inside it?
 
-The indent spacing on the short axis of the fixed-depth map is below the ten
+The indent spacing on the short axis of the load-controlled map is below the ten
 contact depths that Phani and Oliver ask for, and the paper says so. The
 question that follows is whether the shortfall shows up in the data. If adjacent
 plastic zones or elastic fields were interacting, an indent on the outer row of
