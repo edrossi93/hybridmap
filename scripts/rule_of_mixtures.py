@@ -87,23 +87,28 @@ def substitute(table, cls, new_modulus):
 #
 #   14.0   immature Gn cell-wall layer, transverse, PF-QNM on a cross-section
 #   18.0   mature G cell-wall layer, same technique and same geometry as ours
-#   52.5   elementary-fibre axial modulus, from tension along the fibre
+#   45.3   elementary-fibre axial modulus, from tension along the fibre
 #
 # All three from Goudenhooft et al., Fibers 6 (2018) 6. The value this work
 # measures is none of them: it is the compliant response of the flax-rich tow
 # as consolidated, with lumen, middle lamella and impregnating matrix inside
 # the probed volume.
 #
-# The third value needs settling before the next round. Supplementary Table S8
-# prints 45.30 GPa for the same row, and §4.3.4 says "about 45 GPa along the
-# fibre axis", so the table and this list read the same source differently. The
-# published estimates in Table S8 follow from 45.30 and are checked against it in
-# reproduce_paper_values.py. Nothing here is changed until the authors say which
-# reading of the source is the right one.
+# The third value read 52.47 here for two rounds, against the 45.30 GPa of
+# Supplementary Table S8 and the "about 45 GPa along the fibre axis" of §4.3.4.
+# The source settles it: that paper measures 45.3 +/- 9.7 GPa on its own mature
+# elementary fibres, and 52.47 is a figure it quotes from earlier work in its
+# introduction. So the table and §4.3.4 carry the measurement and this list
+# carried the quotation. It carries the measurement now. The column printed by
+# the block at the foot of this file still reads lower than Table S8 for every
+# input, because it is built on the whole-map class fractions and the table is
+# built on the two-level construction; that difference is in the heading it is
+# printed under, and the table's own cells are checked in
+# reproduce_paper_values.py.
 FLAX_INPUTS = [
     (14.0, "immature Gn cell-wall layer"),
     (18.0, "mature G cell-wall layer"),
-    (52.47, "elementary-fibre axial modulus"),
+    (45.30, "elementary-fibre axial modulus"),
 ]
 
 

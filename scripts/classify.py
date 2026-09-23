@@ -114,9 +114,33 @@ def classify(E_GPa, zone, e_lower=E_LOWER, e_upper=E_UPPER_SHALLOW):
 
 def phase_angle_qc(pa_100, pa_150, pa_200, limit=PA_QC, near_surface_limit=20.0):
     """
-    True means keep. An indent is rejected if the phase angle is high anywhere
-    in the analysed depth window, or very high right at the surface, which is
-    the signature of a contact that has not settled.
+    The reusable tool's phase-angle rule, which is not the paper's. True means
+    keep.
+
+    What this implements. An indent is rejected when the largest of the three
+    slice values exceeds `limit`, or when the shallowest of them exceeds
+    `near_surface_limit`. The comparison is on the signed value, and a slice that
+    is missing is skipped rather than counted against the indent. This is the
+    form `hybridmap.classify.qc_keep` takes from a configuration file, where a
+    user's phase-angle channel may be signed either way and a gap in a trace may
+    mean something other than a bad contact, so the package cannot decide either
+    for them.
+
+    What the paper implements. The Methods reject an indent when the phase angle
+    exceeds 15 degrees *in magnitude* at any of the three analysis depths, or
+    when one of those depths has no valid window. That rule is written twice, in
+    `make_classified_depth.py`, which stores it as `qc_flag_strict`, and in
+    `phase_angle_sensitivity.fails()`, which sweeps the limit; the sweep stops
+    the run if the two ever disagree on a single indent.
+
+    The two differ on 16 of the 2000 depth-resolved indents: fifteen with a
+    missing slice, which the paper rejects and this passes, and one whose phase
+    angle is large and negative, which the paper rejects on magnitude and the
+    signed comparison here does not. So this rejects 288 where the paper's 304
+    comes from, and every count, median and figure in the paper is the paper's
+    rule, read from the stored flag. On the deposited data `near_surface_limit`
+    at 20 degrees rejects nothing that the 15 degree limit has not already
+    rejected; it bites only when it is set below `limit`.
     """
     frame = pd.DataFrame({"PA_100": np.asarray(pa_100, float),
                           "PA_150": np.asarray(pa_150, float),
@@ -156,11 +180,10 @@ def classify_depth_resolved(df, zone_col="zone"):
 
     # The paper rejects 304 of the 2000 indents on the phase-angle criterion.
     # make_classified_depth.py is where that decision is taken and stored, so
-    # use the stored flag whenever it is there. The fallback below is for a
-    # frame that arrives without it and is not a second opinion about it:
-    # phase_angle_qc() applies the same 15 degree limit to the same three slice
-    # values but lets an indent with a missing slice through, so it rejects 288
-    # where the stated rule rejects 304.
+    # use the stored flag whenever it is there. The fallback below is for a frame
+    # that arrives without it and is not a second opinion about it:
+    # phase_angle_qc() is the tool's rule rather than the paper's and rejects 288
+    # of the same 2000. Its docstring says how the two differ.
     if "qc_flag_strict" in d:
         rejected = d.qc_flag_strict.astype(bool)
     else:

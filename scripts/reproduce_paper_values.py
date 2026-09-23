@@ -16,18 +16,17 @@ from the manuscript except the published value each line is compared against.
 What it cannot answer. It does not test whether the construction is the right
 one; the sensitivity analyses do that, and they are checked here as published
 numbers rather than as arguments. It does not check the acquisition either: the
-per-indent tables are where this deposit starts. And one printed value has no
-check below, which is said here so that the absence is visible rather than
-silent: the Halpin-Tsai baseline of Figure 8, 27.1 GPa, is a literal in
-`fig08_rom.py` with nothing behind it. The derivation added to that script for
-the inputs §3.4 states gives 27.23 GPa, so the two disagree by 0.13 GPa and the
-figure keeps the published literal until the authors settle which moves.
+per-indent tables are where this deposit starts.
 
-One more disagreement is left standing rather than resolved here. Supplementary
-Table S8 gives the elementary-fibre axial modulus as 45.30 GPa and
-`rule_of_mixtures.FLAX_INPUTS` gives 52.47 GPa for the same row, from the same
-source read two ways. The estimates checked below are computed from the inputs
-the table itself prints.
+Two disagreements that earlier versions of this docstring recorded as open are
+now closed, and are named here because the values moved. The Halpin-Tsai
+baseline of Figure 8 was the literal 27.1 GPa in `fig08_rom.py`, with nothing
+behind it; that script now derives it from the inputs §3.4 states, §3.4 prints
+27.2, and the derivation is checked below like any other published value.
+Supplementary Table S8's elementary-fibre axial modulus and
+`rule_of_mixtures.FLAX_INPUTS` disagreed at 45.30 against 52.47 GPa for the same
+row; the cited paper measures 45.3 GPa and quotes 52.47 from earlier work in its
+own introduction, so the table was right and the list now carries 45.30 too.
 
 An earlier version of this script reported sixty-seven values reproducing while
 checking eight the paper no longer prints, among them the whole-map Voigt sum of
@@ -60,17 +59,17 @@ import input_decomposition as _dec                         # noqa: E402
 
 checks = []
 
-# One unit in the last digit the paper prints. Three cells are rounded the other
-# way from the recomputation and are the only places this is needed: the low end
-# of the tabulated range in 3.4, which is exactly 28.25 and is printed 28.3; the
-# modulus term of the same paragraph, which is 10.746 and is printed 10.8; and
-# the last gap cell of Supplementary Table S8, which is 50.65 and is printed
-# 50.6. Each is a rounding in the document and not a different quantity.
-LAST_DIGIT = 0.06
-
 # Half a unit in a figure the paper prints to one decimal, and a hair more. An
 # exact decimal such as 21.65 is stored just below itself, so a half-unit
-# tolerance written as 0.05 rejects the value the table rounds it to.
+# tolerance written as 0.05 rejects the value the table rounds it to. The same
+# applies to the low end of the tabulated range in 3.4, which is exactly 28.25
+# and is printed 28.3.
+#
+# A second and looser tolerance used to sit here, for three cells that the
+# documents rounded away from the recomputation: the same 28.25, the modulus term
+# of 3.4 at 10.746, and the last gap cell of Supplementary Table S8 at 50.653.
+# The documents now print 10.7 and 50.7, which is where those two values round,
+# so one tolerance covers every cell and the looser one is gone.
 ROUNDED = 0.051
 
 
@@ -382,14 +381,14 @@ report("estimate with the matrix at 1.0 GPa", with_input("matrix", 1.0), 18.07,
 # them is what this work measures.
 for value, estimate, g_basalt, g_flax in [(14.00, 23.38, 19.4, 15.9),
                                           (18.00, 25.49, 26.0, 22.9),
-                                          (45.30, 39.84, 52.7, 50.6)]:
+                                          (45.30, 39.84, 52.7, 50.7)]:
     got = with_input("flax", value)
     report(f"estimate with the flax input at {value:.2f} GPa", got, estimate,
            0.005)
     report("relative gap at that input, basalt-longitudinal",
-           gap(got, "basalt_face"), g_basalt, LAST_DIGIT)
+           gap(got, "basalt_face"), g_basalt, ROUNDED)
     report("relative gap at that input, flax-longitudinal",
-           gap(got, "flax_face"), g_flax, LAST_DIGIT)
+           gap(got, "flax_face"), g_flax, ROUNDED)
 
 print("\ntabulated-input comparison (3.4)")
 E_tab, f_nominal = _dec.TABULATED_E, _dec.NOMINAL_F
@@ -409,18 +408,25 @@ for label, basalt, flax, published in (("low", 70.0, 40.0, 28.3),
                                        ("high", 95.0, 80.0, 44.5)):
     report(f"tabulated sum at the {label} end of the cited ranges",
            _dec.voigt({"basalt": basalt, "flax": flax, "matrix": 1.5},
-                      f_nominal), published, LAST_DIGIT)
+                      f_nominal), published, ROUNDED)
 moduli_only = _dec.voigt(E_measured, f_nominal)
 fractions_only = _dec.voigt(E_tab, f_measured)
 both = _dec.voigt(E_measured, f_measured)
 report("measured moduli at the nominal fractions", moduli_only, 25.0, 0.05)
 report("tabulated moduli at the measured fractions", fractions_only, 43.8, 0.05)
 report("measured moduli at the measured fractions", both, 24.5, 0.05)
-report("what the moduli alone move", moduli_only - tabulated, -10.8, LAST_DIGIT)
+report("what the moduli alone move", moduli_only - tabulated, -10.7, ROUNDED)
 report("what the fractions alone move", fractions_only - tabulated, 8.0, 0.05)
 for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.8)):
     report(f"the measured-fraction construction overshoots {cfg} by",
            gap(both, cfg), published, 0.05)
+# The Halpin-Tsai baseline of the same paragraph and of the Figure 8 panel. Until
+# this round it was a literal in fig08_rom.py and had no check here, because
+# there was nothing to check it against. The function is imported from the figure
+# script rather than rewritten here so that the bar and this line cannot come to
+# disagree, which is how the literal survived two rounds in the first place.
+from fig08_rom import halpin_tsai_balanced as _ht               # noqa: E402
+report("Halpin-Tsai lamina, balanced 0/90 average", _ht()[2], 27.2, ROUNDED)
 
 print("\nsegmentation of the mosaic (Figure 2, 3.4, Supplementary Table S6)")
 # Both files here are primary measurements: the tile statistics and the

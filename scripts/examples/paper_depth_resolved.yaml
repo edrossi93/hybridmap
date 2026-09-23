@@ -84,4 +84,4 @@ clustering:
 macro:
   measured:
     - {label: basalt face in tension, value: 18.85, sd: 0.54, n: 5}
-    - {label: flax face in tension,   value: 19.66, sd: 0.48, n: 5}
+    - {label: flax face in tension,   value: 19.66, sd: 0.49, n: 5}

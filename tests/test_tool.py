@@ -10,8 +10,9 @@ to end through the command line. The populations in it are planted, so the test
 can ask whether the tool recovers what was put in rather than merely whether it
 finishes without raising.
 
-The paper's own config reproduces the published bounds. A worked example that
-drifts from the analysis it claims to reproduce is worse than no example.
+The paper's own config reproduces the paper's class counts, class medians and
+single-map values. A worked example that drifts from the analysis it claims to
+reproduce is worse than no example.
 
 The paper's config and the paper's scripts agree with each other. classify.py
 keeps the thresholds in Python and examples/paper_shallow.yaml keeps them in
@@ -152,7 +153,8 @@ def macro_routes(generated):
 
 def paper_config():
     """The worked example must still be the paper."""
-    print("\nthe worked example against the published values")
+    print("\nthe worked example against the paper's counts, medians and "
+          "single-map values")
     from hybridmap import aggregate, classify, config, io, mixtures
 
     cfg = config.load(SCRIPTS / "examples" / "paper_shallow.yaml")
@@ -172,10 +174,26 @@ def paper_config():
         got = float(table.loc[table["class"] == name, "median"].iloc[0])
         check(f"median E({name})", abs(got - published) <= 0.02,
               f"{got:.2f}, paper {published}")
-    for label, got, published in (("Voigt", voigt, 21.33), ("Hill", hill, 14.41),
-                                  ("Reuss", reuss, 7.50)):
-        check(f"{label} bound", abs(got - published) <= 0.02,
-              f"{got:.2f}, paper {published}")
+    # The single-map construction: the class fractions and class medians of the
+    # whole load-controlled map, with no zone weighting. Two things it is not.
+    # It is not the laminate estimate the paper reports, which mixes the classes
+    # inside each zone and then weights the two zones by the share they occupy
+    # on the imaged section, 18.50 GPa. And none of the three is a bound: the
+    # paper reports an estimate rather than a bound, because neither the
+    # intrinsic constituent moduli nor the true volume fractions enter it.
+    #
+    # Of the three, only the Voigt sum is a published number, and only as the
+    # comparison that motivates the section weighting: 21.33 GPa three times in
+    # the manuscript, and 21.3 in the Figure 8 caption. The Hill and Reuss values
+    # of the same construction appear nowhere in the paper, so they are held
+    # against what rule_of_mixtures.py prints, which is what a worked example has
+    # to keep reproducing.
+    for label, got, value, source in (
+            ("Voigt", voigt, 21.33, "paper, indent-count weighting"),
+            ("Hill", hill, 14.41, "rule_of_mixtures.py"),
+            ("Reuss", reuss, 7.50, "rule_of_mixtures.py")):
+        check(f"{label}, single-map construction", abs(got - value) <= 0.02,
+              f"{got:.2f}, {source} {value}")
 
     sweep = mixtures.sweep(labelled, cfg.phases, cfg.cuts, cfg.sweep,
                            cols["modulus"], cfg.phase_names)

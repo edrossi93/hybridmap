@@ -38,18 +38,6 @@ BASALT_SHALLOW_GPA = 86.0
 # measured fibre volume fraction of 0.649.
 TABULATED_VOIGT = 35.75
 
-# The Halpin-Tsai baseline as the manuscript prints it. This one is a literal
-# taken from the text rather than a value this deposit derives, and it is kept
-# that way deliberately: halpin_tsai_balanced() below rebuilds it from the inputs
-# §3.4 names and returns 27.23 GPa, not 27.1. Every run of this script prints
-# both, so whoever builds the figure sees the disagreement rather than inheriting
-# it. Changing the literal here would put the figure at odds with the text, and
-# 27.1 cannot be recovered from the stated inputs under any convention tried:
-# reaching it needs a fibre volume fraction of 0.646, a fibre modulus of
-# 69.6 GPa or a matrix modulus of 1.45 GPa in place of the values the paper
-# states. The authors decide which of the two moves.
-TABULATED_HT = 27.1
-
 # The tabulated constituent inputs of §3.4. Basalt and flax are the upper
 # midpoints of the ranges cited in the Introduction, the matrix is the bulk
 # PA-11 value, and the fibre volume fraction is the one calculated from the
@@ -86,9 +74,9 @@ def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
     would split them by volume and the fabric specification gives the split by
     mass.
 
-    Prints every input, because the point of the function is that the baseline
-    has inputs at all. Returns the longitudinal, transverse and averaged moduli
-    in GPa.
+    Returns the longitudinal, transverse and averaged moduli in GPa. Nothing is
+    printed here; report_halpin_tsai() below does that, so that the value can be
+    taken at import time without output appearing as a side effect.
     """
     e_fibre = 0.5 * (e_basalt + e_flax)
     ratio = e_fibre / e_matrix
@@ -96,14 +84,35 @@ def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
     longitudinal = v_fibre * e_fibre + (1.0 - v_fibre) * e_matrix
     transverse = e_matrix * (1.0 + xi * eta * v_fibre) / (1.0 - eta * v_fibre)
     balanced = 0.5 * (longitudinal + transverse)
+    return longitudinal, transverse, balanced
 
+
+# The Halpin-Tsai baseline of the panel, derived from the inputs §3.4 states
+# rather than copied out of the text. It used to be the literal 27.1, which was
+# the figure the manuscript carried and which no convention applied to those
+# inputs reproduces: reaching it needs a fibre volume fraction of 0.646, a fibre
+# modulus of 69.6 GPa or a matrix modulus of 1.45 GPa in place of the values the
+# paper states. §3.4 now prints 27.2, which is what the line below rounds to, so
+# the bar and the sentence come from one calculation.
+TABULATED_HT = halpin_tsai_balanced()[2]
+
+
+def report_halpin_tsai(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
+                       e_matrix=HT_E_MATRIX, v_fibre=HT_V_FIBRE, xi=HT_XI):
+    """Print the baseline with every input beside it.
+
+    The point of doing this on every run is that the baseline has inputs at all,
+    which the literal it replaced did not.
+    """
+    longitudinal, transverse, balanced = halpin_tsai_balanced(
+        e_basalt, e_flax, e_matrix, v_fibre, xi)
+    e_fibre = 0.5 * (e_basalt + e_flax)
     print(f"  Halpin-Tsai inputs: basalt {e_basalt:.1f}, flax {e_flax:.1f}, "
           f"fibre mean {e_fibre:.1f}, matrix {e_matrix:.2f} GPa, "
           f"v_fibre {v_fibre:.3f}, xi {xi:.1f}")
     print(f"  longitudinal {longitudinal:.2f}, transverse {transverse:.2f}, "
-          f"balanced 0/90 average {balanced:.2f} GPa")
-    print(f"  the manuscript and this figure print {TABULATED_HT:.1f} GPa, "
-          f"a difference of {balanced - TABULATED_HT:+.2f} GPa")
+          f"balanced 0/90 average {balanced:.2f} GPa, which is the "
+          f"{balanced:.1f} GPa of §3.4")
     return longitudinal, transverse, balanced
 
 
@@ -226,9 +235,17 @@ def build(outdir):
              linewidth=1.1, zorder=3, error_kw=dict(lw=1.4))
     for patch, h in zip(ax_b.patches, hatch):
         patch.set_hatch(h)
+    # Two decimals, which is the precision the caption uses for the estimate and
+    # for the two measured moduli: at one decimal the first bar read 18.5 beside
+    # a caption saying 18.50 +/- 1.44, and the two measured bars read 18.8 and
+    # 19.7 beside 18.85 and 19.66. Two decimals are two glyphs wider, which at
+    # 9 pt brings the first pair and the last pair into contact, by about a pixel
+    # each, too little for layout_report() to call it a collision and enough to
+    # see. 8 pt leaves four pixels between every neighbouring pair and sits just
+    # under the tick labels, which are 8.5.
     for xi, val, e in zip(xb, values, errs):
-        ax_b.text(xi, val + e + 0.8, f"{val:.1f}", ha="center", va="bottom",
-                  fontsize=9, fontweight="bold")
+        ax_b.text(xi, val + e + 0.8, f"{val:.2f}", ha="center", va="bottom",
+                  fontsize=8, fontweight="bold")
     # the rule separates the predictions on the left from the measurements
     ax_b.axvline(5.5, color="0.35", lw=1.4, ls=(0, (5, 3)))
 
@@ -254,7 +271,7 @@ def build(outdir):
     plt.close(fig)
     print(f"  wrote Figure_8, {W:.2f} x {H:.2f} in, embed at exactly {W:.2f} in")
 
-    halpin_tsai_balanced()
+    report_halpin_tsai()
 
     print(zt.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
     print(f"  laminate, section-weighted: Voigt {v_lam:.2f}  Hill {h_lam:.2f}"

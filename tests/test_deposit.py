@@ -22,6 +22,9 @@ documents and puts each one against the file it describes:
   data files       every file in data/ must have a dictionary section
   imports          every third-party module imported anywhere in the deposit
                    must be in requirements.txt
+  reproduced count the number of values the README promises must be the number
+                   reproduce_paper_values.py prints, which means running it;
+                   this is why the suite takes half a minute rather than a second
 
 The last one is the check that would have caught the real failure: five figure
 scripts imported a plotting toolkit that was never in the deposit and only
@@ -29,7 +32,9 @@ resolved because the author's machine had it on sys.path.
 """
 
 import ast
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -301,16 +306,59 @@ class Deposit:
     def check_reproduce_count(self):
         """
         The README promises a specific last line from reproduce_paper_values.py.
-        Read the promise, run nothing: the script itself is a separate gate.
-        Here we only check the two places the README states the number agree.
+        Run the script and hold the promise against what it prints.
+
+        Until this round the check read the promise and compared it against
+        nothing, so the README could promise any number at all and pass as long
+        as it promised the same one in both places, and it also passed when the
+        README promised nothing. Both of those are failures now. The cost is the
+        time the script takes, half a minute, and it buys the only check in here
+        that reaches past the prose and into the analysis.
         """
         text = self.text(self.readme)
         quoted = set(re.findall(r"(\d+) of \1 values reproduce", text))
         quoted |= set(re.findall(r"all (\d+) published values", text))
+
         self.checks += 1
+        if not quoted:
+            self.fail("the README does not say how many values "
+                      "reproduce_paper_values.py reproduces")
+            return
         if len(quoted) > 1:
             self.fail(f"the README quotes more than one count of reproduced "
                       f"values: {', '.join(sorted(quoted))}")
+            return
+        promised = quoted.pop()
+
+        script = self.scripts / "reproduce_paper_values.py"
+        self.checks += 1
+        if not script.exists():
+            self.fail(f"the README promises {promised} reproduced values and "
+                      f"{script.name} is not in the deposit")
+            return
+
+        # Byte compilation off: this test is itself run by the pre-publication
+        # gate, which fails on a __pycache__ directory inside the deposit.
+        proc = subprocess.run([sys.executable, script.name], cwd=self.scripts,
+                              capture_output=True, text=True, timeout=900,
+                              env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+        printed = re.findall(r"(\d+) of (\d+) values reproduce", proc.stdout)
+
+        self.checks += 1
+        if proc.returncode != 0 or not printed:
+            tail = (proc.stdout + proc.stderr).strip().splitlines()
+            last = f", last line {tail[-1].strip()!r}" if tail else ""
+            self.fail(f"{script.name} exited {proc.returncode} without a count "
+                      f"to compare the README against{last}")
+            return
+
+        reproduced, total = printed[-1]
+        if reproduced != total:
+            self.fail(f"{script.name} reproduces {reproduced} of {total} "
+                      f"values; the README promises all of them")
+        elif total != promised:
+            self.fail(f"{script.name} prints '{reproduced} of {total} values "
+                      f"reproduce' and the README promises {promised}")
 
     def check_citation_authors_agree(self):
         """

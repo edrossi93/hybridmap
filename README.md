@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `276 of 276 values reproduce`.
+Expected last line: `277 of 277 values reproduce`.
 
 Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -110,7 +110,7 @@ Twenty-nine files, in three groups, plus the `hybridmap/` package and the exampl
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 276 published values next to the recomputed ones. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 277 published values next to the recomputed ones. This is the one to run first. |
 
 **Analysis.**
 
