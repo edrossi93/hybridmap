@@ -263,10 +263,13 @@ nothing here produces. None of the eleven is edited by hand.
 
 ## `PROVENANCE.json`
 
-Written by `provenance_check.py --record`. The manifest of the deposit: for
-every file in `data/`, whether it is a **measurement** (nothing here produces
-it) or a **product** (a named script does), the producing script for a product,
-and a SHA-256 of the bytes.
+Written by `provenance_check.py --rebuild`, which re-runs every product's script
+and records the hash only where the file came back byte for byte as the manifest
+already holds it. Recording anything else takes `--accept-changes`, so accepting
+drift is a decision someone makes rather than something a routine run does. The
+manifest holds, for every file in `data/`, whether it is a **measurement**
+(nothing here produces it) or a **product** (a named script does), and a SHA-256
+of the bytes.
 
 | key | meaning |
 |---|---|
