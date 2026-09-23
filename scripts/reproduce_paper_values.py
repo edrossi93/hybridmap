@@ -523,7 +523,7 @@ def gap(estimate, configuration):
 
 
 report("relative gap, basalt-longitudinal", gap(voigt, "basalt_face"), -1.9, 0.05)
-report("relative gap, flax-longitudinal", gap(voigt, "flax_face"), -6.3, 0.05)
+report("relative gap, flax-longitudinal", gap(voigt, "flax_face"), -6.8, 0.05)
 basalt_depth = float(_dr_all.loc[(_dr_all.qc_flag_strict == 0)
                                  & (_dr_all.constituent == "basalt"),
                                  "E_150"].median())
@@ -534,7 +534,7 @@ report("estimate with the depth-resolved basalt input", estimate_depth, 16.73,
 report("relative gap on that input, basalt-longitudinal",
        gap(estimate_depth, "basalt_face"), -12.7, 0.05)
 report("relative gap on that input, flax-longitudinal",
-       gap(estimate_depth, "flax_face"), -17.5, 0.05)
+       gap(estimate_depth, "flax_face"), -18.1, 0.05)
 report("estimate with the bulk PA-11 matrix, 1.5 GPa", with_input("matrix", 1.5),
        18.13, 0.005)
 report("estimate with the matrix at 1.0 GPa", with_input("matrix", 1.0), 18.07,
@@ -542,9 +542,9 @@ report("estimate with the matrix at 1.0 GPa", with_input("matrix", 1.0), 18.07,
 # Supplementary Table S8. The three inputs are the ones printed in the table's
 # own first column; they are three different physical quantities and none of
 # them is what this work measures.
-for value, estimate, g_basalt, g_flax in [(14.00, 23.38, 19.4, 15.9),
-                                          (18.00, 25.49, 26.0, 22.9),
-                                          (45.30, 39.84, 52.7, 50.7)]:
+for value, estimate, g_basalt, g_flax in [(14.00, 23.38, 19.4, 15.5),
+                                          (18.00, 25.49, 26.0, 22.5),
+                                          (45.30, 39.84, 52.7, 50.4)]:
     got = with_input("flax", value)
     report(f"estimate with the flax input at {value:.2f} GPa", got, estimate,
            0.005)
@@ -558,11 +558,11 @@ E_tab, f_nominal = _dec.TABULATED_E, _dec.NOMINAL_F
 E_measured, f_measured = _dec.measured_moduli(), _dec.MEASURED_F
 tabulated = _dec.voigt(E_tab, f_nominal)
 report("Voigt sum, tabulated moduli and nominal fractions", tabulated, 35.8, 0.05)
-for cfg, published in (("basalt_face", 47.3), ("flax_face", 45.0)):
+for cfg, published in (("basalt_face", 47.3), ("flax_face", 44.7)):
     report(f"that sum overshoots {cfg} by", gap(tabulated, cfg), published, 0.05)
 # The same comparison with the measurement as the denominator. Both sentences of
 # 3.4 use one denominator each, so both are checked.
-for cfg, published in (("basalt_face", 89.7), ("flax_face", 81.9)):
+for cfg, published in (("basalt_face", 89.7), ("flax_face", 80.9)):
     report(f"overshoot on the measured denominator, {cfg}",
            100 * (tabulated - measured[cfg]) / measured[cfg], published, 0.05)
 # What the tabulated route leaves open: the same fractions with the constituent
@@ -580,7 +580,7 @@ report("tabulated moduli at the measured fractions", fractions_only, 43.8, 0.05)
 report("measured moduli at the measured fractions", both, 24.5, 0.05)
 report("what the moduli alone move", moduli_only - tabulated, -10.7, ROUNDED)
 report("what the fractions alone move", fractions_only - tabulated, 8.0, 0.05)
-for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.8)):
+for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.4)):
     report(f"the measured-fraction construction overshoots {cfg} by",
            gap(both, cfg), published, 0.05)
 # The Halpin-Tsai baseline of the same paragraph and of the Figure 8 panel. Until
@@ -752,11 +752,16 @@ print("\nthree-point bending (3.4, Supplementary Table S7)")
 # The five quantities come from flexural_comparisons.py, which defines each one
 # and is the only place any of them is defined. The two moduli of Table S7 and
 # the strength are also recomputed from the curves there, so this block reduces
-# ten specimens rather than restating a summary.
+# nine specimens rather than restating a summary.
 spec = _fx.per_specimen()
 a_all = spec[spec.configuration == "basalt_face"]
 f_all = spec[spec.configuration == "flax_face"]
-report("specimens per configuration", len(a_all), 5, 0)
+# One line per configuration, because the two counts are no longer the same and
+# one line checking one of them would leave the other unchecked. The flax
+# configuration is four because the source workbook held one of its curves twice;
+# see the data dictionary under `flexural_curves.csv`.
+report("basalt-longitudinal specimens", len(a_all), 5, 0)
+report("flax-longitudinal specimens", len(f_all), 4, 0)
 
 # The Hedges g of the strain at break is None rather than a number, because
 # Supplementary Table S7 prints n/a in that cell: the comparison was not
@@ -764,13 +769,13 @@ report("specimens per configuration", len(a_all), 5, 0)
 # A check against the 8.79 the data give would have been a check against nothing
 # on the page, and was one until this round.
 for label, column, ba, bs, fa, fsd, g_pub in [
-        ("chord modulus", "chord_GPa", 18.85, 0.54, 19.66, 0.49, -1.42),
-        ("peak tangent modulus", "peak_tangent_GPa", 20.01, 0.55, 20.75, 0.24,
-         -1.57),
-        ("flexural strength", "strength_MPa", 181.68, 3.22, 117.55, 4.26, 15.34),
-        ("softening to 0.55 % strain", "softening_pct", 8.40, 0.29, 34.55, 2.38,
-         -13.92),
-        ("strain at break", "strain_at_break_pct", 1.29, 0.08, 0.72, 0.03,
+        ("chord modulus", "chord_GPa", 18.85, 0.54, 19.76, 0.50, -1.54),
+        ("peak tangent modulus", "peak_tangent_GPa", 20.01, 0.55, 20.78, 0.26,
+         -1.51),
+        ("flexural strength", "strength_MPa", 181.68, 3.22, 117.35, 4.89, 14.21),
+        ("softening to 0.55 % strain", "softening_pct", 8.40, 0.29, 34.51, 2.75,
+         -12.80),
+        ("strain at break", "strain_at_break_pct", 1.29, 0.08, 0.71, 0.03,
          None)]:
     x, y = a_all[column], f_all[column]
     report(f"{label}, basalt-longitudinal mean", x.mean(), ba, 0.01)
@@ -781,18 +786,18 @@ for label, column, ba, bs, fa, fsd, g_pub in [
         report(f"{label}, Hedges g", _fx.compare(x, y)["hedges_g"], g_pub, 0.005)
 
 # No document prints a t statistic, here or anywhere. The p value below is the
-# published quantity and it pins t at five specimens per configuration, so the
-# line that compared t against -2.487 verified nothing a reader could look up.
+# published quantity and it pins t at the two group sizes, so the line that
+# compared t against -2.487 verified nothing a reader could look up.
 chord = _fx.compare(a_all.chord_GPa, f_all.chord_GPa)
-report("chord modulus, Welch p uncorrected", chord["p"], 0.0380, 0.0001)
-report("the stiffness difference", -chord["difference"], 0.81, 0.005)
+report("chord modulus, Welch p uncorrected", chord["p"], 0.0357, 0.0001)
+report("the stiffness difference", -chord["difference"], 0.91, 0.005)
 report("that difference, per cent of the flax-longitudinal mean",
-       -100 * chord["difference"] / f_all.chord_GPa.mean(), 4.1, 0.05)
-report("its 95 % interval, low", -chord["ci95"][1], 0.06, 0.005)
-report("its 95 % interval, high", -chord["ci95"][0], 1.56, 0.005)
+       -100 * chord["difference"] / f_all.chord_GPa.mean(), 4.6, 0.05)
+report("its 95 % interval, low", -chord["ci95"][1], 0.08, 0.005)
+report("its 95 % interval, high", -chord["ci95"][0], 1.74, 0.005)
 report("peak tangent modulus, Welch p uncorrected",
        _fx.compare(a_all.peak_tangent_GPa, f_all.peak_tangent_GPa)["p"],
-       0.0369, 0.0001)
+       0.0337, 0.0001)
 
 # The Holm correction under all three families. The stiffness result depends on
 # which family it is counted in, and the paper says so, so all three are checked
@@ -815,9 +820,9 @@ families = {
     "the original family: three":
         ["chord modulus (GPa)", "flexural strength (MPa)",
          "strain at break (%)"]}
-published_holm = {"as reported: four comparisons": 0.0738,
-                  "stiffness as one comparison: three": 0.0380,
-                  "the original family: three": 0.0380}
+published_holm = {"as reported: four comparisons": 0.0675,
+                  "stiffness as one comparison: three": 0.0357,
+                  "the original family: three": 0.0357}
 for label, members in families.items():
     corrected = dict(zip(members,
                          _fx.holm(np.array([raw_p[n] for n in members]))))
@@ -825,12 +830,16 @@ for label, members in families.items():
            corrected["chord modulus (GPa)"], published_holm[label], 0.0001)
     if "peak tangent modulus (GPa)" in corrected:
         report("Holm p on the peak tangent modulus, same family",
-               corrected["peak tangent modulus (GPa)"], 0.0738, 0.0001)
+               corrected["peak tangent modulus (GPa)"], 0.0675, 0.0001)
     report_below(f"Holm p on the strength, {label}",
                  corrected["flexural strength (MPa)"], 0.0001)
     if "softening to 0.55 % strain (%)" in corrected:
+        # A decade looser than the strength cell beside it. At four flax
+        # specimens the softening corrects to about 6e-04 and 9e-04, so the
+        # table cannot print it as < 0.0001 and a check held to that limit
+        # would be held to a cell that is not on the page.
         report_below("Holm p on the softening, same family",
-                     corrected["softening to 0.55 % strain (%)"], 0.0001)
+                     corrected["softening to 0.55 % strain (%)"], 0.001)
 
 # Two lines used to sit here, the mean modulus over the window above the
 # tangent-modulus crossover in each configuration, compared against 19.91 and
@@ -839,9 +848,11 @@ for label, members in families.items():
 # window itself is deposited as `E_window_0p28_0p43_GPa` and the data dictionary
 # and `make_flexural_moduli.py` both document what it is, so a reader who wants
 # the comparison has it. It is not a published value and is no longer reported as
-# one. The 18.48 is the sharper warning of the two: it is also a cell of
+# one. The 18.48 was the sharper warning of the two: it is also a cell of
 # Supplementary Table S2, for an unrelated quantity, so a search of the documents
-# finds it and a careless audit calls it published.
+# finds it and a careless audit calls it published. On the specimens deposited
+# now the flax window mean is 18.52 and the coincidence has gone, which is luck
+# and not a reason to put the check back.
 
 print("\nASTM D790 departures and the bound that follows (2.5)")
 # All four follow from the specimen geometry and the standard, and none of them
@@ -871,8 +882,8 @@ _low, _high = _flex.bracket(_means)
 report("correction at the stiff end of the assumed shear modulus", _low, 3, 0.5)
 report("correction at the compliant end", _high, 7, 0.5)
 # The gaps 4.3.5 prints next are computed from the bracket as that paragraph
-# prints it, to the unit, and not from the exact 3.0 and 6.5 %: the exact
-# correction gives 5.0 and 13.2 %, and 13.2 is not what the page says. Both
+# prints it, to the unit, and not from the exact 3.0 and 6.6 %: the exact
+# correction gives 5.0 and 13.8 %, and 13.8 is not what the page says. Both
 # chains are printed by `flexural_corrections.py`, and the label here says which
 # one is being checked.
 _printed_low, _printed_high = _flex.PRINTED_BRACKET_PCT
@@ -903,8 +914,8 @@ for where, what, why in [
     ("4.3.5", "the 3 to 7 % Timoshenko bracket, to the digit",
      "the through-thickness shear modulus is assumed rather than measured, and "
      "the shear coefficient is not stated. The checks above use 6/5 for a "
-     "rectangular section and the exact inversion, which gives 3.0 to 6.5 %; the "
-     "first-order form would give 2.9 to 6.1 % and would not round to the "
+     "rectangular section and the exact inversion, which gives 3.0 to 6.6 %; the "
+     "first-order form would give 2.9 to 6.2 % and would not round to the "
      "printed bracket"),
 ]:
     print(f"  [--  ] {where}: {what}")

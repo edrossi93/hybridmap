@@ -1,8 +1,11 @@
-"""Figure 9 - three-point bending response, all ten specimens.
+"""Figure 9 - three-point bending response, all nine specimens.
 
-Reviewer 3 comment 22 asked for all five replicates per configuration instead of
-one specimen, and for the removal of the +/- 1 sigma envelope that had been drawn
-around a single curve. Both are done here.
+Reviewer 3 comment 22 asked for every replicate instead of one specimen, and for
+the removal of the +/- 1 sigma envelope that had been drawn around a single
+curve. Both are done here. Every curve the deposit holds is drawn: five
+basalt-longitudinal and four flax-longitudinal, the flax configuration being four
+because the source workbook held one of its curves twice and the duplicate is not
+deposited.
 
 Panel (a) is the stress-strain family with the ASTM D790 chord window shaded.
 Panel (b) is the tangent modulus of the same specimens, which is where the two
@@ -11,8 +14,9 @@ flax-longitudinal laminate softens first.
 
 Each panel carries a narrow strip on its right, sharing its vertical axis, that
 reduces the family to the number quoted in the text: the flexural strength in
-(a) and the ASTM D790 chord modulus in (b), each as a mean over five specimens
-with its standard deviation. Sharing the axis is the point, so the summary sits
+(a) and the ASTM D790 chord modulus in (b), each as a mean over the specimens of
+that configuration with its standard deviation. Sharing the axis is the point, so
+the summary sits
 level with the curves it comes from and can be read against them directly.
 
 Strain is toe-compensated per ASTM D790 Annex A1.1 in both panels, using the
@@ -147,9 +151,16 @@ def build(outdir):
     chord = (moduli.reset_index()
              .groupby("configuration")["E_D790_toe_compensated_GPa"].agg(["mean", "std"]))
 
+    # Each strip is printed at the precision its own caption sentence uses. The
+    # caption gives the strength to one decimal and the chord modulus to two, and
+    # (b) used to print one for both, so the panel read 18.8 +/- 0.5 beside a
+    # caption saying 18.85 +/- 0.54. Figure 8 carries the same moduli and made the
+    # same move for the same reason. Two decimals cost two glyphs, which the
+    # containment check below measures against the strip width rather than
+    # assuming; at 7 pt they fit with room to spare in a 0.62 in strip.
     strip_labels = []
-    for strip, table, main, unit in ((sa, strength, ax_a, "MPa"),
-                                     (sb, chord, ax_b, "GPa")):
+    for strip, table, main, unit, places in ((sa, strength, ax_a, "MPa", 1),
+                                             (sb, chord, ax_b, "GPa", 2)):
         lo, hi = main.get_ylim()
         span = hi - lo
         means = {c: table.loc[c, "mean"] for c in ("basalt_face", "flax_face")}
@@ -165,7 +176,8 @@ def build(outdir):
             # centred on the strip, not on the point: a label centred on a
             # point sits half outside a strip this narrow and is clipped away.
             # Colour ties each value to its marker.
-            strip_labels.append(strip.annotate(f"{m:.1f} ± {sd:.1f}", xy=(0.5, m),
+            strip_labels.append(strip.annotate(f"{m:.{places}f} ± "
+                           f"{sd:.{places}f}", xy=(0.5, m),
                            xytext=(0, -17 if below else 11),
                            textcoords="offset points", ha="center",
                            va="top" if below else "bottom", fontsize=7,

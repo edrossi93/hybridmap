@@ -61,7 +61,10 @@ PRIMARY = {
         "depth-resolved acquisition, the full traces on a common 50 to 300 nm "
         "grid",
     "flexural_curves.csv":
-        "three-point bending records",
+        "three-point bending records, five basalt-longitudinal specimens and "
+        "four flax-longitudinal. One flax-longitudinal curve appeared twice in "
+        "the source workbook under two names and the duplicate was removed "
+        "before deposit; the data dictionary says which",
     "bse_segmentation_tiles.csv":
         "per-tile zone and phase pixel counts from the segmented mosaic",
     "bse_segmentation_summary.json":

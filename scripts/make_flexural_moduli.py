@@ -15,15 +15,15 @@ back to zero stress and taking that intercept as the true strain origin.
 "Steepest linear part" needs a definition, and the choice matters more than it
 looks: fitting over a fixed number of points instead of a fixed strain width
 moves the intercept by up to 0.006 % strain, which is 0.31 GPa on one specimen
-here. That is a third of the 0.81 GPa difference the paper's central comparison
+here. That is a third of the 0.91 GPa difference the paper's central comparison
 turns on, so the convention is written down rather than left implicit.
 
     The window is 0.15 % of strain wide. It slides along the curve, a straight
     line is fitted inside it at each position, and the fit with the greatest
     slope supplies the intercept.
 
-Verified against the values used in the paper: the intercept matches all ten
-specimens to better than 0.0001 % strain.
+Verified against the values used in the paper: the intercept matches every
+specimen to better than 0.0001 % strain.
 
 Usage
     python make_flexural_moduli.py [--data ../data] [--out ../data]

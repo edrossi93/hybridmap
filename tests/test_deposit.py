@@ -4,7 +4,7 @@ Check this deposit's prose against this deposit's files.
     python tests/test_deposit.py
 
 Run it after any change. It exists because the README drifted: it said the
-flexural replicates were missing when all ten curves were present, it gave the
+flexural replicates were missing when every one of them was present, it gave the
 zone boundaries of a partition that had been removed, it listed six scripts out
 of eighteen, and it named 25 reproduced values where the script prints 34.
 Every one of those was true when it was written. Prose does not fail a test

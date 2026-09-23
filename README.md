@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `303 of 303 values reproduce`. The line above it reports ten internal consistency checks, counted separately because they hold the deposit against itself rather than against the page. The block above that names the printed values this deposit cannot reproduce, and the Timoshenko bracket of §4.3.5, which it can reproduce only under a shear coefficient the paper does not state.
+Expected last line: `304 of 304 values reproduce`. The line above it reports ten internal consistency checks, counted separately because they hold the deposit against itself rather than against the page. The block above that names the printed values this deposit cannot reproduce, and the Timoshenko bracket of §4.3.5, which it can reproduce only under a shear coefficient the paper does not state.
 
 Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -41,8 +41,8 @@ Eight CSVs and thirteen JSON summaries. The first three are the exported per-ind
 | `depth_resolved_indents.csv` | 2000 | The same map reduced to slice values at 100, 150 and 200 nm, read from the instrument trace. **These are the numbers the paper reports**; see *Slice extraction* below. |
 | `classified_shallow.csv` | 5553 | The shallow map after the resin cut, carrying the zone and the constituent label. |
 | `classified_depth_resolved.csv` | 2000 | The CSM map with slice values, zone, constituent label, quality flag and the k-means assignment. |
-| `flexural_curves.csv` | 8371 | Three-point bending, stress against strain, **five specimens per configuration**. |
-| `flexural_moduli.csv` | 10 | Per-specimen chord moduli, raw and after ASTM D790 Annex A1.1 toe compensation, plus the modulus over the 0.28-0.43 % window. |
+| `flexural_curves.csv` | 7621 | Three-point bending, stress against strain, **five basalt-longitudinal specimens and four flax-longitudinal**. |
+| `flexural_moduli.csv` | 9 | Per-specimen chord moduli, raw and after ASTM D790 Annex A1.1 toe compensation, plus the modulus over the 0.28-0.43 % window. |
 | `bse_segmentation_tiles.csv` | 91 | One row per imaged tile: zone pixel counts and the fibre/matrix split inside each zone. |
 | `bse_segmentation_summary.json` | - | The constituent volume fractions of Figure 2e, with the aggregation stated. |
 | `mixed_class_deconvolution.json` | - | The mixed-volume class inverted back onto its end members, both acquisitions, with the independent comparison. |
@@ -89,16 +89,18 @@ The class fractions in the paper are **indent-class fractions**: the number of i
 
 ### The flexural replicates
 
-All ten curves are here: five specimens per configuration, every one of them, not a representative curve per configuration. So the statistics the paper quotes can be recomputed rather than taken on trust:
+All nine curves are here, every one of them, not a representative curve per configuration. So the statistics the paper quotes can be recomputed rather than taken on trust:
 
-| configuration | ASTM D790, toe-compensated | mean above the 0.28 % crossover |
-|---|---|---|
-| basalt face in tension | 18.85 ± 0.54 GPa | 19.91 GPa |
-| flax face in tension | 19.66 ± 0.49 GPa | 18.48 GPa |
+| configuration | specimens | ASTM D790, toe-compensated | mean above the 0.28 % crossover |
+|---|---|---|---|
+| basalt face in tension | 5 | 18.85 ± 0.54 GPa | 19.91 GPa |
+| flax face in tension | 4 | 19.76 ± 0.50 GPa | 18.52 GPa |
+
+Nine and not ten, and four in one configuration and five in the other. The source workbook held one of the flax-longitudinal curves twice: two of its five flax-longitudinal records were identical point for point over all 750 points of the shorter one, which was a single final point short of the longer. They were one specimen under two names, so the shorter copy, `16Hybr_Flax_Long_4`, is not in this deposit and the flax-longitudinal configuration is reported at four specimens. The basalt-longitudinal configuration carries no such repeat and is five. Every statistic on this page and in `flexural_comparisons.json` is computed at those counts.
 
 The ranking reverses across the crossover, which is why both windows are reported. `reproduce_paper_values.py` checks these together with the Welch statistic, Hedges *g*, the peak tangent modulus, the strength, the softening and the Holm correction under each of the three families in `flexural_comparisons.json`.
 
-One caveat on the flax standard deviation: 0.49 is what this file gives, and 0.4842 is what the unrounded per-specimen values give. See the note on precision below.
+The standard deviations survive the rounding this file applies: 0.50 is what the stored two-decimal moduli give for the flax configuration and 0.4971 is what the unrounded per-specimen values give, which rounds to the same figure. See the note on precision below.
 
 ---
 
@@ -110,7 +112,7 @@ Thirty-one files, in three groups, plus the `hybridmap/` package and the example
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 303 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 304 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
 
 **Analysis.**
 
@@ -465,13 +467,14 @@ freely, with attribution; `CITATION.cff` has the machine-readable form.
 `flexural_moduli.csv` stores the per-specimen moduli rounded to two decimals,
 which is the precision at which they are reported.
 
-The rounded and the unrounded values differ in the third decimal, and for one
-quantity that changes the second. Recomputing the flax-longitudinal standard
-deviation from this file gives 0.4863 GPa, which rounds to the 0.49 the paper
-reports; from the unrounded values it is 0.4842, which would round to 0.48.
-Nothing is wrong with either number, and the paper prints the one this file
-supports so that the deposit and the page agree. A reader recomputing by hand
-should still know why the last digit can move.
+The rounded and the unrounded values differ in the third decimal. Recomputing
+the flax-longitudinal standard deviation from this file gives 0.4994 GPa and
+from the unrounded values 0.4971, and both round to the 0.50 the paper reports.
+On the nine specimens deposited here the two routes therefore agree at the
+printed precision, which they did not while the duplicate flax curve was in the
+file: there they gave 0.49 and 0.48. The agreement is a property of these data
+and not a guarantee, and a reader recomputing by hand should still know why the
+last digit can move.
 
 ## Files provided as primary inputs
 

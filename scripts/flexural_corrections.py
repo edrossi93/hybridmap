@@ -27,11 +27,11 @@ depends on it inherits that.
 
 Two things a reader should know about the Timoshenko arithmetic. The relation is
 inverted exactly here, E_true = E_app / (1 - c E_app), not truncated at first
-order; the first-order form would give 6.1 % where the exact one gives 6.5, and
+order; the first-order form would give 6.2 % where the exact one gives 6.6, and
 the paper prints 7. And the paper's own bracket is printed to the unit, so the
 gaps it quotes next, 5 % and 14 %, follow from the rounded 3 and 7 % rather than
-from the exact 3.0 and 6.5: carrying the exact correction through gives 5.0 and
-13.2 %. Both chains are printed below. The manuscript should state the shear
+from the exact 3.0 and 6.6: carrying the exact correction through gives 5.0 and
+13.8 %. Both chains are printed below. The manuscript should state the shear
 coefficient it used, since the bracket is not reproducible without it.
 
 Run: python flexural_corrections.py
@@ -200,8 +200,11 @@ def main():
           f"{gap_pct(means[small], estimate, PRINTED_BRACKET_PCT[0]):5.2f} % and "
           f"{gap_pct(means[large], estimate, PRINTED_BRACKET_PCT[1]):5.2f} %")
     print("  4.3.5 prints 5 and 14 %, which is the last line rounded. The exact "
-          "bracket")
-    print("  would give 13 rather than 14 at the upper end.")
+          "bracket now")
+    print("  rounds to the same pair, so the two chains no longer disagree on "
+          "the page,")
+    print("  but they still differ by half a point at the upper end and both "
+          "are printed.")
     return 0
 
 

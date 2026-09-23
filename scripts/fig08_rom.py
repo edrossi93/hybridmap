@@ -243,7 +243,7 @@ def build(outdir):
     # Two decimals, which is the precision the caption uses for the estimate and
     # for the two measured moduli: at one decimal the first bar read 18.5 beside
     # a caption saying 18.50 +/- 1.44, and the two measured bars read 18.8 and
-    # 19.7 beside 18.85 and 19.66. Two decimals are two glyphs wider, which at
+    # 19.8 beside 18.85 and 19.76. Two decimals are two glyphs wider, which at
     # 9 pt brings the first pair and the last pair into contact, by about a pixel
     # each, too little for layout_report() to call it a collision and enough to
     # see. 8 pt leaves four pixels between every neighbouring pair and sits just

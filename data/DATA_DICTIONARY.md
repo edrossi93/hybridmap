@@ -172,9 +172,19 @@ The flax and matrix figures are the two §4.3.2 prints, so they are now checked 
 `reproduce_paper_values.py` rather than only written down, and the flax one also
 bounds the rate departure of §2.5.
 
-## `flexural_curves.csv` - 8371 rows
+## `flexural_curves.csv` - 7621 rows
 
-Three-point bending, five specimens per configuration.
+Three-point bending, five basalt-longitudinal specimens and four
+flax-longitudinal.
+
+Four and not five in the flax configuration. The source workbook carried one of
+its flax-longitudinal curves twice: two of its five flax-longitudinal records
+were identical point for point over all 750 points of the shorter one, which was
+a single final point short of the longer, so they were one specimen under two
+names. The shorter copy, `16Hybr_Flax_Long_4`, is
+not in this file and takes no part in any statistic computed from it. The
+specimen numbering that remains is the workbook's, so the flax specimens are 1,
+2, 3 and 5. The basalt configuration carries no such repeat and is five.
 
 | column | unit | notes |
 |---|---|---|
@@ -183,7 +193,7 @@ Three-point bending, five specimens per configuration.
 | `strain_pct` | % | raw, **not** toe-compensated |
 | `stress_MPa` | MPa | |
 
-## `flexural_moduli.csv` - 10 rows
+## `flexural_moduli.csv` - 9 rows
 
 Derived from the curves by `make_flexural_moduli.py`, which reproduces this file
 exactly.
@@ -349,14 +359,14 @@ correction applied to the family it belongs to.
 
 | key | meaning |
 |---|---|
-| `per_specimen` | ten rows, one per specimen: configuration, chord modulus, peak tangent modulus, strength, softening, strain at break |
+| `per_specimen` | nine rows, one per specimen: configuration, chord modulus, peak tangent modulus, strength, softening, strain at break |
 | `comparisons` | per quantity: the two means, Welch t, uncorrected p, Hedges g |
 | `families` | the same p values under three Holm groupings |
 
 The three families are reported because the conclusion depends on which one is
-used: the stiffness comparison corrects to 0.0738 in the family as
-pre-specified and to 0.0380 in either alternative. The manuscript reports the
-difference itself, about 4 %, rather than a verdict that moves with the
+used: the stiffness comparison corrects to 0.0675 in the family as
+pre-specified and to 0.0357 in either alternative. The manuscript reports the
+difference itself, about 5 %, rather than a verdict that moves with the
 grouping.
 
 ## `poisson_sensitivity.json`
@@ -408,10 +418,13 @@ than between the two solid phases: in the flax zone, matrix is called void on
 ## A note on precision
 
 The flexural moduli are stored rounded to two decimals. Recomputing the
-flax-longitudinal standard deviation from this file gives 0.4863, which rounds to
-the 0.49 the paper reports; from the unrounded values it is 0.4842, which would
-round to 0.48. Neither is wrong, and the paper prints the one this file supports
-so that the deposit and the page agree.
+flax-longitudinal standard deviation from this file gives 0.4994 and from the
+unrounded values 0.4971, and both round to the 0.50 the paper reports, so the
+deposit and the page agree whichever route a reader takes. That was not true
+while the duplicate flax curve was in the file, where the two routes gave 0.49
+and 0.48; the agreement is a property of these nine specimens and not a
+guarantee, and recomputing from the stored file remains the route the printed
+figures follow.
 
 ## `phase_angle_sensitivity.json`
 
