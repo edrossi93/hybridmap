@@ -484,8 +484,13 @@ print("\nphase-angle quality sensitivity (Supplementary Table S3)")
 # basalt median are recorded values of the superseded mask and whose estimate is
 # computed from that median like every other row.
 rows_S3 = _pas.sweep()
-published_S3 = [(433, 21.7, 49.47, 16.53), (473, 23.6, 53.14, 16.73),
-                (304, 15.2, 53.01, 16.73), (217, 10.8, 52.63, 16.70)]
+# Three of these four fractions are exact halves at one decimal: 433, 473 and
+# 217 over 2000 give 21.65, 23.65 and 10.85. The supplement rounds all three
+# half-up and is self-consistent with the "11 % to 24 %" in the body. Python's
+# round() takes 21.65 up but 23.65 and 10.85 down, which is how two of these
+# literals came to hold the table to numbers it does not print.
+published_S3 = [(433, 21.7, 49.47, 16.53), (473, 23.7, 53.14, 16.73),
+                (304, 15.2, 53.01, 16.73), (217, 10.9, 52.63, 16.70)]
 for row, (n, pct, basalt, estimate) in zip(rows_S3, published_S3):
     name = str(row["phase_angle_limit_deg"]).split(" ")[0]
     report(f"rejected at {name} deg", row["rejected"], n, 0)
