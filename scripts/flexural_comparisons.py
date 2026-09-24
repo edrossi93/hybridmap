@@ -1,6 +1,6 @@
 """The planned flexural comparisons, their effect sizes, and three corrections.
 
-Supplementary Table S6 reports four comparisons under one Holm correction.
+Supplementary Table S7 reports four comparisons under one Holm correction.
 Reviewer 3 raised two objections to that in his second report, and both are
 answered here by computing rather than by argument.
 
@@ -18,10 +18,11 @@ how much the conclusion depends on the choice.
 
 Both are reported below, beside the current family. The answer is not
 comfortable and is stated plainly in the paper: under either of the other two
-families the stiffness difference corrects to p = 0.038 rather than 0.074. The
-paper therefore no longer rests anything on a non-significant test. It reports
-that a difference of about 4 % cannot be excluded and that it lies below what
-the construction itself can resolve.
+families the stiffness difference corrects to p = 0.0357 rather than 0.0675,
+on the nine specimens deposited now. The paper therefore no longer rests
+anything on a non-significant test. It reports that a difference of about 5 %
+cannot be excluded and that it lies below what the construction itself can
+resolve.
 
 Every quantity is defined here rather than inherited, because the previous
 table's peak tangent modulus and softening had no script behind them:

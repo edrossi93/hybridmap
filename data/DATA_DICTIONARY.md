@@ -251,7 +251,7 @@ by `uncertainty_budget.py`, and the source of Supplementary Table S5.
 | `type_b_ranges` | the ranges those two are taken over: the threshold grid, 17.998 to 18.839 GPa, and the phase-specific Poisson estimate, 18.3045 GPa |
 | `combined_sd_GPa` | the Type A terms and the two Type B terms in quadrature, 1.4406 |
 | `percentile_95_interval_GPa` | 15.776 to 21.341, from the draws rather than from a coverage factor |
-| `block_size_sensitivity_sd_GPa` | the combined sampling term at 2, 4 and 8 grid columns, 1.21 to 1.68 GPa, so the block width can be seen rather than trusted |
+| `block_size_sensitivity_sd_GPa` | the joint sampling term alone, Type A, at 2, 4 and 8 grid columns, 1.21, 1.38 and 1.68 GPa, from 1000 draws at each width rather than the 6000 of the budget, so the block width can be seen rather than trusted. With the two Type B terms in quadrature those read 1.23, 1.41 and 1.70 GPa; the script prints both forms |
 | `n_draws`, `seed`, `block_columns` | 6000 draws, seed 42, blocks four grid columns wide |
 | `excluded` | the one term left out on purpose, and why |
 
@@ -330,10 +330,17 @@ mapped rather than the section.
 | `w_basalt_indent_counts` | basalt-zone share implied by indent counts, 0.497 |
 | `w_basalt_mosaic` | basalt-zone share of the section, 0.362, from the tile counts in `bse_segmentation_tiles.csv`. **This is the one the estimate uses.** |
 | `w_basalt_downsampled_mask` | the same marking read from `zone_mask_rle.json`, 0.367. Downsampling redraws the zone boundary and moves the share by half a point; the mask is used only for the sliding window below |
-| `windows` | per acquisition, the share seen by a window of that size slid across the mosaic: its range, its median, and the extremes |
+| `w_basalt_depth_resolved_strip` | the basalt-centre band's share of the depth-resolved strip by indent count, 0.300, which is where that window is placed on its own distribution |
+| `windows` | three windows, each slid over the mosaic at an 8 px stride with its long axis through the thickness: the load-controlled map's full footprint, the 704 µm of laminate its retained indents cover, and the depth-resolved footprint. Per window: `footprint_um_along_thickness_by_in_plane`, `n_placements`, the mean and standard deviation of the basalt share and of the Voigt sum over the placements, the 5, 25, 50, 75 and 95 % points of the Voigt sum, `mapped_window_share` (the share the real window saw), and the percentage of placements at or below and at or above it |
 
 The gap between the first two numbers is why the estimate moved from 21.33 to
-18.50 GPa.
+18.50 GPa. What the windows give: over the full load-controlled footprint,
+29 880 placements, a share of 0.369 ± 0.070 and a sum of 18.65 ± 1.46 GPa;
+over the retained 704 µm span, 52 290 placements, 0.360 ± 0.141 and
+18.47 ± 2.96 GPa, with the mapped window's 0.497 at or above 85 % of them.
+For two rounds this sweep ran with the footprint transposed and the file
+carried 0.373 ± 0.342 and 18.72 ± 7.18 GPa over 67 025 placements; the
+script's docstring records the error.
 
 ## `basalt_input_sweep.json`
 
@@ -512,6 +519,8 @@ number in §4.1 and of Supplementary Figure S4.
 | `p_load_controlled_map`, `n_load_controlled_zone` | the same test on the other acquisition, the load-controlled map |
 
 The pool matters and is the reason this file exists: counting only the
-classified indents changes p at k = 8 from 8.5e-11 to 7.4e-11. The published
-value is the one that includes the rejected indents, which is the right choice,
-because a rejected indent still occupies its place on the grid.
+classified indents moves p at k = 8 from the published 2.3e-12 to 4.9e-10 on
+the quality mask deposited now (on the superseded mask the same pair read
+8.5e-11 and 7.4e-11). The published value is the one that includes the rejected
+indents, which is the right choice, because a rejected indent still occupies
+its place on the grid.

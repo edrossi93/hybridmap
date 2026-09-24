@@ -11,9 +11,12 @@ The construction has two levels and they are measured by different instruments:
 The second level is new in this revision. Previously the zone share came from
 the indent counts, which describe the window that happened to be mapped rather
 than the section. Reviewer 3 asked in his second report for the zone share to
-appear in this budget; once it is computed it turns out to be the largest term
-in it, which is why the estimate is now built on the mosaic share. See
-`zone_share.py` for that measurement and for how far the figure moves.
+appear in this budget. As a term it is the second largest of the three sampling
+terms, 0.61 GPa against 1.08 for the class fractions; what made the estimate
+move to the mosaic share is not the size of the term but the 2.83 GPa between
+the two weightings, which is a correction and not an uncertainty and is
+reported as the alternative in Table 2. See `zone_share.py` for that
+measurement and for how far the figure moves.
 
 Three sources are propagated together, in one Monte Carlo rather than as
 independent terms added afterwards, so that their correlations are carried:
@@ -43,9 +46,21 @@ standard uncertainty is the half-range divided by root three:
               values of Supplementary Table S1
 
 One term stays outside the budget on purpose. Which basalt input to use, the
-shallow 86.0 GPa or the depth-resolved 49.5 GPa, is a discriminated choice on
-measurement-physics grounds rather than an uncertainty, and folding it in would
-report a decision as noise. It is reported as a sensitivity instead.
+shallow 86.0 GPa or the depth-resolved 53.0 GPa, is a choice rather than an
+uncertainty, and folding it in would report a decision as noise. The choice
+rests on the two acquisitions agreeing on the same contacts at 80 nm and on the
+deeper reading then falling with depth (Supplementary Figure S7), for a reason
+the data do not settle; the depth-resolved median is therefore not a second
+estimate of the fibre modulus. It is reported as a sensitivity instead.
+
+The block-size sweep at the end is printed in two forms, because the caption
+of Supplementary Table S5 quoted one as the other. The sweep resamples 1000
+draws at each block width and its standard deviation is the joint sampling
+term alone, Type A; the caption's "combined value" is that term in quadrature
+with the two Type B terms. Both are printed with their draw counts. The
+budget's own joint sampling term is the 6000-draw value, and at the four-column
+block the 1000-draw sweep lands near it but not on it, which is what a
+resampled quantity does at a sixth of the draws.
 
 Run: python uncertainty_budget.py
 """
@@ -282,8 +297,16 @@ def main():
         print(f"    {k:<28} ± {v:.3f}")
     print(f"\n  combined                       ± {combined:.3f}")
     print(f"  reported as                      {point:.2f} ± {combined:.2f} GPa")
-    print(f"\n  block-size sensitivity (1000 draws): "
-          + ", ".join(f"{k} cols ± {v:.3f}" for k, v in sweep.items()))
+    type_b_sq = sum(v ** 2 for v in type_b.values())
+    print(f"\n  block-size sensitivity, 1000 draws at each width "
+          f"(grid columns 5.0959 um apart)")
+    print(f"    {'block':<14}{'sampling term alone':>21}"
+          f"{'with Type B in quadrature':>28}")
+    for k, v in sweep.items():
+        print(f"    {k} cols, {k * 5.0959:4.0f} um{v:>17.3f}"
+              f"{(v ** 2 + type_b_sq) ** 0.5:>25.3f}")
+    print(f"    the budget's own sampling term, {N_DRAWS} draws at "
+          f"{BLOCK_COLS} cols: {combined_a:.3f}, combined {combined:.3f}")
     print(f"\nwritten to {out.relative_to(HERE.parent)}")
 
 

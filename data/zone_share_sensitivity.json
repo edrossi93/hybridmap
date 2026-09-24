@@ -2,42 +2,70 @@
   "w_basalt_indent_counts": 0.4970275626013331,
   "w_basalt_mosaic": 0.3619503972551353,
   "w_basalt_downsampled_mask": 0.3669151534920058,
+  "w_basalt_depth_resolved_strip": 0.3,
   "windows": {
     "load-controlled map": {
-      "footprint_um": [
+      "footprint_um_along_thickness_by_in_plane": [
         1086,
         98
       ],
-      "n_placements": 67025,
-      "share_mean": 0.37266687986202723,
-      "share_sd": 0.34191617446854405,
-      "voigt_mean": 18.722825477984827,
-      "voigt_sd": 7.176499939022858,
+      "n_placements": 29880,
+      "share_mean": 0.36931820521022146,
+      "share_sd": 0.06966269943937727,
+      "voigt_mean": 18.652539936589054,
+      "voigt_sd": 1.4621547490578046,
       "voigt_percentiles_5_25_50_75_95": [
-        10.900897063037249,
-        11.60808334933837,
-        17.089317831969435,
-        24.758709654194263,
-        31.708107729314122
-      ]
+        16.313599245922884,
+        17.50704901930228,
+        18.61307416732213,
+        19.802209169319124,
+        21.164968887206644
+      ],
+      "mapped_window_share": 0.4970275626013331,
+      "placements_at_or_below_mapped_share_pct": 97.58366800535475,
+      "placements_at_or_above_mapped_share_pct": 2.416331994645248
+    },
+    "load-controlled map, laminate span after the resin cut": {
+      "footprint_um_along_thickness_by_in_plane": [
+        704,
+        98
+      ],
+      "n_placements": 52290,
+      "share_mean": 0.3604158624701467,
+      "share_sd": 0.14089008022050364,
+      "voigt_mean": 18.465688108854934,
+      "voigt_sd": 2.9571506925139333,
+      "voigt_percentiles_5_25_50_75_95": [
+        12.824924378930417,
+        16.574572154073138,
+        18.86564237891937,
+        20.504700518747164,
+        22.622204517783548
+      ],
+      "mapped_window_share": 0.4970275626013331,
+      "placements_at_or_below_mapped_share_pct": 84.96270797475617,
+      "placements_at_or_above_mapped_share_pct": 15.037292025243831
     },
     "depth-resolved map": {
-      "footprint_um": [
+      "footprint_um_along_thickness_by_in_plane": [
         297,
         57
       ],
-      "n_placements": 85500,
-      "share_mean": 0.3681939300817589,
-      "share_sd": 0.43131371638784016,
-      "voigt_mean": 18.628942455705335,
-      "voigt_sd": 9.052870529357843,
+      "n_placements": 76456,
+      "share_mean": 0.36533268545268227,
+      "share_sd": 0.24209208648309755,
+      "voigt_mean": 18.568887613497257,
+      "voigt_sd": 5.081285922154299,
       "voigt_percentiles_5_25_50_75_95": [
         10.900897063037249,
-        10.900897063037249,
-        12.283936019521448,
-        30.48800235698765,
-        31.889959514316775
-      ]
+        14.628561230794737,
+        18.7413380969352,
+        22.18597948327943,
+        26.896439221770066
+      ],
+      "mapped_window_share": 0.3,
+      "placements_at_or_below_mapped_share_pct": 39.09438108192948,
+      "placements_at_or_above_mapped_share_pct": 60.90561891807052
     }
   }
 }

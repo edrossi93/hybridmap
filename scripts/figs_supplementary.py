@@ -185,8 +185,10 @@ def neighbour_fraction(sub, pool, k):
     The neighbours are drawn from every indent in the zone, including those the
     quality filter rejected. A rejected indent still occupies its place on the
     grid, and leaving it out would move its neighbours' neighbours. Using only
-    the classified indents instead changes p at k = 8 from 8.5e-11 to 7.4e-11,
-    which is how the published figure was identified.
+    the classified indents instead moves p at k = 8 from the published
+    2.3e-12 to 4.9e-10, on the quality mask deposited now; on the superseded
+    mask the same pair read 8.5e-11 and 7.4e-11, which is how the published
+    figure was identified.
     """
     xy = sub[["x_um", "y_um"]].to_numpy()
     pxy = pool[["x_um", "y_um"]].to_numpy()

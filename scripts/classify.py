@@ -39,8 +39,11 @@ Thresholds (GPa):
     lower  15    compliant / stiff split, from the gap in the basalt-zone
                  modulus histogram
     upper  70    shallow map, pure-axial basalt above this
-           40    depth-resolved map, lower because substrate compliance
-                 depresses the fibre modulus at a 300 nm target depth
+           40    depth-resolved map, lower because the stiff contacts read
+                 lower with depth there: the contacts above 70 GPa at 80 nm
+                 have a median of 82.5 GPa there and 44.3 GPa at 300 nm
+                 (Supplementary Figure S7), for a reason the data do not
+                 settle
 """
 
 import sys
@@ -72,11 +75,11 @@ X_ZONE_SPLIT = 730.0
 E_LOWER = 15.0
 
 # Above this, a contact is taken as pure axial basalt. The two maps need
-# different values because they sample mixed-volume contacts differently: the
-# shallow map's small contact volume reaches nearly bare fibre, while at a
-# 300 nm target depth the surrounding compliant material is inside the probed
-# volume and depresses the apparent fibre modulus, so a 70 GPa cut there would
-# reject almost every genuine basalt contact.
+# different values because the stiff contacts read differently at the two
+# depths: the contacts that read above 70 GPa at 80 nm in the depth-resolved
+# map, where the two acquisitions agree, have fallen to a median of 44 GPa by
+# 300 nm (Supplementary Figure S7), for a reason the data do not settle, so a
+# 70 GPa cut at 150 nm would reject almost every genuine basalt contact.
 E_UPPER_SHALLOW = 70.0
 E_UPPER_DEPTH = 40.0
 

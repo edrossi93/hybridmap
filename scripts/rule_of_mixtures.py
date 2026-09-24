@@ -85,14 +85,21 @@ def substitute(table, cls, new_modulus):
 # different physical quantities, which is the point of tabulating them
 # together rather than picking one:
 #
-#   14.0   immature Gn cell-wall layer, transverse, PF-QNM on a cross-section
-#   18.0   mature G cell-wall layer, same technique and same geometry as ours
+#   14.0   immature Gn cell-wall layer, PF-QNM on an ultramicrotomed
+#          cross-section, that is, pressing along the fibre axis
+#   18.0   mature G cell-wall layer, same technique and same geometry
 #   45.3   elementary-fibre axial modulus, from tension along the fibre
 #
-# All three from Goudenhooft et al., Fibers 6 (2018) 6. The value this work
-# measures is none of them: it is the compliant response of the flax-rich tow
-# as consolidated, with lumen, middle lamella and impregnating matrix inside
-# the probed volume.
+# All three from Goudenhooft et al., Fibers 6 (2018) 6. None of the three is
+# measured the way this work measures flax. The cell-wall values are taken on
+# the fibre's cross-section, so the probe presses along the fibre axis; here
+# the flax yarns lie in the plane of the section and the indenter presses
+# across it, the opposite geometry (2.2, 4.3.4). Calling the cell-wall input
+# "transverse", as this list did for two rounds, was the conflation Reviewer 3
+# named. The value this work measures is none of the three: it is the
+# compliant response of the flax-rich tow as consolidated, pressed across its
+# axis, with lumen, middle lamella and impregnating matrix inside the probed
+# volume.
 #
 # The third value read 52.47 here for two rounds, against the 45.30 GPa of
 # Supplementary Table S8 and the "about 45 GPa along the fibre axis" of §4.3.4.

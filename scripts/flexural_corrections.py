@@ -31,8 +31,10 @@ order; the first-order form would give 6.2 % where the exact one gives 6.6, and
 the paper prints 7. And the paper's own bracket is printed to the unit, so the
 gaps it quotes next, 5 % and 14 %, follow from the rounded 3 and 7 % rather than
 from the exact 3.0 and 6.6: carrying the exact correction through gives 5.0 and
-13.8 %. Both chains are printed below. The manuscript should state the shear
-coefficient it used, since the bracket is not reproducible without it.
+13.8 %. Both chains are printed below. The shear coefficient, 6/5 for a
+rectangular section, and the exact inversion are both stated in 4.3.5 now; for
+two rounds the paragraph gave neither, and the bracket could not be reproduced
+from the page.
 
 Run: python flexural_corrections.py
 """
@@ -59,7 +61,7 @@ D790_MIN_OVERHANG_FRACTION = 0.10
 
 # Assumed in 4.3.5, measured nowhere in this deposit.
 SHEAR_MODULUS_RANGE_GPA = (1.5, 3.0)
-# Rectangular section, Timoshenko. The shear coefficient the paper does not state.
+# Rectangular section, Timoshenko; 4.3.5 states it.
 SHEAR_COEFFICIENT = 6.0 / 5.0
 
 # The bracket as 4.3.5 prints it, to the unit. Used only to reproduce the gaps

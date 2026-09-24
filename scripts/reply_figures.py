@@ -12,13 +12,18 @@ from the backscattered-electron pixels rather than from any deposited table, so
 it cannot run on this data and is kept with the micrographs.
 """
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import figstyle as fs
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import figstyle as fs                                           # noqa: E402
+import areal_mass_fractions                                     # noqa: E402
+from fig08_rom import (lamination_theory, fibre_modulus_by_volume,  # noqa: E402
+                       HT_E_BASALT, HT_E_FLAX, HT_E_MATRIX, HT_V_FIBRE)
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -26,6 +31,14 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 # R2 inputs. Fibre volume fractions and measured flexural moduli of the prior
 # laminates are taken from Sergi et al.; the moduli were measured independently
 # of the volume fractions, which is what makes the comparison meaningful.
+#
+# The lamination-theory prediction each laminate is normalised by comes from
+# `fig08_rom.lamination_theory`, the same function that draws the Figure 8
+# baseline and prints the §3.4 value, with the two fibre moduli combined by
+# volume at the densities §3.4 states. This file used to carry its own copy of
+# the calculation and its own density pair, 2.67 and 1.45 g/cm3, and the paper
+# came to print two predictions for one panel: 27.2 GPa in §3.4 and Figure 8,
+# and the 26.25 implied by the 0.72 and 0.75 of §4.2. One route now.
 # ---------------------------------------------------------------------------
 PRIOR = [
     ("PA11 flax, [0]",            0.377,  5.13, "flax"),
@@ -34,7 +47,6 @@ PRIOR = [
     ("PA11 hybrid [0/90], basalt", 0.479, 9.40, "hybrid"),
     ("PA11 hybrid [0/90], flax",   0.479, 9.79, "hybrid"),
 ]
-RHO_BASALT, RHO_FLAX = 2.67, 1.45      # g/cm3, for the 50/50 mass split
 
 
 def consolidation_decomposition(rows):
@@ -69,32 +81,43 @@ def consolidation_decomposition(rows):
 
 
 def fibre_modulus(kind, E_basalt, E_flax):
-    """Rule-of-mixtures fibre modulus for the two fabric types."""
+    """The fibre modulus each fabric enters lamination theory with.
+
+    The flax-only laminate has one fibre; the hybrids have the two combined by
+    volume at the stated densities, exactly as this panel's own baseline does.
+    """
     if kind == "flax":
         return E_flax
-    vb = (1 / RHO_BASALT) / (1 / RHO_BASALT + 1 / RHO_FLAX)
-    return vb * E_basalt + (1 - vb) * E_flax
+    return fibre_modulus_by_volume(E_basalt, E_flax)
 
 
 def clt(vf, Ef, Em, xi=2.0):
-    """Balanced 0/90 crossply average of the axial and Halpin-Tsai transverse ply."""
-    e1 = Ef * vf + Em * (1 - vf)
-    eta = (Ef / Em - 1) / (Ef / Em + xi)
-    e2 = Em * (1 + xi * eta * vf) / (1 - eta * vf)
-    return 0.5 * (e1 + e2)
+    """The balanced 0/90 average, by the shared route; kept for its name."""
+    return lamination_theory(vf, Ef, Em, xi)[2]
+
+
+def r2_table():
+    """The normalised comparison of §4.2, without the figure.
+
+    One row per laminate: name, fibre volume fraction, lamination-theory
+    prediction, measured flexural modulus, the ratio of the two, and whether the
+    row is this work. Built here so that `reproduce_paper_values.py` can check
+    the 0.72, 0.75 and the 1.44 x 1.41 decomposition against the same rows the
+    figure draws, rather than against a second implementation.
+    """
+    moduli = (pd.read_csv(DATA / "flexural_moduli.csv")
+              .groupby("configuration")["E_D790_toe_compensated_GPa"].mean())
+    ours = [("this work, basalt-long", HT_V_FIBRE, moduli["basalt_face"], "hybrid"),
+            ("this work, flax-long", HT_V_FIBRE, moduli["flax_face"], "hybrid")]
+    rows = []
+    for name, vf, meas, kind in PRIOR + ours:
+        pred = clt(vf, fibre_modulus(kind, HT_E_BASALT, HT_E_FLAX), HT_E_MATRIX)
+        rows.append((name, vf, pred, meas, meas / pred, name.startswith("this work")))
+    return rows, ours
 
 
 def r2_clt(outdir):
-    moduli = (pd.read_csv(DATA / "flexural_moduli.csv")
-              .groupby("configuration")["E_D790_toe_compensated_GPa"].mean())
-    ours = [("this work, basalt-long", 0.649, moduli["basalt_face"], "hybrid"),
-            ("this work, flax-long", 0.649, moduli["flax_face"], "hybrid")]
-
-    Eb, Ef_, Em = 80.0, 60.0, 1.5
-    rows = []
-    for name, vf, meas, kind in PRIOR + ours:
-        pred = clt(vf, fibre_modulus(kind, Eb, Ef_), Em)
-        rows.append((name, vf, pred, meas, meas / pred, name.startswith("this work")))
+    rows, ours = r2_table()
 
     # the conclusion must not depend on the constituent moduli chosen, so the
     # ratio is recomputed over a grid of plausible inputs

@@ -5,9 +5,11 @@ architectural zones (flax-rich bottom, basalt-rich centre, flax-rich top). For
 each zone the within-zone class fractions and the class median moduli at
 z = 150 nm give Voigt, Hill and Reuss. A fourth bar shows the shallow-corrected
 Hill bound, in which the basalt input is replaced by the 86 GPa median measured
-in the shallow map, where the fibres are not depressed by substrate compliance.
-The zone-averaged modulus actually measured is marked so the reader can see
-which bound lands closest.
+in the shallow map: the two acquisitions agree on the same contacts at 80 nm,
+and the deeper reading then falls with depth for a reason the data do not
+settle (4.4), so the shallow value is the one taken as the fibre modulus. The
+zone-averaged modulus actually measured is marked so the reader can see which
+bound lands closest.
 
 Panel (b) is the laminate-scale construction from the shallow map. It has two
 levels: the class fractions and medians inside each zone come from the indents,
@@ -67,23 +69,31 @@ ZONE_LABEL = {"flax-bottom": "bottom", "basalt-centre": "centre",
               "flax-top": "top"}
 
 
-def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
-                         e_matrix=HT_E_MATRIX, v_fibre=HT_V_FIBRE, xi=HT_XI):
-    """The Halpin-Tsai baseline of §3.4, derived rather than asserted.
+def fibre_modulus_by_volume(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX):
+    """One fibre modulus for the hybrid fabric, weighted by fibre volume.
 
-    A balanced 0/90 average of a single lamina: the longitudinal direction is
-    the iso-strain sum, the transverse direction is the Halpin-Tsai estimate,
-    and the average of the two is what a balanced fabric of the same constituents
-    would give. The two fibre types enter through one fibre modulus, the mean of
-    the two tabulated values, because the tabulated route has no measurement that
-    would split them by volume and the fabric specification gives the split by
-    mass.
-
-    Returns the longitudinal, transverse and averaged moduli in GPa. Nothing is
-    printed here; report_halpin_tsai() below does that, so that the value can be
-    taken at import time without output appearing as a side effect.
+    The fabric specification splits the two fibres by mass, and the densities
+    §3.4 states turn that into a split by volume: `areal_mass_fractions` owns
+    both and this is read from it. The plain mean of the two tabulated values,
+    70 GPa, was what this panel used for two rounds while the §4.2 comparison
+    used the volume-weighted value at a different density pair, so the paper
+    carried two predictions for the same panel; there is one now.
     """
-    e_fibre = 0.5 * (e_basalt + e_flax)
+    vb = areal_mass_fractions.basalt_share_of_fibre_volume()
+    return vb * e_basalt + (1.0 - vb) * e_flax
+
+
+def lamination_theory(v_fibre, e_fibre, e_matrix=HT_E_MATRIX, xi=HT_XI):
+    """A balanced 0/90 average of one lamina, from a fibre volume fraction.
+
+    The longitudinal direction is the iso-strain sum, the transverse direction
+    is the Halpin-Tsai estimate, and the average of the two is what a balanced
+    fabric of the same constituents would give. This is the one lamination-theory
+    route in the deposit: the Figure 8 baseline, the §3.4 sentence and the §4.2
+    comparison against the prior laminates (`reply_figures.py`) all call it.
+
+    Returns the longitudinal, transverse and averaged moduli in GPa.
+    """
     ratio = e_fibre / e_matrix
     eta = (ratio - 1.0) / (ratio + xi)
     longitudinal = v_fibre * e_fibre + (1.0 - v_fibre) * e_matrix
@@ -92,13 +102,26 @@ def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
     return longitudinal, transverse, balanced
 
 
+def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
+                         e_matrix=HT_E_MATRIX, v_fibre=HT_V_FIBRE, xi=HT_XI):
+    """The Halpin-Tsai baseline of §3.4 for this panel, derived rather than asserted.
+
+    `lamination_theory` at this panel's fibre volume fraction, with the two
+    tabulated fibre moduli combined by volume. Nothing is printed here;
+    report_halpin_tsai() below does that, so that the value can be taken at
+    import time without output appearing as a side effect.
+    """
+    return lamination_theory(v_fibre, fibre_modulus_by_volume(e_basalt, e_flax),
+                             e_matrix, xi)
+
+
 # The Halpin-Tsai baseline of the panel, derived from the inputs §3.4 states
-# rather than copied out of the text. It used to be the literal 27.1, which was
-# the figure the manuscript carried and which no convention applied to those
-# inputs reproduces: reaching it needs a fibre volume fraction of 0.646, a fibre
-# modulus of 69.6 GPa or a matrix modulus of 1.45 GPa in place of the values the
-# paper states. §3.4 now prints 27.2, which is what the line below rounds to, so
-# the bar and the sentence come from one calculation.
+# rather than copied out of the text. It used to be the literal 27.1, which no
+# convention applied to those inputs reproduces; then 27.23 from the plain mean
+# of the two fibre moduli, while §4.2 implied 26.25 for the same panel from a
+# volume-weighted fibre modulus at densities the paper had stopped using. The
+# line below is now the only source of the value, the bar and both sentences
+# come from it, and it rounds to the figure §3.4 prints.
 TABULATED_HT = halpin_tsai_balanced()[2]
 
 
@@ -111,10 +134,13 @@ def report_halpin_tsai(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
     """
     longitudinal, transverse, balanced = halpin_tsai_balanced(
         e_basalt, e_flax, e_matrix, v_fibre, xi)
-    e_fibre = 0.5 * (e_basalt + e_flax)
+    e_fibre = fibre_modulus_by_volume(e_basalt, e_flax)
+    vb = areal_mass_fractions.basalt_share_of_fibre_volume()
     print(f"  Halpin-Tsai inputs: basalt {e_basalt:.1f}, flax {e_flax:.1f}, "
-          f"fibre mean {e_fibre:.1f}, matrix {e_matrix:.2f} GPa, "
-          f"v_fibre {v_fibre:.3f}, xi {xi:.1f}")
+          f"fibre by volume {e_fibre:.2f} (basalt {vb:.4f} of the fibre "
+          f"volume at {areal_mass_fractions.RHO_BASALT_G_PER_CM3:.2f} and "
+          f"{areal_mass_fractions.RHO_FLAX_G_PER_CM3:.2f} g/cm3), "
+          f"matrix {e_matrix:.2f} GPa, v_fibre {v_fibre:.3f}, xi {xi:.1f}")
     print(f"  longitudinal {longitudinal:.2f}, transverse {transverse:.2f}, "
           f"balanced 0/90 average {balanced:.2f} GPa, which is the "
           f"{balanced:.1f} GPa of §3.4")

@@ -21,9 +21,12 @@ per-indent tables are where this deposit starts.
 Two disagreements that earlier versions of this docstring recorded as open are
 now closed, and are named here because the values moved. The Halpin-Tsai
 baseline of Figure 8 was the literal 27.1 GPa in `fig08_rom.py`, with nothing
-behind it; that script now derives it from the inputs §3.4 states, §3.4 prints
-27.2, and the derivation is checked below like any other published value.
-Supplementary Table S8's elementary-fibre axial modulus and
+behind it; then 27.23 derived from the plain mean of the two tabulated fibre
+moduli, while §4.2 normalised the same panel by 26.25 from a volume-weighted
+fibre modulus at a density pair the paper had stopped using. There is one route
+now, `fig08_rom.lamination_theory`, with the fibre moduli combined by volume at
+the densities §3.4 states, and it gives 26.28 GPa; §3.4, Figure 8 and §4.2 are
+all checked against it below. Supplementary Table S8's elementary-fibre axial modulus and
 `rule_of_mixtures.FLAX_INPUTS` disagreed at 45.30 against 52.47 GPa for the same
 row; the cited paper measures 45.3 GPa and quotes 52.47 from earlier work in its
 own introduction, so the table was right and the list now carries 45.30 too.
@@ -66,19 +69,29 @@ Supplementary Table S3 rounds to two decimals. Differencing them before they are
 rounded gives 0.190, and the tolerance is back to 0.005.
 
 Six blocks of printed values had no check at all and now have one: the areal-mass
-route to the volume fractions, whose densities the manuscript does not print and
-which `areal_mass_fractions.py` therefore has to infer and say so; the exclusion
+route to the volume fractions, whose densities 3.4 now states; the exclusion
 test in the Supplementary Figure S3 caption; the spacing test of 2.2 with the
 contact depths of Table 1; the per-class strain-rate sensitivity; the two ASTM
 D790 departures of 2.5 with the rate bound that follows from them; and the
-Timoshenko bracket of 4.3.5.
+Timoshenko bracket of 4.3.5, which reproduces now that the paragraph states its
+shear coefficient and its inversion.
 
-And three groups of printed values are declared at the end as not reproducible
+Four more routes were added in the third round, for printed values that had
+none: the 0.55 and 0.67 of 4.1, a Hill inversion of the two mixed-volume medians
+on the shallow end members; the +/- 1.1 and +/- 3.2 on the imaged fibre fractions
+of Figure 2e, from the field-to-field scatter of the tiles; the 0.72 and 0.75 of
+4.2 with the 1.44 x 1.41 decomposition, now on the same lamination-theory route
+as the Figure 8 baseline; and the block-size sweep of the budget in both of its
+forms, since the Table S5 caption named one as the other. The sliding-window
+checks of 2.4 hold the product to the corrected sweep, which for two rounds ran
+with the map's footprint transposed.
+
+And two groups of printed values are declared at the end as not reproducible
 from what is deposited, rather than passed over in silence: the void-threshold
-range of 3.4, the two figures Supplementary Table S3 carries from the superseded
-quality mask, and the Timoshenko bracket of 4.3.5 to the digit. Declaring them is
-the point. A reader should not have to discover the boundary of the deposit by
-looking for a check that is not there.
+range of 3.4 and the two figures Supplementary Table S3 carries from the
+superseded quality mask. Declaring them is the point. A reader should not have
+to discover the boundary of the deposit by looking for a check that is not
+there.
 """
 
 import json
@@ -434,25 +447,58 @@ report("95 % interval from the draws, low",
        budget["percentile_95_interval_GPa"][0], 15.78, 0.005)
 report("95 % interval from the draws, high",
        budget["percentile_95_interval_GPa"][1], 21.34, 0.005)
-report("u at a 10 um resampling block",
-       budget["block_size_sensitivity_sd_GPa"]["2"], 1.21, 0.005)
-report("u at a 41 um resampling block",
-       budget["block_size_sensitivity_sd_GPa"]["8"], 1.68, 0.005)
+# The block sweep is 1000 draws per width and its values are the joint sampling
+# term alone; the Table S5 caption quoted 1.21 and 1.68 as "the combined value",
+# which they are not. The combined form is the sweep value in quadrature with the
+# two Type B terms. Both forms are checked, so that the caption can print either
+# correctly named; the combined ones are held to values the page does not yet
+# carry.
+_type_b_sq = sum(v ** 2 for v in budget["type_b_sd_GPa"].values())
+for cols, um, alone, combined in (("2", 10, 1.21, 1.23), ("4", 20, 1.38, 1.41),
+                                  ("8", 41, 1.68, 1.70)):
+    sampled = budget["block_size_sensitivity_sd_GPa"][cols]
+    report(f"sampling term alone at a {um} um block, 1000 draws", sampled,
+           alone, 0.005)
+    report(f"with the Type B terms in quadrature, {um} um block",
+           (sampled ** 2 + _type_b_sq) ** 0.5, combined, 0.005)
 
 # Where the map could have sat, which is the other half of the zone-share term:
 # a window of the load-controlled map's own footprint slid over the mosaic.
 # Written by zone_share.py, read here.
+#
+# For two rounds the sweep ran with the footprint transposed, the map's 1086 um
+# lying along the plane of the section instead of through the thickness, and
+# the paper printed what it gave: 67 025 placements, 0.373 +/- 0.342, 18.72 +/-
+# 7.18 GPa. The checks below hold the product to the corrected sweep, and until
+# 2.4 and the reply are reprinted they hold it to values the page does not yet
+# carry: 29 880 placements, 0.369 +/- 0.070 and 18.65 +/- 1.46 GPa for the full
+# footprint, and for the 704 um of laminate the retained indents cover, 52 290
+# placements, 0.360 +/- 0.141 and 18.47 +/- 2.96 GPa, with the mapped window's
+# 0.497 at or above 85 % of placements.
 window = json.loads((DATA / "zone_share_sensitivity.json").read_text())
 placements = window["windows"]["load-controlled map"]
 report("placements of the load-controlled footprint on the mosaic",
-       placements["n_placements"], 67025, 0)
+       placements["n_placements"], 29880, 0)
 report("basalt-rich share over those placements, mean",
-       placements["share_mean"], 0.373, 0.0005)
+       placements["share_mean"], 0.369, 0.0005)
 report("basalt-rich share over those placements, SD",
-       placements["share_sd"], 0.342, 0.0005)
-report("estimate over those placements, mean", placements["voigt_mean"], 18.72,
+       placements["share_sd"], 0.070, 0.0005)
+report("estimate over those placements, mean", placements["voigt_mean"], 18.65,
        0.005)
-report("estimate over those placements, SD", placements["voigt_sd"], 7.18, 0.005)
+report("estimate over those placements, SD", placements["voigt_sd"], 1.46, 0.005)
+span = window["windows"]["load-controlled map, laminate span after the resin cut"]
+report("placements of the retained 704 um span on the mosaic",
+       span["n_placements"], 52290, 0)
+report("basalt-rich share over those placements, mean", span["share_mean"],
+       0.360, 0.0005)
+report("basalt-rich share over those placements, SD", span["share_sd"], 0.141,
+       0.0005)
+report("estimate over those placements, mean", span["voigt_mean"], 18.47, 0.005)
+report("estimate over those placements, SD", span["voigt_sd"], 2.96, 0.005)
+report("placements at or above the mapped window's share, per cent",
+       span["placements_at_or_above_mapped_share_pct"], 15, 0.5)
+report_same("the share those placements are ranked against",
+            span["mapped_window_share"], w_indents)
 
 print("\nthreshold sensitivity (Supplementary Table S2)")
 grid = zs.threshold_grid(raw, w_tiles)
@@ -593,8 +639,43 @@ for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.4)):
 # there was nothing to check it against. The function is imported from the figure
 # script rather than rewritten here so that the bar and this line cannot come to
 # disagree, which is how the literal survived two rounds in the first place.
-from fig08_rom import halpin_tsai_balanced as _ht               # noqa: E402
-report("Halpin-Tsai lamina, balanced 0/90 average", _ht()[2], 27.2, ROUNDED)
+# The value moved from 27.2 to 26.3 when the two fibre moduli were combined by
+# volume at the densities 3.4 states rather than by a plain mean, so that 3.4
+# and 4.2 stop giving two predictions for one panel; this line holds the deposit
+# to the new value until 3.4 and Figure 8 are reprinted.
+from fig08_rom import halpin_tsai_balanced as _ht, fibre_modulus_by_volume  # noqa: E402
+report("fibre modulus by volume at the stated densities, GPa",
+       fibre_modulus_by_volume(), 67.1, ROUNDED)
+report("Halpin-Tsai lamina, balanced 0/90 average", _ht()[2], 26.3, ROUNDED)
+
+# 4.2: each laminate normalised by its own lamination-theory prediction, and
+# the decomposition of the ratio against the prior hybrids. These six figures
+# were printed and unchecked, and the prediction behind them was a second
+# implementation with its own density pair; `reply_figures.r2_table` now calls
+# the same route as the line above. At two decimals none of the six moved when
+# the route was unified: 0.7172 and 0.7518 against the 0.7178 and 0.7525 the old
+# pair gave.
+print("\nthe normalised comparison against the prior laminates (4.2)")
+import reply_figures as _reply                                  # noqa: E402
+_rows, _ = _reply.r2_table()
+_prior = [r[4] for r in _rows if not r[5]]
+report("prior laminates, lowest share of their own prediction", min(_prior),
+       0.37, 0.005)
+report("prior laminates, highest share", max(_prior), 0.58, 0.005)
+for r in _rows:
+    if r[5]:
+        report(f"{r[0]}, share of its own prediction", r[4],
+               {"this work, basalt-long": 0.72, "this work, flax-long": 0.75}[r[0]],
+               0.005)
+_d = _reply.consolidation_decomposition(_rows)
+report("stiffer than the prior hybrids by a factor of", _d["observed"], 2.07,
+       0.005)
+report("of which, from the fibre volume fraction", _d["fibre_volume_fraction"],
+       1.44, 0.005)
+report("and from the share of the prediction realised",
+       _d["consolidation_quality"], 1.41, 0.005)
+report("their product recovers the ratio to within, per cent",
+       _d["residual_pct"], 2, 0.5)
 
 print("\nsegmentation of the mosaic (Figure 2, 3.4, Supplementary Table S6)")
 # Both files here are primary measurements: the tile statistics and the
@@ -614,13 +695,28 @@ report_internal("unmarked interface band, per cent",
 report_internal("the three mosaic zone shares, sum",
                 sum(seg["zone_area_from_mosaic_mask"].values()), 1.0, 1e-9,
                 "they partition the mosaic")
+# The intervals on the two fibre fractions are recorded in the summary file and,
+# until this round, were computed nowhere in the deposit. `imaged_intervals()`
+# in `areal_mass_fractions.py` is the recipe: per zone, the tiles that zone
+# covers by at least 5 % of their pixels, the (n - 1) standard deviation of the
+# in-zone fibre fraction over them, 1.96 standard errors, times the zone's share
+# of the marked mosaic from the mask. The recorded value is held to the live one
+# first, then the page to the recorded one.
+_ci_live = _am.imaged_intervals()
 for cls, published, ci in (("basalt", 24.4, 1.1), ("flax", 39.5, 3.2),
                            ("matrix", 36.1, None)):
     report(f"volume fraction, {cls}", 100 * seg["volume_fraction"][cls],
            published, 0.05)
     if ci is not None:
+        report_same(f"recorded interval against the recipe, {cls}",
+                    seg["ci_95_on_the_mean_pct"][cls],
+                    _ci_live[cls]["half_width_pct"])
         report(f"its 95 % interval on the mean, {cls}",
                seg["ci_95_on_the_mean_pct"][cls], ci, 0.05)
+report_internal("tiles behind the basalt interval", _ci_live["basalt"]["n_tiles"],
+                72, 0, "the tiles the basalt zone covers by 5 % or more")
+report_internal("tiles behind the flax interval", _ci_live["flax"]["n_tiles"],
+                88, 0, "the tiles the flax zone covers by 5 % or more")
 report("fibre volume fraction, measured",
        seg["volume_fraction"]["basalt"] + seg["volume_fraction"]["flax"],
        0.639, 0.0005)
@@ -629,18 +725,16 @@ report("basalt packing inside its own zone",
        0.0005)
 
 # The second route to the same fractions, from the fabric specification, which
-# 3.4, the Figure 2e caption, 4.3.7 and the Conclusions all report and which
+# 3.4, the Figure 2e caption, 4.3.3 and the Conclusions all report and which
 # nothing in this deposit computed until `areal_mass_fractions.py` was written.
 # The agreement, 2.2 percentage points, is quoted in all four places and is the
 # worst of the three phase differences, so it is checked as the maximum it is
 # rather than phase by phase.
 #
-# The densities that route needs are not printed anywhere in the paper. They are
-# inferred in that script from the four values the route is printed as giving, and
-# the script says so and reports what the other density pair in this deposit would
-# give instead. Nothing here is fitted: two densities are fixed by four published
-# figures, and the manuscript has to state the pair it used.
-print("\nthe areal-mass route to the same fractions (3.4, Figure 2e, 4.3.7)")
+# The densities that route needs, 2.70 and 1.50 g/cm3, went unprinted for two
+# rounds and had to be inferred from the four fractions; 3.4 now states them as
+# the nominal datasheet values, and the script reads them as inputs.
+print("\nthe areal-mass route to the same fractions (3.4, Figure 2e, 4.3.3)")
 _calc = _am.fractions()
 _diffs, _worst = _am.agreement(_calc, _am.imaged())
 for cls, pct in (("basalt", 23.2), ("flax", 41.7), ("matrix", 35.1)):
@@ -738,6 +832,24 @@ report("mixed-volume share of the basalt zone, load-controlled",
        100 * acq["shallow"]["mixed_class_fraction"], 55, 0.5)
 report("mixed-volume share of the basalt zone, depth-resolved",
        100 * acq["depth"]["mixed_class_fraction"], 41, 0.5)
+# The two fibre fractions 4.1 and 2.3 print for the mixed-volume contact, 0.55
+# and 0.67, which had no route in the deposit. They are the Hill inversion: the
+# class median placed on the arithmetic mean of the Voigt and Reuss curves
+# between the two shallow end members, 86.0 and 4.66 GPa, and solved for the
+# basalt fraction. Both medians are inverted on the shallow end members. The
+# same medians on the linear form give 0.31 and 0.38 and on the compliance form
+# 0.89 and 0.92, so the printed pair holds under this convention alone.
+from mixed_class_deconvolution import hill_fraction as _hill      # noqa: E402
+_e_b = float(tab.loc[tab["class"] == "basalt", "E_median_GPa"].iloc[0])
+_e_m = float(tab.loc[tab["class"] == "matrix", "E_median_GPa"].iloc[0])
+_mixed_depth = float(_dr_all.loc[_dr_all.constituent == "mixed-volume",
+                                 "E_150"].median())
+_mixed_shallow = float(tab.loc[tab["class"] == "mixed-volume",
+                               "E_median_GPa"].iloc[0])
+report("fibre fraction in the mixed-volume contact, depth-resolved (Hill)",
+       _hill(_mixed_depth, _e_b, _e_m), 0.55, 0.005)
+report("fibre fraction in the mixed-volume contact, load-controlled (Hill)",
+       _hill(_mixed_shallow, _e_b, _e_m), 0.67, 0.005)
 
 print("\nunsupervised cross-check")
 dr = pd.read_csv(DATA / "classified_depth_resolved.csv")
@@ -878,10 +990,9 @@ print("\nTimoshenko shear correction (4.3.5)")
 # deposit measures it, so these four lines are checks on arithmetic over an
 # assumption rather than on a measurement. They are reported as published values
 # because the bracket and the widened gaps are printed, and the assumption they
-# rest on is printed beside them. What is not printed is the shear coefficient,
-# and the bracket cannot be reproduced without it: the value used here, 6/5 for a
-# rectangular section, is stated in `flexural_corrections.py` and the manuscript
-# should state it too.
+# rest on is printed beside them, as are the shear coefficient, 6/5 for a
+# rectangular section, and the exact inversion, both of which 4.3.5 now states
+# and for two rounds did not.
 _means = _flex.measured_means()
 _low, _high = _flex.bracket(_means)
 report("correction at the stiff end of the assumed shear modulus", _low, 3, 0.5)
@@ -901,9 +1012,7 @@ report("widened gap at the printed high end",
 # left out, because the absence of a check is invisible and this deposit's whole
 # claim is that a reader does not have to take anything on trust. Each line says
 # what is missing and where the missing thing is.
-print("\nprinted values this deposit cannot reproduce: four of them, and one "
-      "bracket it can\nreproduce only under an assumption the paper does not "
-      "state")
+print("\nprinted values this deposit cannot reproduce: four of them")
 for where, what, why in [
     ("3.4", "dark-feature area from 12.9 % to 2.7 % across the threshold range",
      "computed on the backscattered-electron pixels, which are several gigabytes "
@@ -916,13 +1025,7 @@ for where, what, why in [
      "phase-angle values reproduces that set, and `phase_angle_sensitivity.py` "
      "carries both as recorded values. The two lines above that compare them "
      "against the table confirm the transcription and not the measurement"),
-    ("4.3.5", "the 3 to 7 % Timoshenko bracket, to the digit",
-     "the through-thickness shear modulus is assumed rather than measured, and "
-     "the shear coefficient is not stated. The checks above use 6/5 for a "
-     "rectangular section and the exact inversion, which gives 3.0 to 6.6 %; the "
-     "first-order form would give 2.9 to 6.2 % and would not round to the "
-     "printed bracket"),
-]:
+    ]:
     print(f"  [--  ] {where}: {what}")
     print(f"         {why}")
 

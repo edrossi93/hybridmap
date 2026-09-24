@@ -35,6 +35,24 @@ the map's own footprint over the mosaic.
 The class medians are held fixed throughout. Only the zone share moves, which
 is what isolates the term.
 
+The sliding window was swept with its footprint transposed for two rounds, and
+the numbers it printed were wrong. The map's long axis, 1086 um, runs through
+the laminate thickness (2.2), which in the mosaic is the vertical direction, the
+rows of the mask. `WINDOWS` used to be written long x short and `sliding` read
+that as width x height, so the 1086 um lay along the plane of the section and
+the 98 um through the thickness: a thin strip lying along one tow instead of a
+column crossing nearly four of the sixteen plies. That window saw one zone or
+the other far more often than a real placement can, and the spread it
+reported, 0.373 +/- 0.342 in
+share and 18.72 +/- 7.18 GPa in the Voigt sum over 67 025 placements, was about
+five times what the map as it lies is worth. The footprint is now written as
+(along the thickness, in the plane) and slid that way. A third window is also
+swept: the map's own 704 um of laminate after the resin cut, since that is the
+span the retained indents cover and the indent-count share of 0.497 belongs to
+it. For each window the share of placements at or below the share that window
+saw is recorded, so that the mapped window can be placed on the distribution
+rather than only compared with its mean.
+
 Run: python zone_share.py
 """
 
@@ -52,8 +70,14 @@ from hybridmap.mixtures import bounds                          # noqa: E402
 DATA = Path(__file__).resolve().parent.parent / "data"
 CLASSES = ["flax", "matrix", "mixed-volume", "basalt"]
 
-# Footprints of the two acquisitions, long x short in micrometres (Table 1).
+# Footprints in micrometres, written (along the thickness, in the plane). Both
+# maps have their long axis through the thickness (2.2, Table 1), and in the
+# mosaic the thickness is vertical, so the first number is slid down the rows
+# of the mask and the second across its columns. The third entry is the part of
+# the load-controlled map that lies on the laminate once the resin is cut away,
+# about 704 x 98 um (3.1); it is the span whose indent counts give the 0.497.
 WINDOWS = {"load-controlled map": (1086, 98),
+           "load-controlled map, laminate span after the resin cut": (704, 98),
            "depth-resolved map": (297, 57)}
 
 STRIDE_PX = 8          # a sliding step below the fibre diameter
@@ -103,13 +127,19 @@ def at_share(per_zone, medians, w_basalt):
     return f, bounds(pd.Series(f), pd.Series(E))
 
 
-def sliding(mask, um_px, width_um, height_um, stride=STRIDE_PX):
+def sliding(mask, um_px, thickness_um, in_plane_um, stride=STRIDE_PX):
     """Basalt share of the marked area for every placement of one window.
+
+    `thickness_um` is the extent down the rows of the mask, which is the
+    through-thickness direction of the mosaic; `in_plane_um` is the extent
+    across its columns. The two arguments are named for the direction rather
+    than called width and height, because a width and a height are what let the
+    footprint go in transposed.
 
     Summed-area tables rather than a loop over pixels: the mosaic is six
     million pixels and there are tens of thousands of placements.
     """
-    h, w = int(round(height_um / um_px)), int(round(width_um / um_px))
+    h, w = int(round(thickness_um / um_px)), int(round(in_plane_um / um_px))
     tables = [np.pad((mask == v).astype(np.int64), ((1, 0), (1, 0)))
               .cumsum(0).cumsum(1) for v in (2, 1)]
     H, W = mask.shape
@@ -121,6 +151,18 @@ def sliding(mask, um_px, width_um, height_um, stride=STRIDE_PX):
             if b + f:
                 out.append(b / (b + f))
     return np.array(out)
+
+
+def depth_resolved_share():
+    """The basalt-rich share of the depth-resolved strip, by indent count.
+
+    The strip crosses three bands, flax, basalt, flax, so its basalt-rich
+    share is the width of the centre band: 600 of the 2000 indents. It is the
+    value the depth-resolved window is placed at on its own distribution below,
+    as the load-controlled window is placed at 0.497 on its.
+    """
+    d = pd.read_csv(DATA / "classified_depth_resolved.csv")
+    return float((d.zone == "basalt-centre").mean())
 
 
 def tile_share():
@@ -189,24 +231,49 @@ def main():
               f"Voigt {V:7.4f}  Hill {H:7.4f}  Reuss {R:6.4f}")
 
     print()
+    print("  windows of each acquisition's footprint slid over the mosaic, the "
+          "long axis through the thickness")
+    # The share each window actually saw, by indent count, so that the window
+    # can be placed on the distribution of where it could have sat.
+    w_depth = depth_resolved_share()
+    mapped = {"load-controlled map": w_indents,
+              "load-controlled map, laminate span after the resin cut":
+                  w_indents,
+              "depth-resolved map": w_depth}
     out = {"w_basalt_indent_counts": w_indents,
            "w_basalt_mosaic": w_mosaic,
            "w_basalt_downsampled_mask": w_mask,
+           "w_basalt_depth_resolved_strip": w_depth,
            "windows": {}}
-    for name, (width_um, height_um) in WINDOWS.items():
-        s = sliding(mask, um_px, width_um, height_um)
+    for name, (thickness_um, in_plane_um) in WINDOWS.items():
+        s = sliding(mask, um_px, thickness_um, in_plane_um)
         v = np.array([at_share(per_zone, medians, x)[1][0] for x in s])
+        # Where the mapped window sits on the distribution of placements: the
+        # share of placements at or below the share it saw, and the share at
+        # or above it, both as percentages.
+        seen = mapped[name]
+        below = 100 * float((s <= seen).mean())
+        above = 100 * float((s >= seen).mean())
         out["windows"][name] = {
-            "footprint_um": [width_um, height_um],
+            "footprint_um_along_thickness_by_in_plane":
+                [thickness_um, in_plane_um],
             "n_placements": int(s.size),
             "share_mean": float(s.mean()), "share_sd": float(s.std()),
             "voigt_mean": float(v.mean()), "voigt_sd": float(v.std()),
             "voigt_percentiles_5_25_50_75_95":
-                [float(x) for x in np.percentile(v, [5, 25, 50, 75, 95])]}
-        print(f"  {name}: {s.size} placements of {width_um} x {height_um} um")
+                [float(x) for x in np.percentile(v, [5, 25, 50, 75, 95])],
+            "mapped_window_share": seen,
+            "placements_at_or_below_mapped_share_pct": below,
+            "placements_at_or_above_mapped_share_pct": above}
+        print(f"  {name}: {s.size} placements of {thickness_um} um through "
+              f"the thickness x {in_plane_um} um in the plane")
         print(f"    basalt share  mean {s.mean():.3f}  sd {s.std():.3f}")
         print(f"    Voigt sum     mean {v.mean():.2f}  sd {v.std():.2f}"
-              f"  GPa, 5-95 % {np.percentile(v, 5):.2f} to {np.percentile(v, 95):.2f}")
+              f"  GPa, 5-95 % {np.percentile(v, 5):.2f} to "
+              f"{np.percentile(v, 95):.2f}")
+        print(f"    the share this window saw, {seen:.3f}: "
+              f"{below:.1f} % of placements at or below it, "
+              f"{above:.1f} % at or above it")
 
     (DATA / "zone_share_sensitivity.json").write_text(
         json.dumps(out, indent=2) + "\n")
