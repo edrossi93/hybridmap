@@ -37,7 +37,15 @@ What is computed, in the order 4.4 reads it:
   * the hardness of the same contacts between 80 and 300 nm;
   * two quantities that do not pass through the area function: S^2/P, which is
     independent of it, from 50 to 300 nm, and the contact stiffness S itself
-    between 250 and 300 nm, where the load is still rising;
+    between 250 and 300 nm, where the load is still rising. The file carries
+    two stiffness records, both exported channels: the stiffness channel, and
+    the S^2/P channel, which agrees with the exported E and H to four decimals
+    through (4/pi) Er^2/H and so carries the stiffness the instrument used
+    for the modulus. The two do not agree with each other (the dictionary
+    gives the ratio), and the step between them is not in the export. The
+    paper reads both quantities off the S^2/P channel, S being taken as the
+    square root of S^2/P times the load; the stiffness channel's own figures
+    are written beside them and are not printed;
   * and two shares that involve no classification cut at 150 nm: the share of
     the band's classified contacts above 70 GPa at 80 nm, against the share of
     the load-controlled basalt-rich zone the 70 GPa cut calls basalt.
@@ -218,6 +226,12 @@ def compute():
     s_fall = (S.loc[ids, DEEP_NM] - S.loc[ids, 250.0]).dropna()
     s_ratio = ratio(S, DEEP_NM, SELECT_AT_NM, ids)
     s_ratio_matrix = ratio(S, DEEP_NM, SELECT_AT_NM, matrix)
+    # The stiffness the S^2/P channel carries, in N/m: S = sqrt(S^2/P * P),
+    # with S^2/P in GPa = 1e9 N/m^2 and P in mN = 1e-3 N.
+    Sd = np.sqrt(S2P * 1e9 * P * 1e-3)
+    sd_fall = (Sd.loc[ids, DEEP_NM] - Sd.loc[ids, 250.0]).dropna()
+    sd_change = (Sd.loc[ids, DEEP_NM] / Sd.loc[ids, 250.0]).dropna()
+    p_change = (P.loc[ids, DEEP_NM] / P.loc[ids, 250.0]).dropna()
 
     medians = {f"{z:g}": float(E.loc[ids, z].median()) for z in DEPTHS_REPORTED}
     shallow_zone = shallow[shallow.zone == "basalt"]
@@ -271,6 +285,34 @@ def compute():
             "falling": int((s2p < 1).sum()),
         },
         "contact_stiffness_S": {
+            "note": ("the paper reads S off the S^2/P channel, as "
+                     "sqrt(S^2/P * P); the figures under 'stiffness_channel' "
+                     "are the exported stiffness channel's own and are not "
+                     "printed"),
+            "median_kN_per_m_at_250_nm": float(Sd.loc[ids, 250.0].median() / 1e3),
+            "median_kN_per_m_at_300_nm": float(Sd.loc[ids, DEEP_NM].median() / 1e3),
+            "change_of_medians_250_to_300_nm_pct": float(
+                100 * (Sd.loc[ids, DEEP_NM].median()
+                       / Sd.loc[ids, 250.0].median() - 1)),
+            "median_indent_change_250_to_300_nm_pct": float(
+                100 * (sd_change.median() - 1)),
+            "falling_250_to_300_nm": int((sd_fall < 0).sum()),
+            "n": int(len(sd_fall)),
+            "median_load_mN_at_250_nm": float(P.loc[ids, 250.0].median()),
+            "median_load_mN_at_300_nm": float(P.loc[ids, DEEP_NM].median()),
+            "load_change_of_medians_250_to_300_nm_pct": float(
+                100 * (P.loc[ids, DEEP_NM].median()
+                       / P.loc[ids, 250.0].median() - 1)),
+            "S300_over_S80_median_selected": float(
+                (Sd.loc[ids, DEEP_NM] / Sd.loc[ids, SELECT_AT_NM]).median()),
+            "S300_over_S80_median_matrix": float(
+                (Sd.loc[matrix, DEEP_NM] / Sd.loc[matrix, SELECT_AT_NM])
+                .dropna().median()),
+            "n_matrix": int((Sd.loc[matrix, DEEP_NM]
+                             / Sd.loc[matrix, SELECT_AT_NM]).dropna().shape[0]),
+        },
+        "stiffness_channel": {
+            "note": "the exported stiffness channel, for the record; not printed",
             "median_kN_per_m_at_250_nm": float(S.loc[ids, 250.0].median() / 1e3),
             "median_kN_per_m_at_300_nm": float(S.loc[ids, DEEP_NM].median() / 1e3),
             "falling_250_to_300_nm": int((s_fall < 0).sum()),
@@ -344,14 +386,20 @@ def main():
           f"{s2['median_ratio_300_over_50']:.2f}, falling on "
           f"{s2['falling']} of {s2['n_with_both']}")
     s = out["contact_stiffness_S"]
-    print(f"  S: {s['median_kN_per_m_at_250_nm']:.1f} to "
-          f"{s['median_kN_per_m_at_300_nm']:.1f} kN/m from 250 to 300 nm, "
-          f"falling on {s['falling_250_to_300_nm']} of {s['n']}, while the "
+    print(f"  S from the S^2/P channel: {s['median_kN_per_m_at_250_nm']:.1f} to "
+          f"{s['median_kN_per_m_at_300_nm']:.1f} kN/m from 250 to 300 nm "
+          f"({s['change_of_medians_250_to_300_nm_pct']:+.1f} % on the medians, "
+          f"falling on {s['falling_250_to_300_nm']} of {s['n']}), while the "
           f"load rises {s['median_load_mN_at_250_nm']:.1f} to "
-          f"{s['median_load_mN_at_300_nm']:.1f} mN; S(300)/S(80) "
-          f"{s['S300_over_S80_median_selected']:.2f} against "
+          f"{s['median_load_mN_at_300_nm']:.1f} mN "
+          f"({s['load_change_of_medians_250_to_300_nm_pct']:+.0f} %); "
+          f"S(300)/S(80) {s['S300_over_S80_median_selected']:.2f} against "
           f"{s['S300_over_S80_median_matrix']:.2f} for the {s['n_matrix']} "
           f"matrix contacts")
+    sc = out["stiffness_channel"]
+    print(f"  the stiffness channel itself: {sc['median_kN_per_m_at_250_nm']:.1f} "
+          f"to {sc['median_kN_per_m_at_300_nm']:.1f} kN/m, falling on "
+          f"{sc['falling_250_to_300_nm']} of {sc['n']} (not printed)")
     cf = out["cut_free_shares"]
     a, b = (cf["depth_resolved_above_70_GPa_at_80_nm"],
             cf["load_controlled_basalt_class"])

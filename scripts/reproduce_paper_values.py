@@ -753,11 +753,9 @@ tabulated = _dec.voigt(E_tab, f_nominal)
 report("Voigt sum, tabulated moduli and nominal fractions", tabulated, 35.8, 0.05)
 for cfg, published in (("basalt_face", 47.3), ("flax_face", 44.7)):
     report(f"that sum overshoots {cfg} by", gap(tabulated, cfg), published, 0.05)
-# The same comparison with the measurement as the denominator. Both sentences of
-# 3.4 use one denominator each, so both are checked.
-for cfg, published in (("basalt_face", 89.7), ("flax_face", 80.9)):
-    report(f"overshoot on the measured denominator, {cfg}",
-           100 * (tabulated - measured[cfg]) / measured[cfg], published, 0.05)
+# The same comparison with the measurement as the denominator, 89.7 % and
+# 80.9 %, was printed by 3.4 until this round and was checked here. The
+# sentence is gone and so is the check.
 # What the tabulated route leaves open: the same fractions with the constituent
 # moduli anywhere inside the ranges the Introduction cites.
 for label, basalt, flax, published in (("low", 70.0, 40.0, 28.3),
@@ -786,8 +784,9 @@ for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.4)):
 # and 4.2 stop giving two predictions for one panel; this line holds the deposit
 # to the new value until 3.4 and Figure 8 are reprinted.
 from fig08_rom import halpin_tsai_balanced as _ht, fibre_modulus_by_volume  # noqa: E402
-report("fibre modulus by volume at the stated densities, GPa",
-       fibre_modulus_by_volume(), 67.1, ROUNDED)
+report_internal("fibre modulus by volume at the stated densities, GPa",
+                fibre_modulus_by_volume(), 67.1, ROUNDED,
+                "behind the 26.3 GPa below; not printed")
 report("Halpin-Tsai lamina, balanced 0/90 average", _ht()[2], 26.3, ROUNDED)
 
 # 4.2: each laminate normalised by its own lamination-theory prediction, and
@@ -1255,11 +1254,15 @@ report("their median E at 300 nm, GPa", _ez["300"], 44.3, ROUNDED)
 _r = _soften["E300_over_E80"]
 report("E(300)/E(80), every one softer at 300 nm, per cent",
        _r["softening_pct"], 100, 0)
-report("softer by half or more", _r["at_or_below_half"], 33, 0)
-report("E(300)/E(80), lowest", _r["min"], 0.33, 0.0051)
-report("E(300)/E(80), highest", _r["max"], 0.78, 0.0051)
+report_internal("softer by half or more", _r["at_or_below_half"], 33, 0,
+                "the median ratio is 0.48; the count is not printed")
+report_internal("E(300)/E(80), lowest", _r["min"], 0.33, 0.0051,
+                "the range behind '100 % softening'; not printed")
+report_internal("E(300)/E(80), highest", _r["max"], 0.78, 0.0051,
+                "as above; not printed")
 report("E(300)/E(80), median", _r["median"], 0.48, 0.0051)
-report("the median falls by, per cent", _r["median_E_fall_pct"], 46, 0.5)
+report_internal("the median falls by, per cent", _r["median_E_fall_pct"], 46,
+                0.5, "82.5 to 44.3 GPa, printed as the two medians")
 _bands_printed = ((60, 0.48, 100), (175, 0.56, 97), (162, 0.82, 69),
                   (137, 1.30, 41))
 for band, (n, ratio, pct) in zip(_soften["bands_by_E80_over_classified"],
@@ -1276,12 +1279,14 @@ _called = _soften["called_basalt_at_150_nm"]
 report("contacts called basalt at 150 nm", _called["n"], 193, 0)
 report("of them softer at 300 than at 80 nm, per cent",
        _called["E300_over_E80"]["softening_pct"], 88, 0.5)
-report("their median E(300)/E(150)", _called["E300_over_E150"]["median"], 0.70,
-       0.0051)
+report_internal("their median E(300)/E(150)",
+                _called["E300_over_E150"]["median"], 0.70, 0.0051,
+                "behind the 96 %; not printed")
 report("of them softer at 300 than at 150 nm, per cent",
        _called["E300_over_E150"]["softening_pct"], 96, 0.5)
-report("the sixty, median E(300)/E(150)", _soften["E300_over_E150"]["median"],
-       0.63, 0.0051)
+report_internal("the sixty, median E(300)/E(150)",
+                _soften["E300_over_E150"]["median"], 0.63, 0.0051,
+                "not printed")
 _dist = _soften["distance_to_nearest_compliant_contact"]
 report("grid pitch, um", _dist["pitch_um"], 3, ROUNDED)
 report("distance to the nearest sub-15 GPa contact, shortest, um",
@@ -1309,30 +1314,45 @@ report("contacts whose hardness is lower at 300 nm", _h["lower_at_300"], 52, 0)
 _s2p = _soften["S2_over_P"]
 report("S^2/P, median at 50 nm, GPa", _s2p["median_GPa_at_50_nm"], 2396, 0.51)
 report("S^2/P, median at 300 nm, GPa", _s2p["median_GPa_at_300_nm"], 754, 0.51)
-report("S^2/P, median ratio 300 over 50", _s2p["median_ratio_300_over_50"],
-       0.31, 0.0051)
+report_internal("S^2/P, median ratio 300 over 50",
+                _s2p["median_ratio_300_over_50"], 0.31, 0.0051,
+                "printed as 'a factor of three'")
+report_below("S^2/P, ratio of the medians, under a third",
+             _s2p["ratio_of_medians"], 1 / 3)
 report("contacts on which S^2/P falls", _s2p["falling"], 59, 0)
 report("contacts with S^2/P at both depths", _s2p["n_with_both"], 59, 0)
+# The contact stiffness 4.4 prints is read off the S^2/P channel, as
+# sqrt(S^2/P * P), so that the sentence and the S^2/P sentence before it rest
+# on one stiffness record. The exported stiffness channel is a second record
+# that does not agree with it (DATA_DICTIONARY.md, depth_resolved_curves.csv);
+# its figures are in the JSON under 'stiffness_channel' and are not printed.
 _s = _soften["contact_stiffness_S"]
-report("S, median at 250 nm, kN/m", _s["median_kN_per_m_at_250_nm"], 71.7,
+report("S, median at 250 nm, kN/m", _s["median_kN_per_m_at_250_nm"], 68.9,
        ROUNDED)
-report("S, median at 300 nm, kN/m", _s["median_kN_per_m_at_300_nm"], 69.7,
+report("S, median at 300 nm, kN/m", _s["median_kN_per_m_at_300_nm"], 70.0,
        ROUNDED)
-report("contacts on which S falls from 250 to 300 nm",
-       _s["falling_250_to_300_nm"], 48, 0)
+report_below("S, change of the medians 250 to 300 nm, under 2 per cent",
+             abs(_s["change_of_medians_250_to_300_nm_pct"]), 2)
 report("load, median at 250 nm, mN", _s["median_load_mN_at_250_nm"], 5.2,
        ROUNDED)
 report("load, median at 300 nm, mN", _s["median_load_mN_at_300_nm"], 6.4,
        ROUNDED)
-report("S(300)/S(80), median on the sixty", _s["S300_over_S80_median_selected"],
-       1.49, 0.0051)
-report("S(300)/S(80), median on the matrix contacts",
-       _s["S300_over_S80_median_matrix"], 3.00, 0.0051)
+report("load, rise of the medians 250 to 300 nm, per cent",
+       _s["load_change_of_medians_250_to_300_nm_pct"], 23, 0.5)
+report_internal("S(300)/S(80), median on the sixty",
+                _s["S300_over_S80_median_selected"], 1.56, 0.0051,
+                "not printed")
+report_internal("S(300)/S(80), median on the matrix contacts",
+                _s["S300_over_S80_median_matrix"], 3.05, 0.0051,
+                "not printed")
+report_internal("the stiffness channel, contacts falling 250 to 300 nm",
+                _soften["stiffness_channel"]["falling_250_to_300_nm"], 48, 0,
+                "the other record; not printed")
 _share = _soften["cut_free_shares"]
 report("share above 70 GPa at 80 nm, basalt-centre, per cent",
-       _share["depth_resolved_above_70_GPa_at_80_nm"]["pct"], 11.2, ROUNDED)
+       _share["depth_resolved_above_70_GPa_at_80_nm"]["pct"], 11, 0.5)
 report("basalt class of the load-controlled basalt-rich zone, per cent",
-       _share["load_controlled_basalt_class"]["pct"], 12.3, ROUNDED)
+       _share["load_controlled_basalt_class"]["pct"], 12, 0.5)
 report_same("that share's numerator, against the count above",
             _share["load_controlled_basalt_class"]["n"],
             int(cross.loc["basalt", "basalt"]))

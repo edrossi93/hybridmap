@@ -46,7 +46,7 @@ landed on the embedding resin.
 | `Er_GPa` | GPa | 0.03–145 | reduced modulus, Oliver–Pharr, 2 blanks |
 | `E_GPa` | GPa | 0.03–152 | indentation modulus at ν = 0.30, 2 blanks |
 | `H_GPa` | GPa | 0–13.3 | hardness, 2 blanks |
-| `S2_over_P_GPa` | GPa | 16–5654 | S²/P, a load-independent stiffness measure |
+| `S2_over_P_GPa` | GPa | 16–5654 | the exported S²/P channel, which does not pass through the area function; equal to (4/π) Er²/H of the two columns above to four decimals, and not to the square of `stiffness_N_per_m` over the load (see the note under `depth_resolved_curves.csv`) |
 
 ## `classified_shallow.csv` - 5553 rows
 
@@ -74,10 +74,12 @@ from 50 to 300 nm, roughly 51 points each.
 | `indent_id` | - | 1–2000 | |
 | `depth_nm` | nm | 50–300 | the resampled grid |
 | `load_mN` | mN | 0–14.4 | |
-| `stiffness_N_per_m` | N m⁻¹ | −1198 to 137900 | 30 blanks; negatives are fit failures near the surface |
+| `stiffness_N_per_m` | N m⁻¹ | −1198 to 137900 | the exported stiffness channel; 30 blanks; negatives are fit failures near the surface. See the note on the two stiffness records below |
 | `E_GPa`, `H_GPa` | GPa | −218 to 267, −0.01 to 28 | unfiltered, so early-depth artefacts are present and negative values occur |
 | `phase_angle_deg` | ° | −90 to 88 | |
-| `S2_over_P_GPa` | GPa | −1738 to 2.1×10⁶ | |
+| `S2_over_P_GPa` | GPa | −1738 to 2.1×10⁶ | the exported S²/P channel, which does not pass through the area function. See the note below |
+
+**Two stiffness records.** `stiffness_N_per_m` and `S2_over_P_GPa` are both channels of the export, and they do not agree with each other. The S²/P channel agrees with the exported modulus and hardness through the identity S²/P = (4/π) Er²/H, to four decimals on every indent of `shallow_map.csv` (there the same relation holds between the same three columns), so it carries the stiffness the instrument used for the modulus. The stiffness channel squared over the load runs above it in this file, by 13 % in the median with no trend in depth, and on the sixty stiff contacts of §4.4 by 11 % at 50 nm falling to 1 % below it at 300 nm; in `shallow_map.csv` the same quotient, on the peak load, runs 6 % below the S²/P channel. The step the software takes between the two is not in the export and is not guessed at here. Everything the paper prints from a stiffness, the S²/P medians of §4.4 and the contact stiffness quoted beside them, is read off the S²/P channel, the stiffness being taken as the square root of S²/P times the load; `scripts/depth_softening.py` computes it that way and writes the stiffness channel's own figures beside it, unprinted, in `depth_softening.json`.
 
 **Nothing here is quality-filtered.** Use `qc_flag_strict` in
 `classified_depth_resolved.csv` to reject the 304 indents the paper excludes.

@@ -12,7 +12,7 @@
     "poisson_sensitivity.json": "8aa14920ea6553a62e6cfb25d535c72d0cc0c4fe8cd386ca15c4366b3ac77ead",
     "flexural_comparisons.json": "421ba4d3e81b076cc7f3d3ea00c99e9f9446ef468ff4faada9310087cdfe2125",
     "basalt_input_sweep.json": "f3c143b6d1210a0b92f9d2cdfd6da66362e6faf20a9c71283e6a1779c32417df",
-    "depth_softening.json": "03472d1f9f0721b01a94db8ddc24da31d1d49c4313ed4b5ee5ed9592c240161c"
+    "depth_softening.json": "51c371e8fce71e57d4e73593bd6aa11d0123e49a11fe76d913a7903c13c683f1"
   },
   "primary": {
     "shallow_map.csv": "01d3fa536b400f2201afca8207e86926c6a4605cc0198cfbdadaccc5fee24976",
@@ -23,7 +23,7 @@
     "bse_segmentation_summary.json": "26d8fea9afd2695560ff6ac789be359394fc5ae67c2dede26c5ddbc5b56d1400",
     "zone_mask_rle.json": "d315b4085b9855b52084cafd22560f96692e5c5bd06cbf356854c33ea75e9b34",
     "bse_validation_metrics.json": "6fa1683607ecd44d1f9069057d38ea92190c1daea39249e3024bf2eb2a8e4aa3",
-    "DATA_DICTIONARY.md": "df526e691f3788f149e652475593ebc0274af6bdecdae21b7f261202b01bcbd7",
+    "DATA_DICTIONARY.md": "6e45355d31caf397912d1e910ead5fc97dfd30cb1b971dadea319e37d0191885",
     "LICENSE": "230ca33bbb6f23e98cfdb831d5d45e277cc64160a7ae046c6ca91609c3adfbe4"
   }
 }

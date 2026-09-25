@@ -184,6 +184,22 @@
     "falling": 59
   },
   "contact_stiffness_S": {
+    "note": "the paper reads S off the S^2/P channel, as sqrt(S^2/P * P); the figures under 'stiffness_channel' are the exported stiffness channel's own and are not printed",
+    "median_kN_per_m_at_250_nm": 68.89375419548465,
+    "median_kN_per_m_at_300_nm": 70.03360165179207,
+    "change_of_medians_250_to_300_nm_pct": 1.6545004255002826,
+    "median_indent_change_250_to_300_nm_pct": -0.8612245705324817,
+    "falling_250_to_300_nm": 33,
+    "n": 60,
+    "median_load_mN_at_250_nm": 5.23055,
+    "median_load_mN_at_300_nm": 6.4231,
+    "load_change_of_medians_250_to_300_nm_pct": 22.79970557589546,
+    "S300_over_S80_median_selected": 1.564300791265862,
+    "S300_over_S80_median_matrix": 3.048083464359048,
+    "n_matrix": 124
+  },
+  "stiffness_channel": {
+    "note": "the exported stiffness channel, for the record; not printed",
     "median_kN_per_m_at_250_nm": 71.66642645,
     "median_kN_per_m_at_300_nm": 69.68439225,
     "falling_250_to_300_nm": 48,

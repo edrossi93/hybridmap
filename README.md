@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `447 of 447 values reproduce`. The line above it reports twenty-three internal consistency checks, counted separately because they hold the deposit against itself rather than against the page. The block above that names the printed values this deposit cannot reproduce.
+Expected last line: `437 of 437 values reproduce`. The line above it reports thirty-four internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
 
 Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -113,7 +113,7 @@ Thirty-two files, in three groups, plus the `hybridmap/` package and the example
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 447 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 437 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
 
 **Analysis.**
 
@@ -246,7 +246,7 @@ What that file is, stated plainly, because this section misdescribed it for one 
 
 The deposited values are not exactly regenerable from `depth_resolved_curves.csv` either. Recomputing the 140 to 160 nm window mean over the resampled 5 nm grid, five points per indent, reproduces `E_150` to a median of 0.012 GPa, at a correlation of 0.99996, but not exactly: 288 of the 1985 indents that have a value differ by more than 0.1 GPa and the largest difference is 2.3 GPa. The likely reason is that the deposited means were taken over the trace points as recorded and the curves file holds the trace after resampling; whichever it is, the file is a measurement input of this deposit, held by its hash in `PROVENANCE.json`, and not a product of the curves. On the class medians at 150 nm the recomputation gives 3.80, 5.34, 29.89 and 52.58 GPa against the deposited 3.79, 5.32, 29.76 and 53.01, the basalt class 0.8 % low and the other three within half a per cent.
 
-What the change of reading moved, with the quality mask held at the 304 rejections the paper uses and the class rule applied to each set of values: the depth-resolved basalt median from 52.76 GPa on the retired reading to 53.01 on the deposited one, flax from 3.82 to 3.79, matrix from 5.37 to 5.32 and mixed-volume from 29.70 to 29.76. The 52.76 is the figure the previous supplement's Table S3 printed at 15°. On the retired reading it is 52.76 under that table's 320-rejection mask and under the present 304 alike, and on the deposited reading it is 53.01 under both, so the move on that cell between the two supplements is the change of reading and not the change of mask. The 320 of the previous letter is reconstructed exactly: the tool's signed phase-angle rule at 15°, with the 20° allowance at 100 nm, rejects 307 on the retired phase angles, and the 13 indents with no value at 150 nm in that file were counted with them. These figures are computed against the previous deposit's file, which is not carried here, so `reproduce_paper_values.py` lists the four retired-reading medians among the values it cannot reproduce.
+What the change of reading moved, with the quality mask held at the 304 rejections the paper uses and the class rule applied to each set of values: the depth-resolved basalt median from 52.76 GPa on the retired reading to 53.01 on the deposited one, flax from 3.82 to 3.79, matrix from 5.37 to 5.32 and mixed-volume from 29.70 to 29.76. The 52.76 is the figure the previous supplement's Table S3 printed at 15°. On the retired reading it is 52.76 under that table's 320-rejection mask and under the present 304 alike, and on the deposited reading it is 53.01 under both, so the move on that cell between the two supplements is the change of reading and not the change of mask. The 320 of the previous letter is reconstructed exactly: the tool's signed phase-angle rule at 15°, which carried a second clause at 20° on the 100 nm slice that rejects nothing the first does not, rejects 307 on the retired phase angles, and the 13 indents with no value at 150 nm in that file were counted with them. These figures are computed against the previous deposit's file, which is not carried here, so `reproduce_paper_values.py` lists the four retired-reading medians among the values it cannot reproduce.
 
 The estimate the paper reports does not depend on any of this: its basalt input is the median of the load-controlled map, which carries no trace and no slices. The reading reaches the depth-resolved column of Table 3 and the alternative input of Supplementary Table S4, where the 0.26 GPa move in the basalt median is worth 0.01 GPa on the estimate built on it.
 
