@@ -493,6 +493,11 @@ def cmd_cluster(args):
           "partitions is 0.\nThis does not choose how many phases there are. "
           "It says whether a partition\nbuilt with no knowledge of the "
           "architecture lands somewhere compatible with\nthe rule that used it.")
+    if c.merge_lowest >= 2:
+        print(f"ARI* merges the {c.merge_lowest} most compliant classes on "
+              f"both sides, clusters and rule\nalike, before scoring. The "
+              f"stability line is plain ARI between the full fit and\neach "
+              f"refit; the rule takes no part in it.")
     return 0
 
 

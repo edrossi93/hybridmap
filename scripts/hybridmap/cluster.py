@@ -9,11 +9,22 @@ the rule that used it.
 ARI is chance-corrected, so the value expected for unrelated partitions is 0,
 not 1/k. That is the calibration for reading whatever number comes out.
 
-ARI* merges the `merge_lowest` most compliant clusters before comparing. A
-distance-based partition tends to split a compliant family by stiffness, and
-that split is often not the boundary the rule draws, because the mechanical
-signal cannot see it. Merging removes a distinction the data do not support.
-Set it to 0 and ARI* is just ARI again.
+ARI* merges the `merge_lowest` most compliant classes on both sides before
+comparing: the `merge_lowest` clusters with the lowest median modulus, and the
+`merge_lowest` rule classes with the lowest median modulus. A distance-based
+partition tends to split a compliant family by stiffness, and that split is
+often not the boundary the rule draws, because the mechanical signal cannot see
+it. Merging removes a distinction the data do not support. Set it to 0 and ARI*
+is just ARI again.
+
+Both sides, and not one. Until this round only the clusters were merged, while
+the rule kept its two compliant labels, so ARI* still scored the partition on a
+distinction the merge existed to remove: on the paper's map that read 0.652
+where the two-sided merge the paper describes gives 0.832. There is no matching
+step of any kind in here. ARI is invariant to how either side numbers its
+classes, so nothing has to be aligned before it is computed; the renumbering in
+`order_by_stiffness` exists so that the labels read the same way between runs,
+not because the score needs it.
 """
 
 import numpy as np
@@ -37,6 +48,26 @@ def order_by_stiffness(labels, modulus, k):
     order = np.argsort([np.nanmedian(modulus[labels == c]) for c in range(k)])
     lut = {old: new for new, old in enumerate(order)}
     return np.array([lut[l] for l in labels])
+
+
+def merge_most_compliant(labels, modulus, n):
+    """Collapse the `n` classes with the lowest median modulus into one.
+
+    The same operation on either side of the comparison: cluster indices after
+    `order_by_stiffness`, or the rule's own class names. Which classes are the
+    most compliant is read off the modulus rather than assumed from the
+    numbering, so the rule side does not need to know how the clusters were
+    ordered and the cluster side does not need to know what the rule calls its
+    classes. With `n` below 2 nothing is merged.
+    """
+    labels = np.asarray(labels)
+    if n < 2:
+        return labels
+    present = list(dict.fromkeys(labels.tolist()))
+    order = sorted(present,
+                   key=lambda c: np.nanmedian(np.asarray(modulus)[labels == c]))
+    lowest = order[:n]
+    return np.where(np.isin(labels, lowest), lowest[0], labels)
 
 
 def _matrix(d, features, seed, use_pca, n_components):
@@ -75,14 +106,21 @@ def run(df, features, modulus_col, k=4, seed=0, n_init=10, model="kmeans",
         raise ValueError(f"unknown clustering model {model!r}; "
                          f"expected 'kmeans' or 'gmm'")
 
-    lab = order_by_stiffness(lab, d[modulus_col].to_numpy(), k)
+    modulus = d[modulus_col].to_numpy()
+    lab = order_by_stiffness(lab, modulus, k)
     rule = d[label_col].to_numpy()
-    merged = np.where(lab <= merge_lowest - 1, 0, lab)
+    # The merge is applied to both partitions. Merging the clusters alone, which
+    # is what this line did until this round, leaves the rule's two compliant
+    # classes in the comparison and scores the partition on the very boundary
+    # the merge is meant to set aside.
+    merged_lab = merge_most_compliant(lab, modulus, merge_lowest)
+    merged_rule = merge_most_compliant(rule, modulus, merge_lowest)
     return {"n": len(d),
             "ARI": adjusted_rand_score(rule, lab),
-            "ARI_star": adjusted_rand_score(rule, merged),
+            "ARI_star": adjusted_rand_score(merged_rule, merged_lab),
             "silhouette": silhouette_score(X, lab),
-            "labels": lab, "rule": rule}
+            "labels": lab, "rule": rule,
+            "merged_labels": merged_lab, "merged_rule": merged_rule}
 
 
 def bootstrap_stability(df, features, k=4, n_rep=20, frac=0.9, seed=0,

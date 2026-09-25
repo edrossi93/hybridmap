@@ -1,0 +1,210 @@
+{
+  "selection": {
+    "zone": "basalt-centre",
+    "read_at_nm": 80.0,
+    "above_GPa": 70.0,
+    "n": 60,
+    "indents_in_zone": 600,
+    "classified_in_zone": 534,
+    "selected_and_classified": 60,
+    "class_at_150_nm": {
+      "basalt": 60
+    },
+    "indent_ids": [
+      30,
+      32,
+      47,
+      149,
+      155,
+      163,
+      170,
+      238,
+      253,
+      347,
+      363,
+      433,
+      442,
+      443,
+      444,
+      551,
+      552,
+      553,
+      563,
+      651,
+      760,
+      847,
+      964,
+      1037,
+      1043,
+      1046,
+      1047,
+      1156,
+      1164,
+      1235,
+      1237,
+      1243,
+      1244,
+      1345,
+      1350,
+      1351,
+      1357,
+      1358,
+      1360,
+      1362,
+      1365,
+      1451,
+      1452,
+      1457,
+      1551,
+      1553,
+      1755,
+      1756,
+      1768,
+      1844,
+      1845,
+      1849,
+      1855,
+      1944,
+      1946,
+      1957,
+      1963,
+      1965,
+      1966,
+      1968
+    ]
+  },
+  "E_median_GPa_by_depth": {
+    "50": 98.3509,
+    "60": 92.3007,
+    "70": 88.0503,
+    "80": 82.51435000000001,
+    "100": 77.78055,
+    "150": 66.10505,
+    "200": 58.490899999999996,
+    "300": 44.3367
+  },
+  "E300_over_E80": {
+    "n": 60,
+    "median": 0.4831062885911178,
+    "at_or_below_half": 33,
+    "min": 0.330546619298354,
+    "max": 0.7755067353908424,
+    "softening_pct": 100.0,
+    "median_E_fall_pct": 46.26789158491826
+  },
+  "E300_over_E150": {
+    "n": 60,
+    "median": 0.6294744079451642,
+    "softening_pct": 98.33333333333333
+  },
+  "bands_by_E80_over_classified": [
+    {
+      "lower_GPa": 70.0,
+      "upper_GPa": null,
+      "n": 60,
+      "median_ratio": 0.4831062885911178,
+      "softening_pct": 100.0
+    },
+    {
+      "lower_GPa": 40.0,
+      "upper_GPa": 70.0,
+      "n": 175,
+      "median_ratio": 0.5559153230660381,
+      "softening_pct": 96.57142857142857
+    },
+    {
+      "lower_GPa": 15.0,
+      "upper_GPa": 40.0,
+      "n": 162,
+      "median_ratio": 0.8165487715178239,
+      "softening_pct": 68.51851851851852
+    },
+    {
+      "lower_GPa": null,
+      "upper_GPa": 15.0,
+      "n": 137,
+      "median_ratio": 1.295419620604605,
+      "softening_pct": 40.87591240875913
+    }
+  ],
+  "called_basalt_at_150_nm": {
+    "n": 193,
+    "E300_over_E80": {
+      "median": 0.5901244915640879,
+      "softening_pct": 88.08290155440415
+    },
+    "E300_over_E150": {
+      "median": 0.7016444030525014,
+      "softening_pct": 96.37305699481865
+    }
+  },
+  "distance_to_nearest_compliant_contact": {
+    "compliant_below_GPa": 15.0,
+    "read_at_nm": 80.0,
+    "pool": "every indent in the band, including quality-rejected ones",
+    "n_compliant_contacts": 194,
+    "pitch_um": 3.00037,
+    "distance_range_um": [
+      3.0,
+      18.976
+    ],
+    "spearman_rho": -0.007935309633654613,
+    "p": 0.9520166147272473,
+    "far": {
+      "criterion": "more than 2 pitches from any compliant contact",
+      "n": 15,
+      "median_ratio": 0.4877907425283334
+    },
+    "near": {
+      "n": 45,
+      "median_ratio": 0.4784218346539023
+    }
+  },
+  "eight_neighbour_basalt_fraction": {
+    "neighbours": 8,
+    "criterion": "at least 6 of 8 neighbours called basalt",
+    "n_at_or_above": 20,
+    "median_ratio_at_or_above": 0.5108729150619475,
+    "n_rest": 40,
+    "median_ratio_rest": 0.47246990607665934,
+    "mann_whitney_two_sided_p": 0.7008371444303705
+  },
+  "H300_over_H80": {
+    "n": 60,
+    "median": 0.6626981860515461,
+    "lower_at_300": 52
+  },
+  "S2_over_P": {
+    "note": "S^2/P does not pass through the area function",
+    "median_GPa_at_50_nm": 2396.434,
+    "median_GPa_at_300_nm": 753.9029,
+    "median_ratio_300_over_50": 0.30810747160527496,
+    "ratio_of_medians": 0.31459364205315066,
+    "n_with_both": 59,
+    "falling": 59
+  },
+  "contact_stiffness_S": {
+    "median_kN_per_m_at_250_nm": 71.66642645,
+    "median_kN_per_m_at_300_nm": 69.68439225,
+    "falling_250_to_300_nm": 48,
+    "n": 60,
+    "median_load_mN_at_250_nm": 5.23055,
+    "median_load_mN_at_300_nm": 6.4231,
+    "S300_over_S80_median_selected": 1.4855068745300082,
+    "S300_over_S80_median_matrix": 2.998367266619754,
+    "n_matrix": 124
+  },
+  "cut_free_shares": {
+    "note": "neither share uses the classification cut at 150 nm: the first is the selection above, the second the load-controlled map's own 70 GPa cut",
+    "depth_resolved_above_70_GPa_at_80_nm": {
+      "n": 60,
+      "of": 534,
+      "pct": 11.235955056179776
+    },
+    "load_controlled_basalt_class": {
+      "n": 340,
+      "of": 2759,
+      "pct": 12.323305545487495
+    }
+  }
+}

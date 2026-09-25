@@ -35,15 +35,22 @@ columns wide, about 20 um, or one fibre diameter. Blocks are resampled with
 replacement within each zone. `BLOCK_COLS` is swept in the reported output so
 that the choice can be seen rather than trusted.
 
-Two further terms are not random quantities but are still uncertainty. They are
-included as Type B contributions in the sense of the GUM, each evaluated as a
-rectangular distribution over the range its sensitivity analysis spans, so the
-standard uncertainty is the half-range divided by root three:
+Three further terms are not random quantities but are still uncertainty. They
+are included as Type B contributions in the sense of the GUM, each evaluated as
+a rectangular distribution over the range its sensitivity analysis spans, so
+the standard uncertainty is the half-range divided by root three:
 
   thresholds  the classification thresholds, over the same 3 x 5 grid as
               Supplementary Table S2, recomputed at the mosaic zone share
   poisson     the uniform Poisson ratio of 0.30 against the phase-specific
               values of Supplementary Table S1
+  runaway     the fifty-nine flax-zone contacts reading below 1 GPa, which the
+              Supplementary Figure S3 caption argues are failed contacts and
+              which the load-controlled map keeps because it carries no
+              filter: the estimate with them in against the estimate with
+              them out, 18.50 against 18.63 GPa. Added in the third round; it
+              is the smallest term in the budget and moves the combined value
+              by less than a thousandth of a GPa
 
 One term stays outside the budget on purpose. Which basalt input to use, the
 shallow 86.0 GPa or the depth-resolved 53.0 GPa, is a choice rather than an
@@ -57,7 +64,7 @@ The block-size sweep at the end is printed in two forms, because the caption
 of Supplementary Table S5 quoted one as the other. The sweep resamples 1000
 draws at each block width and its standard deviation is the joint sampling
 term alone, Type A; the caption's "combined value" is that term in quadrature
-with the two Type B terms. Both are printed with their draw counts. The
+with the Type B terms. Both are printed with their draw counts. The
 budget's own joint sampling term is the 6000-draw value, and at the four-column
 block the 1000-draw sweep lands near it but not on it, which is what a
 resampled quantity does at a sixth of the draws.
@@ -102,6 +109,40 @@ BLOCK_SWEEP = (2, 4, 8)
 # boundary, and a hard-coded table cannot be checked against anything.
 
 RECTANGULAR = 3 ** 0.5
+
+# A flax-zone contact reading below this is a runaway indent rather than soft
+# material: the Supplementary Figure S3 caption gives the evidence, a median
+# contact depth of 3.2 um against 274 nm for the rest of the zone. The map is
+# used as acquired, so they stay in every count the paper reports, and what
+# leaving them in is worth enters the budget below as a bounded choice.
+RUNAWAY_ZONE = "flax"
+RUNAWAY_BELOW_GPA = 1.0
+
+
+def runaway_contacts(shallow):
+    """True on the flax-zone contacts reading below 1 GPa."""
+    return (shallow.zone == RUNAWAY_ZONE) & (shallow.E_GPa < RUNAWAY_BELOW_GPA)
+
+
+def rectangular(low, high):
+    """Standard uncertainty of a value known only to lie in [low, high]."""
+    return abs(high - low) / 2 / RECTANGULAR
+
+
+def runaway_term(shallow, w_mosaic):
+    """Type B: the estimate with the runaway contacts in against with them out.
+
+    Both the flax median and the class fractions move when fifty-nine indents
+    leave, so the alternative is rebuilt from the surviving indents rather than
+    by substituting one median into the construction. This is the same
+    arithmetic `reproduce_paper_values.py` holds to the caption's 18.63 GPa.
+    """
+    kept = shallow[~runaway_contacts(shallow)]
+    per_zone, medians, _ = _zs.zone_fractions(kept)
+    _, (excluded, _, _) = _zs.at_share(per_zone, medians, w_mosaic)
+    per_zone, medians, _ = _zs.zone_fractions(shallow)
+    _, (included, _, _) = _zs.at_share(per_zone, medians, w_mosaic)
+    return rectangular(included, excluded), [included, excluded]
 
 
 def blocks(shallow, block_cols):
@@ -213,7 +254,7 @@ def threshold_term(shallow_raw, tiles, point):
                              for c in CLASSES])
             vals.append(float((frac * np.array([med[c]
                                                 for c in CLASSES])).sum()))
-    return (max(vals) - min(vals)) / 2 / RECTANGULAR, [min(vals), max(vals)]
+    return rectangular(min(vals), max(vals)), [min(vals), max(vals)]
 
 
 def main():
@@ -245,10 +286,19 @@ def main():
     poisson_med = {r["class"]: r["E_phase_specific_GPa"]
                    for _, r in _poi.table().iterrows()}
     _, (poisson_point, _, _) = _zs.at_share(per_zone, poisson_med, w_mosaic)
-    poi = abs(poisson_point - point) / 2 / RECTANGULAR
-    type_b = {"classification_thresholds": thr, "poisson_ratio": poi}
+    poi = rectangular(point, poisson_point)
+    run, run_range = runaway_term(shallow, w_mosaic)
+    type_b = {"classification_thresholds": thr, "poisson_ratio": poi,
+              "runaway_contacts": run}
 
     combined = (combined_a ** 2 + sum(v ** 2 for v in type_b.values())) ** 0.5
+    # The share of variance each term carries, as Supplementary Table S5
+    # prints it: the term squared over the combined value squared. Evaluated
+    # one term at a time with the others held, so the shares do not sum to
+    # one; the joint sampling term is listed beside its three parts.
+    shares = {k: 100 * v ** 2 / combined ** 2
+              for k, v in {**type_a, "type_a_combined": combined_a,
+                           **type_b}.items()}
 
     sweep = {}
     for bc in BLOCK_SWEEP:
@@ -272,8 +322,10 @@ def main():
         "type_a_combined_sd_GPa": combined_a,
         "type_b_sd_GPa": type_b,
         "type_b_ranges": {"threshold_sweep_GPa": thr_range,
-                          "poisson_specific_voigt_GPa": poisson_point},
+                          "poisson_specific_voigt_GPa": poisson_point,
+                          "runaway_contacts_in_and_out_GPa": run_range},
         "combined_sd_GPa": combined,
+        "share_of_variance_pct": shares,
         "percentile_95_interval_GPa": [float(np.percentile(draws, 2.5)),
                                        float(np.percentile(draws, 97.5))],
         "excluded": ("The choice of basalt input, a discriminated choice "
@@ -295,8 +347,13 @@ def main():
     print("  Type B, rectangular over the sensitivity range")
     for k, v in type_b.items():
         print(f"    {k:<28} ± {v:.3f}")
+    print(f"    the runaway range: {run_range[0]:.4f} with the {int(runaway_contacts(shallow).sum())} contacts in, "
+          f"{run_range[1]:.4f} with them out")
     print(f"\n  combined                       ± {combined:.3f}")
     print(f"  reported as                      {point:.2f} ± {combined:.2f} GPa")
+    print("\n  share of variance, one term at a time, as Supplementary Table S5 prints it")
+    for k, v in shares.items():
+        print(f"    {k:<28} {v:6.2f} %")
     type_b_sq = sum(v ** 2 for v in type_b.values())
     print(f"\n  block-size sensitivity, 1000 draws at each width "
           f"(grid columns 5.0959 um apart)")

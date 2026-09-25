@@ -82,8 +82,12 @@ def s1(outdir):
     fs.panel_label(ax1, "a", dx=-0.30, dy=1.10)
     fs.panel_label(ax2, "b", dx=-0.30, dy=1.10)
     fs.save(fig, "FigS5_rule_vs_kmeans", outdir)
-    print(f"  S1: ARI {ari:.3f}, ARI* after merging the compliant pair "
-          f"{ari_star:.3f}  (caption says 0.40 and 0.65)")
+    # ARI* merges the compliant pair on both sides, the two lowest clusters and
+    # flax with matrix. The caption printed 0.65 for two rounds, which was the
+    # one-sided merge; on the two-sided comparison it describes, 0.83.
+    print(f"  S1: ARI {ari:.3f}, ARI* after merging the compliant pair on "
+          f"both sides {ari_star:.3f}  (the caption prints 0.40 and, "
+          f"corrected, 0.83)")
 
 
 def s2(outdir):

@@ -13,6 +13,16 @@ So this reports, across the same grid, the quantity he asked for: the
 pure-basalt median and the number of indents behind it, for the shallow map and
 for the depth-resolved one, beside the laminate figure at both zone weightings.
 
+A third block reads the basalt input at a different depth rather than above a
+different cut. The sixty contacts of the basalt-centre band that read above
+70 GPa at 80 nm, the population Supplementary Figure S7 follows and
+`depth_softening.py` computes, have a median of 82.5 GPa at 80 nm, where the
+two acquisitions agree, and 98.4 GPa at 50 nm, the shallowest point of the
+deposited grid. Each is substituted for the basalt input in the two-level
+construction with everything else held, exactly as Supplementary Table S4
+substitutes the depth-resolved class median, so that the table can carry the
+reading depth as a sensitivity beside the cut.
+
 Run: python basalt_input_sweep.py
 """
 
@@ -69,13 +79,47 @@ def depth_rows(d):
     return pd.DataFrame(rows)
 
 
+def reading_depth_rows(shallow, tiles):
+    """The estimate with the basalt input read at 80 and at 50 nm.
+
+    The input is the median of the sixty basalt-centre contacts that read above
+    70 GPa at 80 nm, taken from `depth_softening.py` so that this file and
+    `depth_softening.json` cannot disagree about it. Everything else in the
+    construction, the class fractions, the other three medians and the zone
+    share, is the reference's. The relative gaps are on the convention of
+    Supplementary Table S4, (estimate - measured) / estimate.
+    """
+    from depth_softening import basalt_readings
+    flex = pd.read_csv(DATA / "flexural_moduli.csv")
+    measured = {c: float(g.E_D790_toe_compensated_GPa.mean())
+                for c, g in flex.groupby("configuration")}
+    per_zone, medians, _ = ZS.zone_fractions(shallow)
+    w_mosaic = ZS.tile_share()
+    readings = basalt_readings()
+    rows = []
+    for depth_nm, basalt in sorted(readings["median_GPa"].items(), reverse=True):
+        swapped = dict(medians)
+        swapped["basalt"] = basalt
+        estimate = float(ZS.at_share(per_zone, swapped, w_mosaic)[1][0])
+        rows.append({"read_at_nm": depth_nm,
+                     "basalt_input_GPa": basalt,
+                     "n_contacts": readings["n"],
+                     "voigt_mosaic_GPa": estimate,
+                     **{f"relative_gap_{c}_pct":
+                        100 * (estimate - measured[c]) / estimate
+                        for c in ("basalt_face", "flax_face")}})
+    return pd.DataFrame(rows)
+
+
 def main():
     raw = pd.read_csv(DATA / "shallow_map.csv")
     tiles = pd.read_csv(DATA / "bse_segmentation_tiles.csv")
     depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
+    shallow = pd.read_csv(DATA / "classified_shallow.csv")
 
     sh = shallow_rows(raw, tiles)
     dr = depth_rows(depth)
+    rd = reading_depth_rows(shallow, tiles)
 
     print("  shallow map, pure-basalt class")
     print(sh.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
@@ -92,12 +136,25 @@ def main():
     print("\n  depth-resolved map, pure-basalt class")
     print(dr.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
 
+    print("\n  the estimate with the basalt input read at a shallower contact: "
+          "the sixty basalt-centre\n  contacts above 70 GPa at 80 nm, "
+          "substituted for the basalt median with everything else held")
+    print(rd.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
+
     out = {"shallow": sh.to_dict(orient="records"),
            "depth_resolved": dr.to_dict(orient="records"),
+           "reading_depth": rd.to_dict(orient="records"),
            "note": ("The pure-basalt class is the tail above the upper cut, so "
                     "its median moves with the cut by construction. Reported "
                     "here so that the agreement with single-fibre values can "
-                    "be read against the range rather than at one cut.")}
+                    "be read against the range rather than at one cut."),
+           "reading_depth_note": ("The basalt input read from the same sixty "
+                                  "traces at 80 nm, where the two acquisitions "
+                                  "agree, and at 50 nm, substituted into the "
+                                  "two-level construction as Supplementary "
+                                  "Table S4 substitutes the depth-resolved "
+                                  "class median. The contacts are those of "
+                                  "depth_softening.json.")}
     path = DATA / "basalt_input_sweep.json"
     path.write_text(json.dumps(out, indent=2) + "\n", newline="\n")
     print(f"\n  written: {path.name}")

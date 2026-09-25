@@ -18,9 +18,22 @@ the table.
 
 The Poisson ratios are inputs rather than measurements and are named in the
 table's own caption: basalt 0.24, flax 0.30, PA-11 0.42, and 0.34 for the
-mixed-volume class as a Voigt-Reuss-Hill average at a basalt fraction of 0.50.
+mixed-volume class.
 
-Run: python poisson_sensitivity.py [--out ../data/poisson_sensitivity.json]
+The 0.34 is an assumed intermediate value between the basalt and the matrix
+figures, and nothing more. The caption used to call it a Voigt-Reuss-Hill
+average of 0.24 and 0.42 at a basalt fraction of 0.50, which it is not: at
+0.50 the Voigt mean is 0.330, the Reuss mean 0.306 and the Hill average 0.318,
+and at the fractions the deconvolution of 4.1 puts on the mixed-volume contact,
+0.55 and 0.67, the Hill average is 0.309 and 0.290. `hill_average_nu` computes
+those and the JSON carries them, so that the description can be checked rather
+than believed. The value itself is not changed: the table tests the sensitivity
+of the estimate to a plausible phase-specific set, and 0.34 is inside the
+interval either end member bounds. The term it contributes to the budget is
+0.056 GPa.
+
+Run: python poisson_sensitivity.py            writes data/poisson_sensitivity.json
+     python poisson_sensitivity.py --no-write  prints the table only
 """
 
 import argparse
@@ -43,7 +56,15 @@ NU_INDENTER = 0.07
 # The uniform convention the paper adopts, and the phase-specific alternative
 # Table S1 tests against it.
 NU_UNIFORM = 0.30
+# The mixed-volume value is an assumed intermediate between the basalt and
+# the matrix figures; see the module docstring for what a Hill average would
+# give instead.
 NU_PHASE = {"flax": 0.30, "matrix": 0.42, "mixed-volume": 0.34, "basalt": 0.24}
+
+# The basalt fractions at which the Hill average of the two end-member Poisson
+# ratios is reported: the 0.50 the caption used to name, and the two fractions
+# the deconvolution of 4.1 puts on the mixed-volume contact.
+HILL_FRACTIONS = (0.50, 0.55, 0.67)
 
 CLASSES = ["flax", "matrix", "mixed-volume", "basalt"]
 
@@ -51,6 +72,18 @@ CLASSES = ["flax", "matrix", "mixed-volume", "basalt"]
 def modulus(er, nu):
     """Specimen modulus from the reduced modulus, at an assumed Poisson ratio."""
     return (1 - nu ** 2) / (1.0 / er - (1 - NU_INDENTER ** 2) / E_INDENTER)
+
+
+def hill_average_nu(f_basalt, nu_basalt=NU_PHASE["basalt"],
+                    nu_matrix=NU_PHASE["matrix"]):
+    """Voigt, Reuss and Hill means of two Poisson ratios at a basalt fraction.
+
+    Voigt is the arithmetic mean by fraction, Reuss the harmonic one, Hill the
+    average of the two. Returned as a dict so that all three travel together.
+    """
+    voigt = f_basalt * nu_basalt + (1 - f_basalt) * nu_matrix
+    reuss = 1.0 / (f_basalt / nu_basalt + (1 - f_basalt) / nu_matrix)
+    return {"voigt": voigt, "reuss": reuss, "hill": 0.5 * (voigt + reuss)}
 
 
 def table():
@@ -106,19 +139,42 @@ def main(out=None):
           "Recomputing\n  them from the two-decimal values printed in Table S1 "
           "gives 18.50 and 18.30.")
 
+    hill = {f"{f:.2f}": hill_average_nu(f) for f in HILL_FRACTIONS}
+    print(f"\n  the mixed-volume nu of {NU_PHASE['mixed-volume']} is an assumed "
+          f"intermediate value; a Hill average of\n  {NU_PHASE['basalt']} and "
+          f"{NU_PHASE['matrix']} would give")
+    for f, v in hill.items():
+        print(f"    basalt fraction {f}: Voigt {v['voigt']:.3f}  Reuss "
+              f"{v['reuss']:.3f}  Hill {v['hill']:.3f}")
+
     if out:
         Path(out).write_text(json.dumps(
             {"indenter": {"E_GPa": E_INDENTER, "nu": NU_INDENTER},
              "nu_uniform": NU_UNIFORM,
              "per_class": rows.to_dict(orient="records"),
-             "laminate_estimate_GPa": est},
-            indent=2) + "\n", encoding="utf8")
+             "laminate_estimate_GPa": est,
+             "mixed_volume_nu": {
+                 "assumed": NU_PHASE["mixed-volume"],
+                 "note": ("an assumed intermediate value between the basalt "
+                          "and matrix ratios, not a Voigt-Reuss-Hill average "
+                          "of them; the averages at each basalt fraction are "
+                          "given so the description can be checked"),
+                 "averages_by_basalt_fraction": hill}},
+            indent=2) + "\n", encoding="utf8", newline="\n")
         print(f"\n  written: {out}")
     return 0
 
 
 if __name__ == "__main__":
+    # Writes the product by default, like every other generator in the
+    # deposit. Until this round the file was written only when --out was
+    # given, so `provenance_check.py --rebuild`, which runs each generator
+    # with no arguments, ran this one, found the product untouched and
+    # reported it reproduced without ever having regenerated it. The flag
+    # remains for writing a copy elsewhere; `--no-write` prints the table
+    # and leaves the deposit alone.
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", nargs="?", const=str(DATA /
-                                                  "poisson_sensitivity.json"))
-    sys.exit(main(ap.parse_args().out))
+    ap.add_argument("--out", default=str(DATA / "poisson_sensitivity.json"))
+    ap.add_argument("--no-write", action="store_true")
+    args = ap.parse_args()
+    sys.exit(main(None if args.no_write else args.out))

@@ -85,7 +85,8 @@ uncertainty:
   seed: 42
 
 macro:
-  # Three-point bending on the same plaque, five specimens per configuration.
+  # Three-point bending on the same plaque, five basalt-longitudinal specimens
+  # and four flax-longitudinal.
   # The comparison values are computed from the curves below rather than typed
   # in as a measured block: a number transcribed into a config is a number that
   # can be transcribed wrongly, and the point of the deposit is that everything

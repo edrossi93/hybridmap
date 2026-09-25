@@ -78,11 +78,18 @@ clustering:
   n_init: 20
   # k-means splits the compliant family into two by stiffness, and that split
   # is not the matrix against flax boundary, which the mechanical signal cannot
-  # see. Merging the two most compliant clusters before scoring removes a
+  # see. Merging the two most compliant classes on both sides before scoring,
+  # the two lowest clusters and the two lowest rule classes, removes a
   # distinction the data do not support; that comparison is ARI*.
   merge_lowest: 2
 
 macro:
+  # The two bending configurations as the paper reports them: ASTM D790 chord
+  # moduli after toe compensation, five basalt-longitudinal specimens and four
+  # flax-longitudinal, the fifth flax curve having been a duplicate. The values
+  # are recomputed from the curves in examples/paper_shallow.yaml; here they are
+  # typed in, which is the form to use when all you have is a value and its
+  # uncertainty.
   measured:
     - {label: basalt face in tension, value: 18.85, sd: 0.54, n: 5}
-    - {label: flax face in tension,   value: 19.66, sd: 0.49, n: 5}
+    - {label: flax face in tension,   value: 19.76, sd: 0.50, n: 4}

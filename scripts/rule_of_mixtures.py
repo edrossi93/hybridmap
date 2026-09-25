@@ -1,11 +1,17 @@
 """
-Voigt, Reuss and Hill bounds from the per-class medians and indent-class
-fractions, plus the sensitivity checks reported in the Supplementary
-Information.
+Voigt, Reuss and Hill values from the per-class medians and indent-class
+fractions of a single map, plus the substitutions and the threshold sweep on
+that single-map sum.
 
 The arithmetic lives in `hybridmap.aggregate` and `hybridmap.mixtures`. What is
-here is the paper's four classes, in the paper's order, and the threshold grid
-the Supplementary Information reports.
+here is the paper's four classes, in the paper's order, and the sweep as the
+command-line tool runs it on one map. Everything this file prints weights the
+two zones by indent count, which is what a single map knows; the paper's
+estimate, 18.50 GPa, weights them by the share each occupies on the imaged
+section, and is built in `zone_share.py`. Of the single-map figures only the
+Voigt sum, 21.33 GPa, appears in the paper, as the indent-count alternative
+that motivates the section weighting; the Hill and Reuss values beside it, and
+the 20.83 to 21.44 GPa of the sweep, are the tool's and are printed as such.
 
 Two things worth stating plainly, because they are easy to misread:
 
@@ -148,12 +154,30 @@ def flax_input_sensitivity(table, measured, inputs=FLAX_INPUTS):
 if __name__ == "__main__":
     data = Path(__file__).resolve().parents[1] / "data"
 
+    # Everything this block prints is the single-map construction: the four
+    # class fractions counted over the whole load-controlled map, so the two
+    # zones are weighted by how many indents landed in each, 49.7 % basalt-rich.
+    # That is what the command-line tool computes on one map with no knowledge
+    # of the section, and it is not the estimate the paper reports. The paper's
+    # 18.50 GPa weights the zones by the 36.2 % share the basalt-rich zone
+    # occupies on the imaged section; `zone_share.py` builds it, and the only
+    # single-map figure the paper carries is the 21.33 GPa Voigt sum, printed as
+    # the comparison that motivates the section weighting. Until this round the
+    # lines below carried no label at all, so the retired construction read as
+    # the result.
+    print("single-map construction: whole-map class fractions, zones weighted "
+          "by indent count.\nNot the paper's estimate, which weights the zones "
+          "by the imaged section (zone_share.py).\n")
+
     sh = pd.read_csv(data / "classified_shallow.csv")
     tab = class_table(sh)
     print(tab.to_string(index=False, float_format=lambda v: f"{v:.4f}"))
 
     v, h, r = bounds(tab.fraction, tab.E_median_GPa)
-    print(f"\nVoigt {v:.2f}   Hill {h:.2f}   Reuss {r:.2f}  GPa")
+    print(f"\nsingle-map, indent-count weighted: Voigt {v:.2f}   Hill {h:.2f}"
+          f"   Reuss {r:.2f}  GPa")
+    print("  the paper prints the Voigt sum alone, as the indent-count "
+          "alternative to its 18.50 GPa")
 
     g, z = check_zone_weighting(sh)
     print(f"\nglobal fractions      {np.round(g, 5)}")
@@ -167,29 +191,33 @@ if __name__ == "__main__":
     basalt_depth = float(_dr.loc[(_dr.qc_flag_strict == 0)
                                  & (_dr.constituent == "basalt"),
                                  "E_150"].median())
-    print(f"\nbasalt input swapped to the depth-resolved value "
-          f"({basalt_depth:.2f} GPa): "
-          f"Voigt {substitute(tab, 'basalt', basalt_depth)[0]:.2f} GPa")
+    print(f"\nsingle-map sum with the basalt input swapped to the "
+          f"depth-resolved value ({basalt_depth:.2f} GPa): "
+          f"{substitute(tab, 'basalt', basalt_depth)[0]:.2f} GPa")
+    print("  (Supplementary Table S4 makes the same substitution in the "
+          "two-level construction: 16.73 GPa)")
     for Em in (1.0, 1.2, 1.5):
-        print(f"matrix set to bulk PA-11 {Em} GPa: "
-              f"Voigt {substitute(tab, 'matrix', Em)[0]:.2f} GPa")
+        print(f"single-map sum with the matrix set to bulk PA-11 {Em} GPa: "
+              f"{substitute(tab, 'matrix', Em)[0]:.2f} GPa")
 
     flex = pd.read_csv(data / "flexural_moduli.csv")
     measured = {c: g.E_D790_toe_compensated_GPa.mean()
                 for c, g in flex.groupby("configuration")}
     fs = flax_input_sensitivity(tab, measured)
-    print("\nflax-input sensitivity (Supplementary Table S8, at the whole-map "
-          "fractions rather than the two-level construction)")
+    print("\nflax-input sensitivity on the single-map sum (Supplementary Table "
+          "S8 carries the same\ninputs through the two-level construction; "
+          "its cells are checked in reproduce_paper_values.py)")
     print(f"  {'flax input':>10}  {'source':<32}{'Voigt':>7}"
           f"{'closure basalt':>16}{'closure flax':>14}")
     for _, r in fs.iterrows():
         print(f"  {r.flax_input_GPa:>10.2f}  {r.source:<32}{r.Voigt_GPa:>7.2f}"
               f"{100 * r.closure_basalt_face:>15.1f}%{100 * r.closure_flax_face:>13.1f}%")
-    print("  the sum stays above both measurements for every input")
 
     raw = pd.read_csv(data / "shallow_map.csv")
     sweep = threshold_sweep(raw)
     ref = sweep[(sweep.lower_GPa == 15) & (sweep.upper_GPa == 70)].Voigt_GPa.iloc[0]
-    print(f"\nthreshold sweep: reference {ref:.2f} GPa, "
+    print(f"\nthreshold sweep on the single-map sum: reference {ref:.2f} GPa, "
           f"range {sweep.Voigt_GPa.min():.2f} to {sweep.Voigt_GPa.max():.2f}, "
           f"max deviation {np.abs(sweep.Voigt_GPa - ref).max():.2f} GPa")
+    print("  (Supplementary Table S2 is the same sweep through the two-level "
+          "construction: 18.00 to 18.84 about 18.50)")

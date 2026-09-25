@@ -3,7 +3,7 @@ Check that the reusable tool is reusable, and that it still is the paper.
 
     python tests/test_tool.py
 
-Three things are tested, and the third is the one that matters most.
+Four things are tested, and the third is the one that matters most.
 
 A synthetic map with different column names, three phases and one zone runs end
 to end through the command line. The populations in it are planted, so the test
@@ -18,6 +18,10 @@ The paper's config and the paper's scripts agree with each other. classify.py
 keeps the thresholds in Python and examples/paper_shallow.yaml keeps them in
 YAML, which is two copies of the same decisions. Two copies drift unless
 something compares them, so this compares them.
+
+And the unsupervised cross-check scores what the paper says it scores: ARI*
+with the compliant classes merged on both sides of the comparison, not on the
+cluster side alone, which is what it did for two rounds.
 """
 
 import subprocess
@@ -207,6 +211,50 @@ def paper_config():
           f"{summary['max_deviation_GPa']:.2f}, paper 0.50")
 
 
+def ari_star_merges_both_sides():
+    """
+    ARI* must compare two partitions that have both had their compliant
+    classes merged.
+
+    For two rounds the package merged the two most compliant clusters and left
+    the rule's flax and matrix labels in place, so the score still turned on
+    the boundary the merge exists to set aside, and printed 0.65 where the
+    comparison the paper describes gives 0.83. This holds the package to the
+    description: the score it returns has to equal an adjusted Rand index
+    computed here between the rule with flax and matrix collapsed and the
+    clusters with their two lowest collapsed, and with nothing merged it has to
+    collapse back to plain ARI.
+    """
+    print("\nARI* on the paper's depth-resolved map, both sides merged")
+    import numpy as np
+    from sklearn.metrics import adjusted_rand_score
+    import clustering_check as cc
+
+    frame = pd.read_csv(ROOT / "data" / "classified_depth_resolved.csv")
+    r = cc.run(frame)
+    rule = np.where(np.isin(r["rule"], ["flax", "matrix"]), "compliant", r["rule"])
+    clusters = np.where(r["labels"] <= 1, 0, r["labels"])
+    direct = adjusted_rand_score(rule, clusters)
+    check("ARI* equals the two-sided comparison computed here",
+          abs(r["ARI_star"] - direct) < 1e-12,
+          f"{r['ARI_star']:.4f} against {direct:.4f}")
+    one_sided = adjusted_rand_score(r["rule"], clusters)
+    check("and is not the one-sided value the package used to return",
+          abs(r["ARI_star"] - one_sided) > 0.01,
+          f"one-sided {one_sided:.4f}")
+    merged = set(r["merged_rule"])
+    check("the merged rule collapses flax and matrix and nothing else",
+          len(merged) == 3 and {"mixed-volume", "basalt"} <= merged
+          and not {"flax", "matrix"} <= merged,
+          ", ".join(sorted(merged)))
+    from hybridmap import cluster
+    plain = cluster.run(frame, cc.FEATURES, cc.MODULUS, k=4, seed=cc.SEED,
+                        n_init=cc.N_INIT, merge_lowest=0)
+    check("with nothing merged ARI* is plain ARI",
+          abs(plain["ARI_star"] - plain["ARI"]) < 1e-12,
+          f"{plain['ARI_star']:.4f} against {plain['ARI']:.4f}")
+
+
 def config_matches_the_scripts():
     """
     The same decisions are written down twice. Compare the copies.
@@ -273,6 +321,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     paper_config()
+    ari_star_merges_both_sides()
     config_matches_the_scripts()
 
     print("\n" + "-" * 72)

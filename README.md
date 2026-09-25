@@ -2,7 +2,7 @@
 
 Data and code behind *Estimating the flexural modulus of a hybrid flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a rule of mixtures*.
 
-Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed values this deposit cannot reproduce and what each of them would need. There are four of those, and the script names them rather than leaving them to be noticed: the two ends of the dark-feature range in §3.4, and the rejected count and basalt median that Supplementary Table S3 carries over from the superseded quality mask.
+Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed values this deposit cannot reproduce and what each of them would need. There are eight of those, and the script names them rather than leaving them to be noticed: the two ends of the dark-feature range in §3.4, the rejected count and basalt median that Supplementary Table S3 carries over from the superseded quality mask, and the four depth-resolved class medians the reply quotes on the previous deposit's retired reading of the slice values, which this deposit does not carry (see *Slice extraction*).
 
 ---
 
@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `325 of 325 values reproduce`. The line above it reports fifteen internal consistency checks, counted separately because they hold the deposit against itself rather than against the page. The block above that names the printed values this deposit cannot reproduce.
+Expected last line: `447 of 447 values reproduce`. The line above it reports twenty-three internal consistency checks, counted separately because they hold the deposit against itself rather than against the page. The block above that names the printed values this deposit cannot reproduce.
 
 Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -32,13 +32,13 @@ Needs Python 3.8 or newer, and the six packages in `requirements.txt`, which say
 
 ## What is in `data/`
 
-Eight CSVs and thirteen JSON summaries. The first three are the exported per-indent arrays and are primary inputs to this deposit, the next two carry the classification used in the paper, two cover the mechanical testing, and three hold the backscattered-electron segmentation behind Figure 2 and its validation. The rest are the summaries the later analyses write; `data/DATA_DICTIONARY.md` documents every key of every one.
+Eight CSVs and fourteen JSON summaries. The first three are the exported per-indent arrays and are primary inputs to this deposit, the next two carry the classification used in the paper, two cover the mechanical testing, and three hold the backscattered-electron segmentation behind Figure 2 and its validation. The rest are the summaries the later analyses write; `data/DATA_DICTIONARY.md` documents every key of every one.
 
 | file | rows | what it is |
 |---|---|---|
 | `shallow_map.csv` | 8553 | The load-controlled high-speed map, one row per indent. Every indent in the acquisition, including the 3000 that sit on the embedding resin. |
 | `depth_resolved_curves.csv` | 101515 | The CSM map as curves. Each of the 2000 indents is resampled onto a common 5 nm depth grid from 50 to 300 nm, so it is one tidy table instead of 2000 ragged ones. |
-| `depth_resolved_indents.csv` | 2000 | The same map reduced to slice values at 100, 150 and 200 nm, read from the instrument trace. **These are the numbers the paper reports**; see *Slice extraction* below. |
+| `depth_resolved_indents.csv` | 2000 | The same map reduced to slice values at 100, 150 and 200 nm: the per-indent 20 nm window means of Supplementary Note S1. **These are the numbers the paper reports**; see *Slice extraction* below for what the file is and is not. |
 | `classified_shallow.csv` | 5553 | The shallow map after the resin cut, carrying the zone and the constituent label. |
 | `classified_depth_resolved.csv` | 2000 | The CSM map with slice values, zone, constituent label, quality flag and the k-means assignment. |
 | `flexural_curves.csv` | 7621 | Three-point bending, stress against strain, **five basalt-longitudinal specimens and four flax-longitudinal**. |
@@ -47,10 +47,11 @@ Eight CSVs and thirteen JSON summaries. The first three are the exported per-ind
 | `bse_segmentation_summary.json` | - | The constituent volume fractions of Figure 2e, with the aggregation stated. |
 | `mixed_class_deconvolution.json` | - | The mixed-volume class inverted back onto its end members, both acquisitions, with the independent comparison. |
 | `spatial_localisation.json` | - | The neighbourhood statistics behind the claim that mixed-volume contacts sit at the phase boundaries. |
-| `uncertainty_budget.json` | - | The uncertainty on the estimate, term by term, from the spatial block bootstrap and the zone-share sweep. |
+| `uncertainty_budget.json` | - | The uncertainty on the estimate, term by term: three sampling terms from the spatial block bootstrap and the tile bootstrap, and three bounded analysis choices. |
 | `zone_mask_rle.json` | - | The architectural zone of every mosaic pixel, run-length encoded. |
 | `zone_share_sensitivity.json` | - | How much of the section each zone occupies, and how that depends on where a window of each map's footprint is placed, slid over the mosaic with its long axis through the thickness. |
-| `basalt_input_sweep.json` | - | The basalt input under every classification cut in the swept range, both acquisitions. |
+| `basalt_input_sweep.json` | - | The basalt input under every classification cut in the swept range, both acquisitions, and the estimate with that input read at 80 and at 50 nm instead. |
+| `depth_softening.json` | - | The depth dependence of the stiff basalt-centre contacts behind §4.4 and Supplementary Figure S7: the sixty selected, their moduli by depth, the softening ratios, the tests against distance and neighbourhood, and the hardness, S²/P and stiffness of the same contacts. |
 | `flexural_comparisons.json` | - | Every planned bending comparison, with the Holm correction under three family groupings. |
 | `phase_angle_sensitivity.json` | - | Supplementary Table S3: what moving the phase-angle quality limit does to the rejected count, to the basalt input and to the estimate built on it. |
 | `bse_validation_metrics.json` | - | Leave-one-field-out validation of the segmentation against the operator's own labels: the confusion matrix, and precision and recall per class. Behind Supplementary Table S6. |
@@ -106,25 +107,25 @@ The standard deviations survive the rounding this file applies: 0.50 is what the
 
 ## What is in `scripts/`
 
-Thirty-one files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
+Thirty-two files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib and PyYAML, and on nothing else. Only the last is needed for the tool rather than for the reproduction.
 
 **Start here.**
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 325 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 447 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
 
 **Analysis.**
 
 | file | what it does |
 |---|---|
 | `classify.py` | The rule-based classification: spatial zones plus modulus thresholds. |
-| `rule_of_mixtures.py` | Voigt, Reuss and Hill bounds, threshold sweep, input substitutions. |
-| `clustering_check.py` | k-means and Gaussian-mixture cross-check, ARI against the rule. |
+| `rule_of_mixtures.py` | The single-map construction, which is what the command-line tool computes on one map: Voigt, Reuss and Hill values with the zones weighted by indent count, the cut sweep and the input substitutions on that sum. Every line it prints is labelled as such; the paper's estimate weights the zones by the imaged section and lives in `zone_share.py`. |
+| `clustering_check.py` | k-means and Gaussian-mixture cross-check, ARI against the rule, and ARI* with the two compliant classes merged on both sides. |
 | `input_decomposition.py` | Separates the effect of the constituent moduli from that of the volume fractions in the comparison between the tabulated and the measured construction. |
 | `areal_mass_fractions.py` | The second route to the constituent volume fractions of §3.4: sixteen plies of a 360 g/m² fabric at a 50/50 mass split through a 4.60 mm laminate, at the nominal datasheet densities §3.4 states. Also the basalt share of the fibre volume that the lamination-theory comparison needs, and the field-to-field intervals on the imaged fibre fractions of Figure 2e. |
 | `flexural_corrections.py` | The numbers around the bending test that follow from the specimen geometry and the standard rather than from a table: the two ASTM D790 departures of §2.5, the bound the rate departure puts on the reported modulus, and the Timoshenko shear correction of §4.3.5 with the shear modulus that paragraph assumes. |
-| `uncertainty_budget.py` | The uncertainty on the laminate estimate, term by term: the spatial block bootstrap over the indents, the tile bootstrap over the zone share, and the two bounded analysis choices. Writes `data/uncertainty_budget.json`. |
+| `uncertainty_budget.py` | The uncertainty on the laminate estimate, term by term: the spatial block bootstrap over the indents, the tile bootstrap over the zone share, and the three bounded analysis choices, the classification thresholds, the Poisson ratio and the fifty-nine runaway contacts left in the flax class. Writes `data/uncertainty_budget.json`. |
 | `phase_angle_sensitivity.py` | Supplementary Table S3: sweeps the phase-angle quality limit at 10, 15 and 20 degrees and reports the rejected count, the depth-resolved basalt median and the estimate built on it. Writes `data/phase_angle_sensitivity.json`. |
 | `spacing_compliance.py` | Contact depth per indent from load and hardness, against the Phani–Oliver spacing criterion. Reaches 5550 of the 5551 classified indents and records the one it cannot, by identifier and reason. Writes `data/spacing_compliance.json`. |
 | `border_effect.py` | Whether the spacing shortfall leaves a trace: indents on the outer row of the short axis against the interior indents of the same class in the same zone, with a Holm correction over the five comparisons. |
@@ -135,7 +136,8 @@ Thirty-one files, in three groups, plus the `hybridmap/` package and the example
 | `mixed_class_deconvolution.py` | Inverts every indent in the basalt-rich zone onto the basalt/matrix tie line, under parallel and series mixing, and compares the two acquisitions with each other and with the imaging. Writes `data/mixed_class_deconvolution.json`. |
 | `make_classified_depth.py` | Derives `classified_depth_resolved.csv` from `depth_resolved_indents.csv`: the zone bands, the modulus rule, the phase-angle quality flag and the cluster index. Before it existed, that file was both a record and a product, which is why nothing could regenerate it. |
 | `zone_share.py` | The share of the section each zone occupies, from the mosaic, the two-level construction built on it, the sliding-window sweep of §2.4, and the classification-threshold grid of Supplementary Table S2. Writes `data/zone_share_sensitivity.json`. |
-| `basalt_input_sweep.py` | The basalt input under every classification cut in the swept range. Writes `data/basalt_input_sweep.json`. |
+| `basalt_input_sweep.py` | The basalt input under every classification cut in the swept range, and the estimate with the input read at 80 and at 50 nm from the sixty stiff contacts of Supplementary Figure S7 in place of the class median. Writes `data/basalt_input_sweep.json`. |
+| `depth_softening.py` | Everything §4.4 and the Supplementary Figure S7 caption print about the stiff contacts of the basalt-centre band: the sixty selected above 70 GPa at 80 nm, their moduli by depth, the E(300)/E(80) ratios and their gradient across the whole band, the tests against distance to a compliant contact and against the eight-neighbour basalt fraction, and the hardness, S²/P and contact stiffness of the same contacts. Writes `data/depth_softening.json`. |
 | `flexural_comparisons.py` | Every planned bending comparison, with the Holm correction under three family groupings. Writes `data/flexural_comparisons.json`. |
 | `provenance_check.py` | Declares every file in `data/` a measurement or a product, checks the products against their scripts, and records `data/PROVENANCE.json`. |
 
@@ -192,6 +194,7 @@ python areal_mass_fractions.py     # the fabric route to the volume fractions, a
 python flexural_corrections.py     # the two D790 departures and the shear correction
 python border_rejection.py         # whether the rejections crowd the edge of the map
 python mixed_class_deconvolution.py  # the class inverted onto its end members
+python depth_softening.py            # the stiff contacts followed from 50 to 300 nm, and the tests on the fall
 python figs_supplementary.py         # Supplementary Figures S3, S4, S5, S6 and their statistics
 ```
 
@@ -199,7 +202,7 @@ python figs_supplementary.py         # Supplementary Figures S3, S4, S5, S6 and 
 
 `shallow_map.csv`, `depth_resolved_curves.csv` and `depth_resolved_indents.csv` are **primary inputs to this deposit**. They are the per-indent arrays exported from the two nanoindentation acquisitions, and everything else here is computed from them by the scripts in `scripts/`.
 
-The instrument files they were exported from are not part of this deposit and are not distributed. The acquisition and the proprietary export that produces these arrays are the instrument's, not the analysis's, and almost nothing in the paper depends on them: every reported number but four is recomputed from the tables above by `reproduce_paper_values.py`, and that script names those four and says what each of them would need. The three files are complete, in the sense that no indent has been removed from them: `shallow_map.csv` still carries the ~3000 indents that landed on the embedding resin, and `depth_resolved_curves.csv` is unfiltered, artefacts and all.
+The instrument files they were exported from are not part of this deposit and are not distributed. The acquisition and the proprietary export that produces these arrays are the instrument's, not the analysis's, and almost nothing in the paper depends on them: every reported number but eight is recomputed from the tables above by `reproduce_paper_values.py`, and that script names those eight and says what each of them would need. The three files are complete, in the sense that no indent has been removed from them: `shallow_map.csv` still carries the ~3000 indents that landed on the embedding resin, and `depth_resolved_curves.csv` is unfiltered, artefacts and all.
 
 So the reproduction boundary of this deposit is the exported per-indent table. Below that line is the instrument. Above it, everything is here.
 
@@ -223,21 +226,29 @@ The ± 1.1 and ± 3.2 percentage points on the two imaged fibre fractions are `i
 
 **Threshold sensitivity (Supplementary Table S2).** `threshold_grid()` in `zone_share.py`. The reference construction at 15 and 70 GPa gives 18.50 GPa; the fifteen threshold pairs span 18.00 to 18.84 GPa, largest deviation 0.50 GPa. `threshold_sweep()` in `rule_of_mixtures.py` is the same sweep without the zone weighting, which is what the command-line tool runs on a single map; it spans 20.83 to 21.44 GPa about 21.33.
 
-**The unsupervised cross-check (Section 3.3).** `clustering_check.py`. ARI is 0.408 against the rule and 0.652 once the two compliant clusters are merged. Across the five seeds it runs, four give 0.4080 and one gives 0.4092; ARI\* is 0.652 on all five. Refitting on twenty random 90 % subsamples gives 0.979 ± 0.016 against the full fit. The comparison is also run on three principal components, 0.410 and 0.653, and on a full-covariance Gaussian mixture, 0.352 and 0.713.
+**The unsupervised cross-check (Section 3.3).** `clustering_check.py`. ARI is 0.408 against the rule and 0.832 once the two compliant classes are merged on both sides, the two most compliant clusters into one and flax with matrix into one compliant rule class, which is the comparison §2.3 describes and the paper reports as ARI\*. Across the five seeds it runs, four give 0.4080 and one gives 0.4092; ARI\* is 0.832 on all five. Refitting on twenty random 90 % subsamples gives 0.979 ± 0.016 against the full fit; that figure is plain ARI between the full fit and each refit, with nothing merged and the rule taking no part. The comparison is also run on three principal components, 0.410 and 0.830, and on a full-covariance Gaussian mixture, 0.352 and 0.722.
+
+For two rounds ARI\* was computed one-sided. The two compliant clusters were merged and the rule kept its flax and matrix labels, so the score still turned on the boundary the merge exists to set aside, and the deposit printed 0.652, with 0.653 and 0.713 for the two variants, where the paper printed 0.65. The merge is now applied to both partitions, as described; ARI, the seed sweep and the stability did not move, because none of them merges anything. There is no matching step before the score, Hungarian or otherwise, and there never needed to be one: the adjusted Rand index does not depend on how either partition numbers its classes. `tests/test_tool.py` holds the package to the two-sided comparison.
 
 One thing to be clear about: the clustering does **not** independently select four populations. The silhouette peaks at k = 2, and the Gaussian-mixture BIC falls steeply to k = 7 and turns up at k = 8, with no feature at k = 4. Four is chosen on architectural grounds, and the clustering tells us that a partition built with no architectural knowledge lands somewhere compatible with the rule. ARI is chance-corrected, so 0.408 should be read against an expectation of 0 for unrelated partitions.
+
+**The depth dependence of the stiff contacts (Section 4.4, Supplementary Figure S7).** `depth_softening.py`, which writes `data/depth_softening.json`. The sixty contacts of the basalt-centre band that read above 70 GPa at 80 nm, every one of them classified basalt at 150 nm, have a median modulus of 98.4, 92.3, 88.1, 82.5, 77.8, 66.1, 58.5 and 44.3 GPa at 50, 60, 70, 80, 100, 150, 200 and 300 nm. Their E(300)/E(80) has a median of 0.483, 33 of the 60 are at or below 0.5, the range is 0.331 to 0.776 and none is above 1. Over all 534 classified contacts of the band the same ratio falls with the modulus read at 80 nm: 0.483 above 70 GPa, 0.556 from 40 to 70 (n = 175, 97 % softening), 0.817 from 15 to 40 (n = 162, 69 %) and 1.295 below 15 (n = 137, 41 %); of the 193 contacts the classification itself calls basalt, 88 % are softer at 300 nm than at 80 and 96 % softer at 300 than at 150. The softening does not follow the distance to the nearest contact below 15 GPa at 80 nm, drawn from every indent in the band as the neighbourhoods of §4.1 are: Spearman ρ = −0.008, p = 0.95, and the 15 indents more than two pitches from any such contact give a median ratio of 0.488 against 0.478 for the 45 closer to one; nor the eight-neighbour basalt fraction, where the 20 with at least six basalt neighbours give 0.511 against 0.472 for the rest (p = 0.70). The hardness of the same sixty falls with the modulus, by a median ratio of 0.663, on 52 of them. Two readings that do not pass through the area function fall with it: S²/P from a median of 2396 GPa at 50 nm to 754 at 300, a median ratio of 0.308 on all 59 contacts that have both, and the contact stiffness S itself from 71.7 to 69.7 kN m⁻¹ between 250 and 300 nm on 48 of the 60, while the load rises from 5.2 to 6.4 mN; S(300)/S(80) is 1.49 on the sixty against 3.00 on the 124 matrix contacts of the band. And with no cut at 150 nm involved, the contacts above 70 GPa at 80 nm are 60 of the band's 534 classified, 11.2 %, against 340 of 2759, 12.3 %, called basalt by the same 70 GPa cut in the load-controlled basalt-rich zone.
+
+**The basalt input read at a shallower depth (Supplementary Table S4).** `reading_depth_rows()` in `basalt_input_sweep.py`, from the same sixty traces. Read at 80 nm, where the two acquisitions agree, the input is 82.51 GPa and the two-level construction gives 18.31 GPa, 2.9 % and 7.9 % below the two measurements; read at 50 nm, the shallowest deposited point, it is 98.35 GPa and the estimate 19.16 GPa, 1.6 % above the basalt-longitudinal measurement and 3.1 % below the flax-longitudinal one. The substitution is the one Table S4 makes with the depth-resolved class median, 53.01 GPa and 16.73 GPa.
 
 ---
 
 ## Slice extraction
 
-Slice values at 100, 150 and 200 nm are the mean of the CSM response over a 20 nm window centred on the target depth, requiring at least three valid points inside the window.
+Slice values at 100, 150 and 200 nm are the mean of the CSM response over a 20 nm window centred on the target depth, requiring at least three valid points inside the window, as Supplementary Note S1 states. `depth_resolved_indents.csv` carries them, `classified_depth_resolved.csv` repeats them value for value, and they are the numbers the paper reports.
 
-There is one of them in the deposit, and there used to be two. `E_150` in `depth_resolved_indents.csv` is taken from the instrument trace as recorded; `classified_depth_resolved.csv` carries the same column, value for value, and it is what the paper reports. The second convention, a window mean recomputed over the resampled 5 nm grid, was deposited as `depth_resolved_slices.csv` and has been removed: two files holding one quantity under two conventions is how a quality mask that matched neither survived two rounds of review, because whichever number was checked the other was available to explain it away.
+What that file is, stated plainly, because this section misdescribed it for one round. The deposited columns are the per-indent 20 nm window means of Note S1, and they are identical, to within 5 × 10⁻⁵ GPa, the last stored digit, to what the previous deposit carried as `depth_resolved_slices.csv` and described as the window mean over the 5 nm grid. The previous deposit's `classified_depth_resolved.csv` carried a second reading of the same quantity, described as taken from the instrument trace, which differed from the window means on nearly every indent: at 150 nm on 1967 of the 1979 indents both files hold, by a median of 0.047 GPa and by up to 4.8 GPa, and with a different pattern of blanks. That second reading is retired. The previous version of this section said the reverse, that the retained value was the instrument-trace reading and the window mean had been removed; it was the other way round, and the data dictionary said the same.
 
-The resampled route is still open to anyone who wants it. `depth_resolved_curves.csv` holds the full traces, so the window mean can be recomputed from them. Expect the two compliant classes to agree and the two stiff classes to land about 2 % low, which is where E(z) is steepest; the two routes correlate at 0.9997.
+The deposited values are not exactly regenerable from `depth_resolved_curves.csv` either. Recomputing the 140 to 160 nm window mean over the resampled 5 nm grid, five points per indent, reproduces `E_150` to a median of 0.012 GPa, at a correlation of 0.99996, but not exactly: 288 of the 1985 indents that have a value differ by more than 0.1 GPa and the largest difference is 2.3 GPa. The likely reason is that the deposited means were taken over the trace points as recorded and the curves file holds the trace after resampling; whichever it is, the file is a measurement input of this deposit, held by its hash in `PROVENANCE.json`, and not a product of the curves. On the class medians at 150 nm the recomputation gives 3.80, 5.34, 29.89 and 52.58 GPa against the deposited 3.79, 5.32, 29.76 and 53.01, the basalt class 0.8 % low and the other three within half a per cent.
 
-The estimate the paper reports does not depend on any of this: its basalt input is the median of the load-controlled map, which carries no trace and no slices. The convention reaches only the alternative input of Supplementary Table S4, and a 2 % shift in the depth-resolved basalt median moves the estimate built on that input by less than a tenth of a GPa.
+What the change of reading moved, with the quality mask held at the 304 rejections the paper uses and the class rule applied to each set of values: the depth-resolved basalt median from 52.76 GPa on the retired reading to 53.01 on the deposited one, flax from 3.82 to 3.79, matrix from 5.37 to 5.32 and mixed-volume from 29.70 to 29.76. The 52.76 is the figure the previous supplement's Table S3 printed at 15°. On the retired reading it is 52.76 under that table's 320-rejection mask and under the present 304 alike, and on the deposited reading it is 53.01 under both, so the move on that cell between the two supplements is the change of reading and not the change of mask. The 320 of the previous letter is reconstructed exactly: the tool's signed phase-angle rule at 15°, with the 20° allowance at 100 nm, rejects 307 on the retired phase angles, and the 13 indents with no value at 150 nm in that file were counted with them. These figures are computed against the previous deposit's file, which is not carried here, so `reproduce_paper_values.py` lists the four retired-reading medians among the values it cannot reproduce.
+
+The estimate the paper reports does not depend on any of this: its basalt input is the median of the load-controlled map, which carries no trace and no slices. The reading reaches the depth-resolved column of Table 3 and the alternative input of Supplementary Table S4, where the 0.26 GPa move in the basalt median is worth 0.01 GPa on the estimate built on it.
 
 ---
 
@@ -440,7 +451,7 @@ python tests/test_tool.py
 | file | what it checks |
 |---|---|
 | `test_deposit.py` | This README and the data dictionary against the actual files: row counts, columns in both directions, the script and data inventories, and that every third-party import is in `requirements.txt`. |
-| `test_tool.py` | That the tool runs end to end on a second dataset, that `examples/paper_shallow.yaml` still reproduces the single-map Voigt, Hill and Reuss values, and that the config and the scripts still agree on every threshold. |
+| `test_tool.py` | That the tool runs end to end on a second dataset, that `examples/paper_shallow.yaml` still reproduces the single-map Voigt, Hill and Reuss values, that ARI* merges the compliant classes on both sides of the comparison, and that the config and the scripts still agree on every threshold. |
 | `make_synthetic_map.py` | Writes the second dataset. It is synthetic and is not a measurement; see below. |
 
 The second dataset is generated, not measured. `make_synthetic_map.py` draws three populations from fixed distributions with a stated seed. `test_tool.py` writes it to a temporary directory that does not outlive the test, so no synthetic file is ever left sitting in the deposit; run the generator by hand and it writes to `tests/_generated/` instead, which is not committed. It has different column names, three phases and one zone, so it fails if anything in the tool has this laminate baked into it. Because the populations are planted, `test_tool.py` can check that the tool recovers what was put in: it labels 99.8 % of the points with the phase they were drawn from, the rest being the tails that genuinely cross a cut.
@@ -495,12 +506,13 @@ The exported per-indent arrays, described under *Where the per-indent tables
 come from* above. They are the starting point of everything else here.
 
 The three are close relatives but not derivable from one another.
-`depth_resolved_indents.csv` holds the 20 nm window mean at each target depth as
-the instrument recorded the trace; `depth_resolved_curves.csv` holds the same
-traces resampled onto a common 5 nm grid, which is what makes them one tidy
-table. Recomputing the slice values from the resampled grid gives numbers that
-correlate at 0.9997 with the deposited ones and land about 2 % low on the two
-stiff classes. The paper uses the deposited ones.
+`depth_resolved_indents.csv` holds the 20 nm window mean of Supplementary Note
+S1 at each target depth; `depth_resolved_curves.csv` holds the traces resampled
+onto a common 5 nm grid, which is what makes them one tidy table. Recomputing
+the window mean from the resampled grid reproduces the deposited values to a
+median of 0.012 GPa at 150 nm and not exactly, the largest difference being
+2.3 GPa and the basalt class median landing 0.8 % low; *Slice extraction* above
+gives the comparison in full. The paper uses the deposited ones.
 
 ### `bse_segmentation_tiles.csv` and `bse_segmentation_summary.json`
 
@@ -519,7 +531,14 @@ How the tile statistics were produced:
    mosaic area and is excluded from the fractions.
 3. Within each marked zone, pixels were classified as fibre or matrix by a
    texture classifier trained on the operator's labels, and voids and cracks
-   were separated by threshold.
+   were separated by threshold. In production the classifier carries the two
+   solid labels only, so every marked pixel is called fibre or matrix and
+   `basaltzone_fib + basaltzone_mat` is 1 on every tile; voids and cracks are
+   located separately by the dark-feature threshold and reported as the
+   threshold sweep of §3.4. The three-class model with a void label exists only
+   in the leave-one-field-out validation of `bse_validation_metrics.json`, so
+   that its confusion with the two solid phases can be reported
+   (Supplementary Table S6).
 4. Per-tile pixel counts were written to `bse_segmentation_tiles.csv`.
 
 The manual zone marking is the one subjective step in the measurement, and it

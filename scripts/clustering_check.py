@@ -18,10 +18,22 @@ both representations to show the answer does not depend on that choice.
 ARI is chance-corrected, so its expected value for unrelated partitions is 0,
 not 1/k. That is the calibration for reading 0.40.
 
-ARI* collapses the two compliant clusters. k-means splits the compliant family
-into two groups by stiffness, and that split is not the matrix/flax boundary,
-which the mechanical signal cannot see. Merging them removes a distinction the
-data do not support and is the comparison reported as ARI* in the paper.
+ARI* collapses the two compliant classes on both sides: the two most compliant
+clusters into one, and flax and matrix into one compliant rule class. k-means
+splits the compliant family into two groups by stiffness, and that split is not
+the matrix/flax boundary, which the mechanical signal cannot see. Merging
+removes a distinction the data do not support and is the comparison reported
+as ARI* in the paper.
+
+Until this round the merge was one-sided. The two compliant clusters were
+collapsed and the rule kept its flax and matrix labels, so ARI* still scored
+the partition against the boundary the merge exists to set aside, and printed
+0.652 where the two-sided comparison §2.3 describes gives 0.832. The
+principal-component and Gaussian-mixture variants moved with it, 0.653 to
+0.830 and 0.713 to 0.722; the plain ARI, the seed sweep and the subsample
+stability, none of which merge anything, did not move. There is no Hungarian
+or other matching step here and there never needed to be one: ARI is invariant
+to how either partition numbers its classes.
 """
 
 import sys
@@ -56,7 +68,9 @@ SEED = 42
 # ten occasionally landed in a worse local minimum.
 N_INIT = 20
 
-# The two most compliant clusters are merged before scoring ARI*.
+# The two most compliant classes on each side are merged before scoring ARI*:
+# the two lowest-modulus clusters, and the two lowest-modulus rule classes,
+# which on this map are flax and matrix.
 MERGE_LOWEST = 2
 
 
@@ -85,9 +99,15 @@ if __name__ == "__main__":
 
     print("\nARI is chance-corrected, so the value expected for unrelated "
           "partitions is 0.000")
+    print("ARI* merges the two most compliant classes on both sides, the two "
+          "lowest clusters and\nflax with matrix, before scoring")
 
+    # Plain ARI between the full fit and each refit, at k = 4 on both sides:
+    # nothing is merged and the rule takes no part, so this figure is neither
+    # the ARI against the rule nor ARI*.
     m, s = bootstrap_stability(df)
-    print(f"cluster stability over 20 subsamples at k = 4: ARI {m:.3f} +/- {s:.3f}")
+    print(f"cluster stability over 20 subsamples at k = 4: ARI {m:.3f} +/- {s:.3f}"
+          f"  (full fit against each refit, no merge, rule not involved)")
 
     print("\nseed check")
     for seed in (0, 1, 42, 123, 2024):

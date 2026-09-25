@@ -42,5 +42,26 @@
     "uniform": 18.497243977069772,
     "phase_specific": 18.304464060954338,
     "shift_pct": 1.0422088628685162
+  },
+  "mixed_volume_nu": {
+    "assumed": 0.34,
+    "note": "an assumed intermediate value between the basalt and matrix ratios, not a Voigt-Reuss-Hill average of them; the averages at each basalt fraction are given so the description can be checked",
+    "averages_by_basalt_fraction": {
+      "0.50": {
+        "voigt": 0.32999999999999996,
+        "reuss": 0.3054545454545455,
+        "hill": 0.31772727272727275
+      },
+      "0.55": {
+        "voigt": 0.32099999999999995,
+        "reuss": 0.2973451327433628,
+        "hill": 0.3091725663716814
+      },
+      "0.67": {
+        "voigt": 0.2994,
+        "reuss": 0.2795341098169717,
+        "hill": 0.28946705490848584
+      }
+    }
   }
 }

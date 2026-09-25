@@ -3,15 +3,16 @@
     "classified_shallow.csv": "44888b0df6c73996dacfe199709de3cf486a94d5d1d914dbc015473350283629",
     "classified_depth_resolved.csv": "a9154c1585aa508fb5cf2c49b882947a361246fc07cbcfcccd88b86810302c7c",
     "flexural_moduli.csv": "0abb2811ade40dae872e8fc6009d582ae7e9cbc79e909e20826ddbcf06642cf4",
-    "uncertainty_budget.json": "55f06428341ccef618af07bc4467b921a2bf632feee8f24501f93daf8823561f",
+    "uncertainty_budget.json": "82d41f0481e97f6d7f8108a1ea63ba5ba07b26fc111f3d77dbda7b2eb6ddc3ad",
     "phase_angle_sensitivity.json": "eaaa133b73c482ce2082abec0568ff80ad1e8df1a8e25fc490499d5279b3d9b3",
     "spacing_compliance.json": "c09b034cd69a0e8d34e3a38fbb7fc93801c70576f9e879b4c861b7f09aa4d101",
     "mixed_class_deconvolution.json": "3be3e82eba949e66431c6df4fe0f22462a8f0e42faeadce6b6f5e99928122f22",
     "spatial_localisation.json": "1fcb03399d8075f9c0e17eff1e30f6b427c8dbc02e3a5283b8792f2b1a9c0f22",
     "zone_share_sensitivity.json": "68bedd09129aaa1e433c2c24661ac991cb3e62325d665eb7f242edbfd9ccaed2",
-    "poisson_sensitivity.json": "d36e81aefeb6e2b1650fe4ab687d9d2ad74a5393e4687e9b5085f91377fde293",
+    "poisson_sensitivity.json": "8aa14920ea6553a62e6cfb25d535c72d0cc0c4fe8cd386ca15c4366b3ac77ead",
     "flexural_comparisons.json": "421ba4d3e81b076cc7f3d3ea00c99e9f9446ef468ff4faada9310087cdfe2125",
-    "basalt_input_sweep.json": "6dd9398801a84fbb9405481fd79364a87437ac8db481f04052737cbafbf5d218"
+    "basalt_input_sweep.json": "f3c143b6d1210a0b92f9d2cdfd6da66362e6faf20a9c71283e6a1779c32417df",
+    "depth_softening.json": "03472d1f9f0721b01a94db8ddc24da31d1d49c4313ed4b5ee5ed9592c240161c"
   },
   "primary": {
     "shallow_map.csv": "01d3fa536b400f2201afca8207e86926c6a4605cc0198cfbdadaccc5fee24976",
@@ -22,7 +23,7 @@
     "bse_segmentation_summary.json": "26d8fea9afd2695560ff6ac789be359394fc5ae67c2dede26c5ddbc5b56d1400",
     "zone_mask_rle.json": "d315b4085b9855b52084cafd22560f96692e5c5bd06cbf356854c33ea75e9b34",
     "bse_validation_metrics.json": "6fa1683607ecd44d1f9069057d38ea92190c1daea39249e3024bf2eb2a8e4aa3",
-    "DATA_DICTIONARY.md": "ed53a79227ebdd3bdd4bb0df8569c93eaf04f4f1709ed22abf4afb89d66e22b2",
+    "DATA_DICTIONARY.md": "df526e691f3788f149e652475593ebc0274af6bdecdae21b7f261202b01bcbd7",
     "LICENSE": "230ca33bbb6f23e98cfdb831d5d45e277cc64160a7ae046c6ca91609c3adfbe4"
   }
 }
