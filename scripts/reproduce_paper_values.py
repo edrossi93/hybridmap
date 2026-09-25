@@ -292,6 +292,12 @@ for cls, n, E, lo, hi, H, tol in [
     report(f"median H({cls}) @ 150 nm", float(g.H_150.median()), H, 0.0051)
     report(f"CI low  E({cls}) @ 150 nm", float(_dr_ci.ci_low_GPa[cls]), lo, tol)
     report(f"CI high E({cls}) @ 150 nm", float(_dr_ci.ci_high_GPa[cls]), hi, tol)
+# 2.3 and Table 2: why the depth-resolved cut is at 40 GPa and not 70. The
+# basalt class is read at 150 nm, so the count is of its members below 70 GPa
+# there.
+_dr_basalt = _dr_all[_dr_all.constituent == "basalt"]
+report("basalt contacts of the depth-resolved class a 70 GPa cut would reject",
+       int((_dr_basalt.E_150 <= 70).sum()), 178, 0)
 
 # The four strain-rate sensitivity medians of 3.2, of which 4.3.2 quotes the
 # flax and matrix ones as the evidence that the compliant classes are separable
