@@ -456,7 +456,8 @@ report("estimate with the zones weighted by indent counts",
 E_class = np.array([medians[c] for c in zs.CLASSES])
 terms = dict(zip(zs.CLASSES, fractions * E_class))
 compliant = terms["flax"] + terms["matrix"]
-report("compliant classes, contribution to the estimate", compliant, 3.02, 0.005)
+report_internal("compliant classes, contribution to the estimate", compliant,
+                3.02, 0.005, "behind the printed 16 %; 3.019 is printed in 4.3.2")
 report("compliant classes, per cent of the estimate",
        100 * compliant / voigt, 16, 0.5)
 report("mixed-volume, contribution to the estimate", terms["mixed-volume"],
@@ -465,8 +466,9 @@ report("mixed-volume, per cent of the estimate",
        100 * terms["mixed-volume"] / voigt, 59, 0.5)
 report("pure basalt, per cent of the estimate",
        100 * terms["basalt"] / voigt, 25, 0.5)
-report("the two stiff classes, contribution to the estimate",
-       terms["mixed-volume"] + terms["basalt"], 15.48, 0.005)
+report_internal("the two stiff classes, contribution to the estimate",
+                terms["mixed-volume"] + terms["basalt"], 15.48, 0.005,
+                "behind the printed 84 %; not printed")
 report("the two stiff classes, per cent of the estimate",
        100 * (terms["mixed-volume"] + terms["basalt"]) / voigt, 84, 0.5)
 # Interchanging the two compliant labels, which is the residual ambiguity of
@@ -757,8 +759,12 @@ E_tab, f_nominal = _dec.TABULATED_E, _dec.NOMINAL_F
 E_measured, f_measured = _dec.measured_moduli(), _dec.MEASURED_F
 tabulated = _dec.voigt(E_tab, f_nominal)
 report("Voigt sum, tabulated moduli and nominal fractions", tabulated, 35.8, 0.05)
+# 3.4 printed these two gaps until 28 September; it now gives the 35.8 GPa
+# against the two measurements, because a gap taken on the prediction reads,
+# to anyone who does not know the convention, as a gap on the measurement.
 for cfg, published in (("basalt_face", 47.3), ("flax_face", 44.7)):
-    report(f"that sum overshoots {cfg} by", gap(tabulated, cfg), published, 0.05)
+    report_internal(f"that sum overshoots {cfg} by", gap(tabulated, cfg),
+                    published, 0.05, "the 35.8 GPa is printed; not the gap")
 # The same comparison with the measurement as the denominator, 89.7 % and
 # 80.9 %, was printed by 3.4 until this round and was checked here. The
 # sentence is gone and so is the check.
@@ -775,11 +781,14 @@ both = _dec.voigt(E_measured, f_measured)
 report("measured moduli at the nominal fractions", moduli_only, 25.0, 0.05)
 report("tabulated moduli at the measured fractions", fractions_only, 43.8, 0.05)
 report("measured moduli at the measured fractions", both, 24.5, 0.05)
-report("what the moduli alone move", moduli_only - tabulated, -10.7, ROUNDED)
-report("what the fractions alone move", fractions_only - tabulated, 8.0, 0.05)
+report_internal("what the moduli alone move", moduli_only - tabulated, -10.7,
+                ROUNDED, "35.8 to 25.0 GPa is printed")
+report_internal("what the fractions alone move", fractions_only - tabulated,
+                8.0, 0.05, "35.8 to 43.8 GPa is printed")
 for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.4)):
-    report(f"the measured-fraction construction overshoots {cfg} by",
-           gap(both, cfg), published, 0.05)
+    report_internal(f"the measured-fraction construction overshoots {cfg} by",
+                    gap(both, cfg), published, 0.05,
+                    "24.5 GPa is printed; not the gap")
 # The Halpin-Tsai baseline of the same paragraph and of the Figure 8 panel. Until
 # this round it was a literal in fig08_rom.py and had no check here, because
 # there was nothing to check it against. The function is imported from the figure
@@ -887,8 +896,9 @@ _diffs, _worst = _am.agreement(_calc, _am.imaged())
 for cls, pct in (("basalt", 23.2), ("flax", 41.7), ("matrix", 35.1)):
     report(f"areal-mass volume fraction, {cls}", 100 * _calc[cls], pct, ROUNDED)
 report("fibre volume fraction, calculated", _calc["fibre"], 0.649, 0.0005)
-report("the two routes, percentage points apart on the fibre fraction",
-       100 * (_calc["fibre"] - _am.imaged()["fibre"]), 1.0, 0.05)
+report_internal("the two routes, percentage points apart on the fibre fraction",
+                100 * (_calc["fibre"] - _am.imaged()["fibre"]), 1.0, 0.05,
+                "0.639 and 0.649 are printed")
 report("worst disagreement with the imaging, percentage points", _worst, 2.2,
        ROUNDED)
 # The Halpin-Tsai baseline of Figure 8 is drawn at the fibre volume fraction of
