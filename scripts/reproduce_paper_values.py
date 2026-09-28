@@ -460,8 +460,10 @@ report_internal("compliant classes, contribution to the estimate", compliant,
                 3.02, 0.005, "behind the printed 16 %; 3.019 is printed in 4.3.2")
 report("compliant classes, per cent of the estimate",
        100 * compliant / voigt, 16, 0.5)
-report("mixed-volume, contribution to the estimate", terms["mixed-volume"],
-       10.9, 0.05)
+report_internal("mixed-volume, contribution to the estimate",
+                terms["mixed-volume"], 10.9, 0.05,
+                "behind the printed 59 %; the 10.9 GPa of 3.4 is the "
+                "flax-rich zone sum")
 report("mixed-volume, per cent of the estimate",
        100 * terms["mixed-volume"] / voigt, 59, 0.5)
 report("pure basalt, per cent of the estimate",
