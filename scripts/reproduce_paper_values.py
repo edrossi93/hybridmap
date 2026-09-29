@@ -483,7 +483,7 @@ report("combined uncertainty, per cent of the estimate",
 for key, printed, tol in (("fractions", 56, 0.5), ("medians", 6, 0.5),
                           ("zone_share", 18, 0.5), ("type_a_combined", 97, 0.5),
                           ("classification_thresholds", 3, 0.5),
-                          ("poisson_ratio", 0.2, ROUNDED),
+                          ("poisson_ratio", 0.1, ROUNDED),
                           ("runaway_contacts", 0.1, ROUNDED)):
     report(f"share of variance, {key}, per cent",
            budget["share_of_variance_pct"][key], printed, tol)
