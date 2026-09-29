@@ -2,7 +2,7 @@
 of 4.4, computed once and written down.
 
 The paper chooses the load-controlled basalt median, 86 GPa, over the
-depth-resolved one, 53 GPa, on the grounds that the two acquisitions agree on
+depth-resolved one, 55 GPa, on the grounds that the two acquisitions agree on
 the same contacts at 80 nm and that the deeper reading of those contacts then
 falls with depth. Supplementary Figure S7 draws that fall; this script is the
 arithmetic behind every figure 4.4 quotes about it, and behind a few more that
@@ -12,18 +12,18 @@ hand and printed, and nothing in the deposit could reproduce them.
 The selection is the figure's: every indent of the basalt-centre band whose
 trace reads above the load-controlled map's own 70 GPa cut at 80 nm. It is made
 at 80 nm and the behaviour below is read afterwards, so nothing about the trace
-beyond 80 nm enters the choice of which traces to follow. Sixty indents meet
-it, all sixty of them classified basalt at 150 nm.
+beyond 80 nm enters the choice of which traces to follow. Every indent that
+meets it is classified basalt at 150 nm.
 
 What is computed, in the order 4.4 reads it:
 
-  * the median modulus of the sixty at each depth from 50 to 300 nm, and the
+  * the median modulus of the selected contacts at each depth from 50 to 300 nm, and the
     ratio E(300)/E(80) indent by indent: its median, how many are at or below a
     half, its range, and whether any indent fails to soften;
   * the same ratio over every classified contact of the band, in four bands of
-    the modulus read at 80 nm, so that the sixty can be seen as the top of a
+    the modulus read at 80 nm, so that the selection can be seen as the top of a
     gradient rather than as a population picked for a high reading;
-  * the 193 indents the depth-resolved classification itself calls basalt, a
+  * the indents the depth-resolved classification itself calls basalt, a
     population selected at 150 nm and not at 80, on E(300)/E(80) and on
     E(300)/E(150);
   * whether the softening follows the distance to the nearest compliant
@@ -33,7 +33,7 @@ What is computed, in the order 4.4 reads it:
     the rest. The (2, 0) shell sits at exactly two pitches and is counted as
     near; the (2, 1) shell, at root five pitches, is the first shell beyond it;
   * the same question read through the eight-neighbour basalt fraction of 4.1,
-    splitting the sixty at six of eight neighbours called basalt;
+    splitting the selection at six of eight neighbours called basalt;
   * the hardness of the same contacts between 80 and 300 nm;
   * two quantities that do not pass through the area function: S^2/P, which is
     independent of it, from 50 to 300 nm, and the contact stiffness S itself
@@ -51,7 +51,7 @@ What is computed, in the order 4.4 reads it:
     the load-controlled basalt-rich zone the 70 GPa cut calls basalt.
 
 The reading-depth sensitivity of the laminate estimate, the basalt input read
-from these sixty traces at 80 and at 50 nm and substituted into the two-level
+from the selected traces at 80 and at 50 nm and substituted into the two-level
 construction, is written by `basalt_input_sweep.py` beside the cut sweep it
 belongs with; the medians it substitutes are computed here and imported there.
 
@@ -186,8 +186,7 @@ def basalt_readings(depths=(50.0, SELECT_AT_NM)):
 
     What `basalt_input_sweep.py` substitutes for the basalt input to read the
     laminate estimate at a shallower contact than the load-controlled map's
-    own: the same sixty traces, read at 80 nm where the two acquisitions agree
-    and at 50 nm, the shallowest point of the deposited grid.
+    own: the same selected traces, read at 80 nm and at 50 nm, the shallowest point of the deposited grid.
     """
     classified_depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
     curves = pd.read_csv(DATA / "depth_resolved_curves.csv")

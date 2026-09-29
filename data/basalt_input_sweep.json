@@ -124,48 +124,48 @@
   "depth_resolved": [
     {
       "upper_GPa": 30,
-      "basalt_median_GPa": 45.70711,
-      "n_basalt": 329
+      "basalt_median_GPa": 47.70454,
+      "n_basalt": 345
     },
     {
       "upper_GPa": 35,
-      "basalt_median_GPa": 49.31828,
-      "n_basalt": 269
+      "basalt_median_GPa": 52.03604,
+      "n_basalt": 303
     },
     {
       "upper_GPa": 40,
-      "basalt_median_GPa": 53.01353,
-      "n_basalt": 211
+      "basalt_median_GPa": 54.666055,
+      "n_basalt": 242
     },
     {
       "upper_GPa": 45,
-      "basalt_median_GPa": 56.31346,
-      "n_basalt": 171
+      "basalt_median_GPa": 58.3678,
+      "n_basalt": 195
     },
     {
       "upper_GPa": 50,
-      "basalt_median_GPa": 60.465015,
-      "n_basalt": 126
+      "basalt_median_GPa": 61.803065000000004,
+      "n_basalt": 162
     }
   ],
   "reading_depth": [
     {
       "read_at_nm": 80.0,
-      "basalt_input_GPa": 82.51435000000001,
-      "n_contacts": 60,
-      "voigt_mosaic_GPa": 18.310964800713702,
-      "relative_gap_basalt_face_pct": -2.932861294481702,
-      "relative_gap_flax_face_pct": -7.899830593469971
+      "basalt_input_GPa": 84.67005,
+      "n_contacts": 86,
+      "voigt_mosaic_GPa": 18.426823684397803,
+      "relative_gap_basalt_face_pct": -2.285669645598303,
+      "relative_gap_flax_face_pct": -7.2214090631848595
     },
     {
       "read_at_nm": 50.0,
-      "basalt_input_GPa": 98.3509,
-      "n_contacts": 60,
-      "voigt_mosaic_GPa": 19.162105963402148,
-      "relative_gap_basalt_face_pct": 1.639203770201765,
-      "relative_gap_flax_face_pct": -3.107143013064431
+      "basalt_input_GPa": 97.9282,
+      "n_contacts": 86,
+      "voigt_mosaic_GPa": 19.139387797547315,
+      "relative_gap_basalt_face_pct": 1.522450982390633,
+      "relative_gap_flax_face_pct": -3.229529643220333
     }
   ],
   "note": "The pure-basalt class is the tail above the upper cut, so its median moves with the cut by construction. Reported here so that the agreement with single-fibre values can be read against the range rather than at one cut.",
-  "reading_depth_note": "The basalt input read from the same sixty traces at 80 nm, where the two acquisitions agree, and at 50 nm, substituted into the two-level construction as Supplementary Table S4 substitutes the depth-resolved class median. The contacts are those of depth_softening.json."
+  "reading_depth_note": "The basalt input read from the same traces at 80 nm and at 50 nm, substituted into the two-level construction as Supplementary Table S4 substitutes the depth-resolved class median. The contacts are those of depth_softening.json."
 }

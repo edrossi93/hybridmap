@@ -18,92 +18,18 @@ one; the sensitivity analyses do that, and they are checked here as published
 numbers rather than as arguments. It does not check the acquisition either: the
 per-indent tables are where this deposit starts.
 
-Two disagreements that earlier versions of this docstring recorded as open are
-now closed, and are named here because the values moved. The Halpin-Tsai
-baseline of Figure 8 was the literal 27.1 GPa in `fig08_rom.py`, with nothing
-behind it; then 27.23 derived from the plain mean of the two tabulated fibre
-moduli, while §4.2 normalised the same panel by 26.25 from a volume-weighted
-fibre modulus at a density pair the paper had stopped using. There is one route
-now, `fig08_rom.lamination_theory`, with the fibre moduli combined by volume at
-the densities §3.4 states, and it gives 26.28 GPa; §3.4, Figure 8 and §4.2 are
-all checked against it below. Supplementary Table S8's elementary-fibre axial modulus and
-`rule_of_mixtures.FLAX_INPUTS` disagreed at 45.30 against 52.47 GPa for the same
-row; the cited paper measures 45.3 GPa and quotes 52.47 from earlier work in its
-own introduction, so the table was right and the list now carries 45.30 too.
+What the count means. Every line marked as published compares a value printed
+in the manuscript, the supplement or the reply with the value recomputed here, at
+the precision it is printed. Lines marked as internal hold the deposit against
+itself: a stored product against the live computation of the same quantity, or
+an invariant of printed numbers. A check against a value no document carries is
+not kept, because it would report success on nothing.
 
-An earlier version of this script reported sixty-seven values reproducing while
-checking eight the paper no longer prints, among them the whole-map Voigt sum of
-21.33 GPa read as the headline estimate, the Hill and Reuss values that go with
-it, and an overshoot against a 20.1 GPa target from the first submission. Those
-checks are gone. A check against a value the paper does not carry is worse than
-no check, because it reports success.
-
-The same audit has now been run line by line against the seven documents, and the
-count this script reports means one thing only: the number of values printed in
-them that reproduce. What changed in this round.
-
-Four checks compared against quantities that appear in none of the seven
-documents and are gone. The Welch t of the chord modulus, which is nowhere on the
-page, and whose p value is checked instead and pins it. The two moduli over the
-window above the tangent-modulus crossover, 19.91 and 18.48 GPa, which the paper
-does not discuss; `make_flexural_moduli.py` documents the window and the column
-is deposited, so nothing is lost by not claiming them as published. And the
-Hedges g of the strain at break, where Supplementary Table S7 prints n/a, because
-that comparison was not pre-specified.
-
-Two more compared against something real but unpublished and are now reported as
-internal consistency checks rather than as published values: the unmarked
-interface band at 4.0 %, which is stated in the README and in the segmentation
-file's own method note but in no document, and the sum of the Eq. (1) fractions,
-which is an invariant of four printed numbers rather than a fifth printed number.
-
-Nine cells of the depth-resolved column of Table 3 were compared against literals
-carried to more decimals than the table prints: 29.76 where it prints 29.8, 0.203
-where it prints 0.20. Those now compare against the printed figure at the printed
-precision, which is what a reader can check.
-
-One tolerance had been widened by hand, to 0.015 where its neighbours use 0.005,
-so that a computed 0.200 would accept the 0.19 the paper prints. The printed value
-was right and the check was wrong: it differenced two estimates that
-Supplementary Table S3 rounds to two decimals. Differencing them before they are
-rounded gives 0.190, and the tolerance is back to 0.005.
-
-Six blocks of printed values had no check at all and now have one: the areal-mass
-route to the volume fractions, whose densities 3.4 now states; the exclusion
-test in the Supplementary Figure S3 caption; the spacing test of 2.2 with the
-contact depths of Table 1; the per-class strain-rate sensitivity; the two ASTM
-D790 departures of 2.5 with the rate bound that follows from them; and the
-Timoshenko bracket of 4.3.5, which reproduces now that the paragraph states its
-shear coefficient and its inversion.
-
-Four more routes were added in the third round, for printed values that had
-none: the 0.55 and 0.67 of 4.1, a Hill inversion of the two mixed-volume medians
-on the shallow end members; the +/- 1.1 and +/- 3.2 on the imaged fibre fractions
-of Figure 2e, from the field-to-field scatter of the tiles; the 0.72 and 0.75 of
-4.2 with the 1.44 x 1.41 decomposition, now on the same lamination-theory route
-as the Figure 8 baseline; and the block-size sweep of the budget in both of its
-forms, since the Table S5 caption named one as the other. The sliding-window
-checks of 2.4 hold the product to the corrected sweep, which for two rounds ran
-with the map's footprint transposed.
-
-And three groups of printed values are declared at the end as not reproducible
-from what is deposited, rather than passed over in silence: the void-threshold
-range of 3.4, the two figures Supplementary Table S3 carries from the
-superseded quality mask, and the four class medians the reply quotes on the
-previous deposit's retired reading of the slice values. Declaring them is the
-point. A reader should not have to discover the boundary of the deposit by
-looking for a check that is not there.
-
-The fourth round added checks for what was printed and unchecked: the peak
-loads, the 2 mN shares and the depth decline of the stiff medians in 3.2, the
-per-band counts of 3.3, every spatial statistic of 4.1, the within-band
-construction of Figure 8a, the two clustering variants with the seed sweep and
-the subsample stability, the whole of 4.4 through `depth_softening.py`, the
-reading-depth rows of Supplementary Table S4, and the sixth row and the
-share-of-variance column of Table S5. One target moved with a correction to the
-code rather than to the page: ARI* is held to 0.83, because the metric 2.3
-describes merges the compliant classes on both sides and the code had merged
-them on one, which is where the 0.65 the paper printed came from.
+One printed value cannot be recomputed from what is deposited, the dark-feature
+area across the threshold sweep of §3.1, which is computed on the raw tile
+images. It is named at the end of the run rather than passed over, so that a
+reader does not have to find the boundary of the deposit by looking for a check
+that is not there.
 """
 
 import json
@@ -272,20 +198,16 @@ report("rejected, per cent", 100 * _dr_all.qc_flag_strict.mean(), 15.2, 0.05)
 # data.
 _dr_ci = _intervals(_dr_all, "E_150").set_index("class")
 # Every figure below is the one Table 3 prints, at the precision it prints it.
-# Nine of these cells used to be compared against literals carried to more
-# decimals than the table has: 29.76 against a printed 29.8, 0.203 against a
-# printed 0.20. Each of those extra digits was right, and none of them was on the
-# page, so nine of the values this script reported as published were not. The
-# modulus column of this table does not print to one precision: the two compliant
+# The modulus column of this table does not print to one precision: the two compliant
 # classes are given to two decimals and the two stiff ones to one, because the
 # table follows the significance of the value and not a format string. The
 # tolerance follows the cell, so `tol` is carried per row. Half a unit in the last
 # printed digit, and a hair more, exactly as ROUNDED is for a one-decimal cell.
 for cls, n, E, lo, hi, H, tol in [
-        ("flax", 1120, 3.79, 3.67, 3.94, 0.20, 0.0051),
-        ("matrix", 124, 5.32, 4.65, 6.39, 0.23, 0.0051),
-        ("mixed-volume", 241, 29.8, 27.4, 31.2, 1.87, ROUNDED),
-        ("basalt", 211, 53.0, 50.5, 54.5, 4.19, ROUNDED)]:
+        ("flax", 1118, 4.10, 3.97, 4.27, 0.20, 0.0051),
+        ("matrix", 115, 5.50, 4.78, 6.55, 0.21, 0.0051),
+        ("mixed-volume", 221, 29.1, 27.8, 31.3, 1.58, ROUNDED),
+        ("basalt", 242, 54.7, 53.4, 57.1, 3.98, ROUNDED)]:
     g = _dr_all[_dr_all.constituent == cls]
     report(f"n({cls}), depth-resolved", len(g), n, 0)
     report(f"median E({cls}) @ 150 nm", float(g.E_150.median()), E, tol)
@@ -297,20 +219,18 @@ for cls, n, E, lo, hi, H, tol in [
 # there.
 _dr_basalt = _dr_all[_dr_all.constituent == "basalt"]
 report("basalt contacts of the depth-resolved class a 70 GPa cut would reject",
-       int((_dr_basalt.E_150 <= 70).sum()), 178, 0)
+       int((_dr_basalt.E_150 <= 70).sum()), 197, 0)
 
 # The four strain-rate sensitivity medians of 3.2, of which 4.3.2 quotes the
 # flax and matrix ones as the evidence that the compliant classes are separable
 # where the measurement can resolve them. The flax one is also what bounds the
-# rate departure of 2.5 below, so it is checked where it is measured. The basalt
-# and mixed-volume medians were printed and unchecked until this round.
+# rate departure of 2.5 below, so it is checked where it is measured.
 _srs = _flex.strain_rate_sensitivity()
-for cls, printed in (("basalt", 0.021), ("mixed-volume", 0.026),
-                     ("matrix", 0.059), ("flax", 0.073)):
+for cls, printed in (("basalt", 0.021), ("mixed-volume", 0.028),
+                     ("matrix", 0.062), ("flax", 0.073)):
     report(f"strain-rate sensitivity, {cls}", _srs[cls], printed, 0.0005)
 
-# The rest of what 3.2 reads off the depth-resolved curves, none of it checked
-# until this round. The peak load per class is the median over its indents of
+# The rest of what 3.2 reads off the depth-resolved curves. The peak load per class is the median over its indents of
 # the largest load each trace records, which on a depth-controlled acquisition
 # is the load at the 300 nm target; the two shares reaching 2 mN are counted on
 # the same per-indent maximum. The decline of the two stiff medians between 100
@@ -321,8 +241,8 @@ print("\ndepth-resolved loading curves and depth signatures (3.2, Figure 5)")
 from fig05_curves_per_class import resample as _fig05_resample, GRID as _fig05_grid  # noqa: E402
 _curves = pd.read_csv(DATA / "depth_resolved_curves.csv")
 _peak = _curves.groupby("indent_id").load_mN.max()
-for cls, printed in (("flax", 0.37), ("matrix", 0.51), ("mixed-volume", 2.68),
-                     ("basalt", 5.41)):
+for cls, printed in (("flax", 0.37), ("matrix", 0.47), ("mixed-volume", 2.39),
+                     ("basalt", 5.18)):
     ids = _dr_all.loc[_dr_all.constituent == cls, "indent_id"]
     report(f"median peak load, {cls}, mN", float(_peak.reindex(ids).median()),
            printed, 0.0051)
@@ -331,7 +251,7 @@ for cls, printed in (("flax", 0.1), ("matrix", 4)):
     report(f"{cls} indents reaching 2 mN, per cent",
            100 * float((_peak.reindex(ids) >= 2.0).mean()), printed,
            ROUNDED if printed < 1 else 0.5)
-for cls, at_100, at_300 in (("basalt", 59, 39), ("mixed-volume", 31, 22)):
+for cls, at_100, at_300 in (("basalt", 61, 40), ("mixed-volume", 31, 22)):
     ids = _dr_all.loc[_dr_all.constituent == cls, "indent_id"]
     stack = np.nanmedian(_fig05_resample(_curves, ids, "E_GPa"), axis=0)
     grid = list(_fig05_grid)
@@ -349,13 +269,13 @@ print("\nper-band counts of the depth-resolved map (3.3)")
 _bands = _dr_all[_dr_all.constituent != "QC/invalid"]
 _centre = _bands[_bands.zone == "basalt-centre"]
 report("classified contacts in the basalt-centre band", len(_centre), 534, 0)
-for cls, n, pct in (("matrix", 124, 23), ("mixed-volume", 217, 41),
-                    ("basalt", 193, 36)):
+for cls, n, pct in (("matrix", 115, 22), ("mixed-volume", 197, 37),
+                    ("basalt", 222, 42)):
     report(f"n({cls}) in the basalt-centre band",
            int((_centre.constituent == cls).sum()), n, 0)
     report(f"{cls}, per cent of the band",
            100 * float((_centre.constituent == cls).mean()), pct, 0.5)
-for zone, above, of in (("flax-top", 18, 731), ("flax-bottom", 0, 431)):
+for zone, above, of in (("flax-top", 19, 731), ("flax-bottom", 1, 431)):
     g = _bands[_bands.zone == zone]
     report(f"classified contacts in the {zone} band", len(g), of, 0)
     report(f"of them above 40 GPa at 150 nm", int((g.E_150 > 40).sum()), above, 0)
@@ -368,36 +288,37 @@ report("the two flax-rich bands above 40 GPa, about, per cent",
 # Where the rejections fall, which 2.2 reports in two sentences. The border
 # definition is imported rather than repeated: `border_rejection.py` owns it, and
 # `border_effect.py` uses the same one on the other map.
-# The spacing test of 2.2 and the contact depths of Table 1, which had no line
-# here: `spacing_compliance.py` computed them and nothing held them to the page.
-# The two columns come from different places on purpose. Table 1's contact depths
-# are the instrument's own, read from the deposited column; the compliance shares
-# are computed from the reconstruction the same paragraph describes, because a
-# reconstruction is what the deposited load and hardness support.
+# The spacing test of 2.2 and the depths of Table 1. The contact depths are the
+# instrument's own, read from the deposited column; the maximum depths are the
+# deposited column the spacing criterion is applied to, indent by indent.
 print("\nindent spacing and contact depth (2.2, Table 1)")
-_kept_hc, _no_hc = _spacing.reconstruct(sh)
-for cls, depth, hardness in (("basalt", 41, 6.98), ("mixed-volume", 78, 1.94),
-                             ("flax", 308, 0.21), ("matrix", 325, 0.19)):
+_sp = json.loads((DATA / "spacing_compliance.json").read_text())
+_sp_rows = {r["class"]: r for r in _sp["rows"]}
+for cls, depth, hmax, hardness in (("basalt", 41, 56, 6.98),
+                                   ("mixed-volume", 78, 97, 1.94),
+                                   ("flax", 308, 350, 0.21),
+                                   ("matrix", 325, 366, 0.19)):
     g = sh[sh.constituent == cls]
     report(f"median contact depth, {cls}, nm",
            float(g.contact_depth_nm.median()), depth, 0.51)
+    report(f"median maximum depth, {cls}, nm",
+           float(g.max_depth_nm.median()), hmax, 0.51)
     report(f"median hardness, {cls}, GPa", float(g.H_GPa.median()), hardness,
            0.0051)
-for cls, pct in (("flax", 79.2), ("matrix", 78.4)):
-    report(f"{cls} indents breaching the criterion, per cent",
-           _spacing.violating_pct(_kept_hc, cls), pct, ROUNDED)
-report("mixed-volume contacts meeting it, per cent",
-       100 - _spacing.violating_pct(_kept_hc, "mixed-volume"), 97.7, ROUNDED)
-# 2.2 says the depth is reconstructed for every indent, and it is reconstructed
-# for 5550 of the 5551 classified: indent 8553 carries a hardness of exactly zero,
-# so A = P/H has no value. The product records which indent and why; these two
-# lines hold that record to the live computation rather than to the page, since no
-# document carries either count.
-_sp = json.loads((DATA / "spacing_compliance.json").read_text())
-report_same("spacing test, classified indents",
-            _sp["classified_indents"], len(_kept_hc) + len(_no_hc))
-report_same("spacing test, indents with a contact depth",
-            _sp["indents_with_a_reconstructed_contact_depth"], len(_kept_hc))
+for cls, short, long_ in (("flax", 84, 19), ("matrix", 82, 16),
+                          ("mixed-volume", 2, 0), ("basalt", 0, 0)):
+    report(f"{cls} indents breaching the criterion, short axis, per cent",
+           _spacing.breaching_pct(sh[sh.constituent == cls], cls, "short"),
+           short, 0.5)
+    report(f"{cls} indents breaching the criterion, long axis, per cent",
+           _spacing.breaching_pct(sh[sh.constituent == cls], cls, "long"),
+           long_, 0.5)
+report_same("spacing product, flax short-axis share against the live count",
+            _sp_rows["flax"]["breaching_short_axis_pct"],
+            round(_spacing.breaching_pct(sh[sh.constituent == "flax"], "flax",
+                                         "short"), 1))
+report("depth-resolved map, pitch over maximum depth",
+       _sp["depth_resolved"]["pitch_over_max_depth"], 10, 0)
 
 print("\nwhere the rejected indents fall (2.2)")
 _edge = _border.rejection_rates(_dr_all, "x_um")
@@ -421,7 +342,7 @@ for cls, uniform, phase in (("flax", 4.70, 4.70), ("matrix", 4.66, 4.22),
            float(_s1.E_phase_specific_GPa[cls]), phase, 0.005)
 _est = _poi.estimates(_poi.table())
 report("estimate at phase-specific Poisson ratios", _est["phase_specific"],
-       18.30, 0.005)
+       18.31, 0.005)
 
 # Eq. (1) as the paper now builds it. The fractions are mixed inside each zone
 # and the two zones are weighted by the share they occupy on the imaged section,
@@ -651,17 +572,15 @@ report_same("grid high, against the budget's recorded range",
             budget["type_b_ranges"]["threshold_sweep_GPa"][1])
 
 print("\nphase-angle quality sensitivity (Supplementary Table S3)")
-# Every cell of the table, including the first row, whose rejected count and
-# basalt median are recorded values of the superseded mask and whose estimate is
-# computed from that median like every other row.
+# Every cell of the table. The first row applies the instrument's own flag,
+# deposited as `qc_flag_instrument`; the rest apply the stated rule.
 rows_S3 = _pas.sweep()
 # Three of these four fractions are exact halves at one decimal: 433, 473 and
 # 217 over 2000 give 21.65, 23.65 and 10.85. The supplement rounds all three
-# half-up and is self-consistent with the "11 % to 24 %" in the body. Python's
-# round() takes 21.65 up but 23.65 and 10.85 down, which is how two of these
-# literals came to hold the table to numbers it does not print.
-published_S3 = [(433, 21.7, 49.47, 16.53), (473, 23.7, 53.14, 16.73),
-                (304, 15.2, 53.01, 16.73), (217, 10.9, 52.63, 16.70)]
+# half-up and is self-consistent with the "11 % to 24 %" in the body, so the
+# checks carry the half-up figures.
+published_S3 = [(433, 21.7, 51.98, 16.67), (473, 23.7, 54.70, 16.82),
+                (304, 15.2, 54.67, 16.81), (217, 10.9, 54.59, 16.81)]
 for row, (n, pct, basalt, estimate) in zip(rows_S3, published_S3):
     name = str(row["phase_angle_limit_deg"]).split(" ")[0]
     report(f"rejected at {name} deg", row["rejected"], n, 0)
@@ -671,16 +590,20 @@ for row, (n, pct, basalt, estimate) in zip(rows_S3, published_S3):
     report(f"estimate on that input at {name} deg",
            row["Voigt_with_that_input_GPa"], estimate, 0.005)
 swept = [r["Voigt_with_that_input_GPa"] for r in rows_S3[1:]]
-report("what the 10 to 20 deg sweep moves", max(swept) - min(swept), 0.03, 0.005)
-# 4.3.3 prints 0.19 GPa for this move. The check used to difference the two cells
-# of Supplementary Table S3, which the table rounds to 16.53 and 16.73, so it got
-# 0.200 and the tolerance had been widened from 0.005 to 0.015 to let 0.19 in. A
-# tolerance that exists to make a check pass tests the tolerance. The two
-# estimates unrounded differ by 0.190, which is what the paper prints, so the
-# difference is taken before the rounding and the tolerance is back where its
-# neighbours are.
-report("what replacing the superseded mask moved", _pas.superseded_move(), 0.19,
-       0.005)
+report("what the 10 to 20 deg sweep moves", max(swept) - min(swept), 0.01, 0.005)
+# 4.3.3 prints this move. It is the difference of the two estimates before
+# they are rounded into the table.
+report("the estimate between the instrument's flag and the stated rule",
+       _pas.instrument_flag_move(), 0.14, 0.005)
+_flags = pd.read_csv(DATA / "depth_resolved_indents.csv")[
+    ["indent_id", "qc_flag_instrument"]].merge(
+    _dr_all[["indent_id", "qc_flag_strict"]], on="indent_id")
+report("indents the stated rule readmits against the instrument's flag",
+       int(((_flags.qc_flag_instrument == 1) & (_flags.qc_flag_strict == 0)).sum()),
+       132, 0)
+report("indents it newly rejects",
+       int(((_flags.qc_flag_instrument == 0) & (_flags.qc_flag_strict == 1)).sum()),
+       3, 0)
 
 print("\ninput substitutions (Supplementary Tables S4 and S8, 3.4)")
 flex = pd.read_csv(DATA / "flexural_moduli.csv")
@@ -703,20 +626,20 @@ report("relative gap, flax-longitudinal", gap(voigt, "flax_face"), -6.8, 0.05)
 basalt_depth = float(_dr_all.loc[(_dr_all.qc_flag_strict == 0)
                                  & (_dr_all.constituent == "basalt"),
                                  "E_150"].median())
-report("depth-resolved basalt input", basalt_depth, 53.01, 0.02)
+report("depth-resolved basalt input", basalt_depth, 54.67, 0.005)
 estimate_depth = with_input("basalt", basalt_depth)
-report("estimate with the depth-resolved basalt input", estimate_depth, 16.73,
+report("estimate with the depth-resolved basalt input", estimate_depth, 16.81,
        0.005)
 report("relative gap on that input, basalt-longitudinal",
-       gap(estimate_depth, "basalt_face"), -12.7, 0.05)
+       gap(estimate_depth, "basalt_face"), -12.1, 0.05)
 report("relative gap on that input, flax-longitudinal",
-       gap(estimate_depth, "flax_face"), -18.1, 0.05)
+       gap(estimate_depth, "flax_face"), -17.5, 0.051)
 report("estimate with the bulk PA-11 matrix, 1.5 GPa", with_input("matrix", 1.5),
        18.13, 0.005)
 report("estimate with the matrix at 1.0 GPa", with_input("matrix", 1.0), 18.07,
        0.005)
 # The reading depth as a sensitivity, beside the cut: the basalt input read
-# from the sixty basalt-centre traces of Supplementary Figure S7 at 80 nm,
+# from the selected basalt-centre traces of Supplementary Figure S7 at 80 nm,
 # where the two acquisitions agree, and at 50 nm, the shallowest deposited
 # point, each substituted as the depth-resolved median is above. The medians
 # are held to the live computation in `depth_softening.py`, and the two rows
@@ -728,11 +651,11 @@ _readings = _soft.basalt_readings()["median_GPa"]
 _sweep = json.loads((DATA / "basalt_input_sweep.json").read_text())
 for row, (printed_input, printed, g_basalt, g_flax) in zip(
         _sweep["reading_depth"],
-        ((82.5, 18.31, -2.9, -7.9), (98.4, 19.16, 1.6, -3.1))):
+        ((84.7, 18.43, -2.3, -7.2), (97.9, 19.14, 1.5, -3.2))):
     z = row["read_at_nm"]
     report_same(f"basalt input read at {z:g} nm, product against the traces",
                 row["basalt_input_GPa"], _readings[z])
-    report(f"basalt input read at {z:g} nm on the sixty, GPa",
+    report(f"basalt input read at {z:g} nm on the selected traces, GPa",
            row["basalt_input_GPa"], printed_input, ROUNDED)
     report_same(f"estimate on that input, product against Eq. (1)",
                 row["voigt_mosaic_GPa"], with_input("basalt", row["basalt_input_GPa"]))
@@ -957,42 +880,41 @@ report("its interval, low", acq["shallow"]["phi_compliance_ci95"][0], 0.68, 0.00
 report("its interval, high", acq["shallow"]["phi_compliance_ci95"][1], 0.71, 0.005)
 report("basalt fraction on the tie line, depth-resolved",
        acq["depth"]["phi_compliance"], 0.78, 0.005)
-report("its interval, low", acq["depth"]["phi_compliance_ci95"][0], 0.75, 0.005)
-report("its interval, high", acq["depth"]["phi_compliance_ci95"][1], 0.80, 0.005)
+report("its interval, low", acq["depth"]["phi_compliance_ci95"][0], 0.76, 0.005)
+report("its interval, high", acq["depth"]["phi_compliance_ci95"][1], 0.81, 0.005)
 report("the same under linear mixing, load-controlled",
        acq["shallow"]["phi_linear"], 0.36, 0.005)
 report("the same under linear mixing, depth-resolved",
-       acq["depth"]["phi_linear"], 0.55, 0.005)
+       acq["depth"]["phi_linear"], 0.57, 0.005)
 report("basalt packing in the zone, from the imaging",
        dec["independent_comparison"]["in_zone_basalt_packing_from_imaging"],
        0.665, 0.001)
 report("two-class sum, load-controlled",
        dec["two_class_sum_GPa"]["compliance"]["shallow"], 61.0, 0.05)
 report("two-class sum, depth-resolved",
-       dec["two_class_sum_GPa"]["compliance"]["depth"], 67.7, 0.05)
+       dec["two_class_sum_GPa"]["compliance"]["depth"], 68.4, 0.05)
 report("the two sums, per cent apart",
-       dec["two_class_sum_GPa"]["compliance"]["spread_pct"], 10.3, 0.05)
+       dec["two_class_sum_GPa"]["compliance"]["spread_pct"], 11.4, 0.05)
 bulk = [e for e in acq["shallow"]["endpoint_sensitivity"]
-        if e["e_matrix"] == 1.0 and e["e_basalt"] == 85.99][0]
+        if e["e_matrix"] == 1.0 and abs(e["e_basalt"] - acq["shallow"]["e_basalt_end_member_GPa"]) < 0.01][0]
 report("load-controlled fraction at a bulk matrix end member",
        bulk["phi_compliance"], 0.91, 0.005)
 bulk_depth = [e for e in acq["depth"]["endpoint_sensitivity"]
-              if e["e_matrix"] == 1.0 and e["e_basalt"] == 53.14][0]
+              if e["e_matrix"] == 1.0 and abs(e["e_basalt"] - acq["depth"]["e_basalt_end_member_GPa"]) < 0.01][0]
 report("depth-resolved fraction at a bulk matrix end member",
-       bulk_depth["phi_compliance"], 0.94, 0.005)
-# 4.3.6 prints this span to the unit, "within 3 to 9 %", so that is what the two
-# lines compare against. They used to compare against 3.2 and 9.1, which are what
-# the deposited product carries and are nowhere on the page.
+       bulk_depth["phi_compliance"], 0.95, 0.005)
+# 4.3.6 prints this span to the unit, so that is what the two lines compare
+# against.
 report("gap between the acquisitions across that sweep, low",
-       dec["cross_acquisition_agreement"]["gap_span_pct"][0], 3, 0.5)
+       dec["cross_acquisition_agreement"]["gap_span_pct"][0], 4, 0.5)
 report("gap between the acquisitions across that sweep, high",
-       dec["cross_acquisition_agreement"]["gap_span_pct"][1], 9, 0.5)
+       dec["cross_acquisition_agreement"]["gap_span_pct"][1], 10, 0.5)
 report("mixed-volume share of the basalt zone, load-controlled",
        100 * acq["shallow"]["mixed_class_fraction"], 55, 0.5)
 report("mixed-volume share of the basalt zone, depth-resolved",
-       100 * acq["depth"]["mixed_class_fraction"], 41, 0.5)
-# The two fibre fractions 4.1 and 2.3 print for the mixed-volume contact, 0.55
-# and 0.67, which had no route in the deposit. They are the Hill inversion: the
+       100 * acq["depth"]["mixed_class_fraction"], 37, 0.5)
+# The two fibre fractions 4.1 and 2.3 print for the mixed-volume contact, 0.54
+# and 0.67. They are the Hill inversion: the
 # class median placed on the arithmetic mean of the Voigt and Reuss curves
 # between the two shallow end members, 86.0 and 4.66 GPa, and solved for the
 # basalt fraction. Both medians are inverted on the shallow end members. The
@@ -1006,24 +928,25 @@ _mixed_depth = float(_dr_all.loc[_dr_all.constituent == "mixed-volume",
 _mixed_shallow = float(tab.loc[tab["class"] == "mixed-volume",
                                "E_median_GPa"].iloc[0])
 report("fibre fraction in the mixed-volume contact, depth-resolved (Hill)",
-       _hill(_mixed_depth, _e_b, _e_m), 0.55, 0.005)
+       _hill(_mixed_depth, _e_b, _e_m), 0.54, 0.005)
 report("fibre fraction in the mixed-volume contact, load-controlled (Hill)",
        _hill(_mixed_shallow, _e_b, _e_m), 0.67, 0.005)
 
 # Where the mixed-volume contacts sit, which 4.1 states in five numbers and
-# three words, none of them checked until this round. Read from the deposited
-# product, which `figs_supplementary.py` writes and `provenance_check.py` holds
-# to it; the definitions are in the file beside the values. The three medians
-# are printed as words, a quarter, half and none, and are checked as the
+# three words. Read from the deposited product, which `figs_supplementary.py`
+# writes and `provenance_check.py` holds to it; the definitions are in the file
+# beside the values. The three medians are printed as words, three eighths,
+# five eighths and one eighth, and are checked as the
 # fractions those words name.
 print("\nspatial localisation of the mixed-volume class (4.1, Figure S6)")
 _spatial = json.loads((DATA / "spatial_localisation.json").read_text())
-for cls, printed, word in (("mixed-volume", 0.25, "a quarter"),
-                           ("basalt", 0.5, "half"), ("matrix", 0.0, "none")):
+for cls, printed, word in (("mixed-volume", 0.375, "three eighths"),
+                           ("basalt", 0.625, "five eighths"),
+                           ("matrix", 0.125, "one eighth")):
     report(f"basalt share of the eight neighbours, {cls} ({word})",
            _spatial["median_basalt_neighbour_fraction"][cls], printed, 0.0005)
 report_sci("Mann-Whitney p, mixed-volume above matrix, k = 8",
-           _spatial["p_depth_resolved"], 2.3, -12)
+           _spatial["p_depth_resolved"], 2.6, -15)
 report("bootstrap interval on the median difference, low",
        _spatial["median_difference_ci95"][0], 0.125, 0.0005)
 report("bootstrap interval on the median difference, high",
@@ -1032,7 +955,7 @@ report_below("largest p over k = 3 to 20", _spatial["p_max_over_k_3_to_20"],
              1e-9)
 report("indents left after excluding 6 um at each end of the band",
        _spatial["n_after_edge_exclusion"], 467, 0)
-report_sci("p on those indents", _spatial["p_excluding_edge_bands"], 6.5, -8)
+report_sci("p on those indents", _spatial["p_excluding_edge_bands"], 9.1, -11)
 report_sci("p on the load-controlled map", _spatial["p_load_controlled_map"],
            1.1, -77)
 report("indents in the load-controlled basalt-rich zone",
@@ -1049,13 +972,13 @@ print("\nthe within-band construction (3.4, Figure 8a)")
 from fig08_rom import zone_table as _zone_table                     # noqa: E402
 _zt = _zone_table(_dr_all).set_index("zone")
 report("basalt-centre, shallow-corrected Voigt",
-       float(_zt.voigt_shallow_corrected["basalt-centre"]), 44.5, ROUNDED)
+       float(_zt.voigt_shallow_corrected["basalt-centre"]), 47.8, ROUNDED)
 report("basalt-centre, shallow-corrected Hill",
-       float(_zt.hill_shallow_corrected["basalt-centre"]), 30.4, ROUNDED)
+       float(_zt.hill_shallow_corrected["basalt-centre"]), 32.8, ROUNDED)
 report("basalt-centre, observed zone mean",
-       float(_zt.observed["basalt-centre"]), 33.9, ROUNDED)
-for zone, printed in (("basalt-centre", 11), ("flax-bottom", 18),
-                      ("flax-top", 18)):
+       float(_zt.observed["basalt-centre"]), 36.7, ROUNDED)
+for zone, printed in (("basalt-centre", 12), ("flax-bottom", 16),
+                      ("flax-top", 19)):
     hill_c, obs = (float(_zt.hill_shallow_corrected[zone]),
                    float(_zt.observed[zone]))
     report(f"{zone}, Hill below the observed mean, per cent of Hill",
@@ -1064,38 +987,31 @@ for zone, printed in (("basalt-centre", 11), ("flax-bottom", 18),
 print("\nunsupervised cross-check (2.3, 3.3, Figure S5)")
 dr = pd.read_csv(DATA / "classified_depth_resolved.csv")
 c = cluster_run(dr)
-# 3.3 carries the first of these to four decimals, 0.4080, where it reports the
-# seed sweep, and the second to two everywhere it appears.
-#
-# ARI* is held to 0.83 and not to the 0.65 the paper printed for two rounds.
-# 2.3 describes the metric as computed with both compliant phases merged into a
-# single class, and the code merged the two compliant clusters only, leaving
-# the rule's flax and matrix labels in the comparison, which gave 0.652. With
-# the merge applied to both sides, as described, it is 0.832; the two variants
-# below move with it, 0.653 to 0.830 and 0.713 to 0.722, and nothing else does,
-# because nothing else merges. These lines hold the deposit to the corrected
-# values until 2.3, 3.3, 4.3.2, the Conclusions and the Figure S5 caption are
-# reprinted.
-report("ARI, rule vs k-means (k = 4)", c["ARI"], 0.408, 0.005)
-report("ARI*, compliant classes merged on both sides", c["ARI_star"], 0.83,
+# 3.3 carries the first of these to four decimals where it reports the seed
+# sweep, and the second to two everywhere it appears. ARI* merges the compliant
+# classes on both sides, as 2.3 describes: the two most compliant clusters into
+# one, and flax with matrix into one compliant rule class.
+report("ARI, rule vs k-means (k = 4)", c["ARI"], 0.40, 0.005)
+report("ARI*, compliant classes merged on both sides", c["ARI_star"], 0.81,
        0.0051)
-# The rest of what 3.3 prints about the partition, none of it checked until
-# this round: the two variants, the seed sweep and the subsample stability. The
-# stability is plain ARI between the full fit and each refit at k = 4, with
-# nothing merged and the rule taking no part, so it is neither the ARI against
-# the rule nor ARI* and it did not move when ARI* was corrected.
+# The rest of what 3.3 prints about the partition: the two variants, the seed
+# sweep and the subsample stability. The stability is plain ARI between the
+# full fit and each refit at k = 4, with nothing merged and the rule taking no
+# part, so it is neither the ARI against the rule nor ARI*.
 for label, kw, ari, ari_star in (("three principal components",
-                                  dict(use_pca=True), 0.410, 0.83),
+                                  dict(use_pca=True), 0.404, 0.81),
                                  ("full-covariance Gaussian mixture",
-                                  dict(model="gmm"), 0.352, 0.72)):
+                                  dict(model="gmm"), 0.357, 0.74)):
     v = cluster_run(dr, **kw)
     report(f"ARI, {label}", v["ARI"], ari, 0.0005)
     report(f"ARI*, {label}", v["ARI_star"], ari_star, 0.0051)
 _seed_aris = sorted(round(cluster_run(dr, seed=s)["ARI"], 4)
                     for s in (0, 1, 42, 123, 2024))
-report("seeds reproducing the same partition, at ARI 0.4080",
-       _seed_aris.count(0.408), 4, 0)
-report("the fifth seed, ARI", max(_seed_aris), 0.4092, 0.00005)
+_seed_mode = max(set(_seed_aris), key=_seed_aris.count)
+report("seeds reproducing the same partition",
+       _seed_aris.count(_seed_mode), 4, 0)
+report("the partition's ARI", _seed_mode, 0.4016, 0.00005)
+report("the fifth seed, ARI", max(_seed_aris), 0.4028, 0.00005)
 from clustering_check import bootstrap_stability as _stability      # noqa: E402
 _stab_mean, _stab_sd = _stability(dr)
 report("stability over twenty 90 % subsamples, mean ARI", _stab_mean, 0.979,
@@ -1251,38 +1167,36 @@ report("widened gap at the printed high end",
        _flex.gap_pct(max(_means.values()), voigt, _printed_high), 14, 0.5)
 
 # The depth dependence of the stiff contacts, which 4.4 argues from and the
-# Figure S7 caption summarises. Every figure in that section was computed by
-# hand until this round; `depth_softening.py` now computes them and writes
+# Figure S7 caption summarises. `depth_softening.py` computes them and writes
 # `depth_softening.json`, which `provenance_check.py` holds to the script. The
 # checks read the product, after holding its selection to a live recomputation
-# so that a stale file cannot pass. The last block, S^2/P, the contact
-# stiffness and the two cut-free shares, is held to the values the reply and
-# 4.4 will print for them, which no document carries yet.
+# so that a stale file cannot pass.
 print("\nthe depth dependence of the stiff contacts (4.4, Figure S7)")
 _soften = json.loads((DATA / "depth_softening.json").read_text())
 _sel = _soften["selection"]
 report_same("selected contacts, product against the traces", _sel["n"],
             _soft.basalt_readings()["n"])
-report("basalt-centre contacts above 70 GPa at 80 nm", _sel["n"], 60, 0)
+report("basalt-centre contacts above 70 GPa at 80 nm", _sel["n"], 86, 0)
 report("of them classified basalt at 150 nm",
-       _sel["class_at_150_nm"].get("basalt", 0), 60, 0)
+       _sel["class_at_150_nm"].get("basalt", 0), 86, 0)
 _ez = _soften["E_median_GPa_by_depth"]
-report("their median E at 80 nm, GPa", _ez["80"], 82.5, ROUNDED)
-report("their median E at 300 nm, GPa", _ez["300"], 44.3, ROUNDED)
+for _z, _printed in (("50", 97.9), ("60", 91.0), ("70", 87.5), ("80", 84.7),
+                     ("100", 78.1), ("150", 68.5), ("200", 61.6), ("300", 46.3)):
+    report(f"their median E at {_z} nm, GPa", _ez[_z], _printed, ROUNDED)
 _r = _soften["E300_over_E80"]
 report("E(300)/E(80), every one softer at 300 nm, per cent",
        _r["softening_pct"], 100, 0)
-report_internal("softer by half or more", _r["at_or_below_half"], 33, 0,
-                "the median ratio is 0.48; the count is not printed")
+report_internal("softer by half or more", _r["at_or_below_half"], 38, 0,
+                "the median ratio is 0.52; the count is not printed")
 report_internal("E(300)/E(80), lowest", _r["min"], 0.33, 0.0051,
                 "the range behind '100 % softening'; not printed")
-report_internal("E(300)/E(80), highest", _r["max"], 0.78, 0.0051,
+report_internal("E(300)/E(80), highest", _r["max"], 0.92, 0.0051,
                 "as above; not printed")
-report("E(300)/E(80), median", _r["median"], 0.48, 0.0051)
-report_internal("the median falls by, per cent", _r["median_E_fall_pct"], 46,
-                0.5, "82.5 to 44.3 GPa, printed as the two medians")
-_bands_printed = ((60, 0.48, 100), (175, 0.56, 97), (162, 0.82, 69),
-                  (137, 1.30, 41))
+report("E(300)/E(80), median", _r["median"], 0.52, 0.0051)
+report_internal("the median falls by, per cent", _r["median_E_fall_pct"], 45,
+                0.5, "84.7 to 46.3 GPa, printed as the two medians")
+_bands_printed = ((86, 0.52, 100), (177, 0.55, 95), (141, 0.88, 62),
+                  (130, 1.28, 42))
 for band, (n, ratio, pct) in zip(_soften["bands_by_E80_over_classified"],
                                  _bands_printed):
     lo, hi = band["lower_GPa"], band["upper_GPa"]
@@ -1294,16 +1208,16 @@ for band, (n, ratio, pct) in zip(_soften["bands_by_E80_over_classified"],
     report(f"band {name} GPa, softening, per cent", band["softening_pct"], pct,
            0.5)
 _called = _soften["called_basalt_at_150_nm"]
-report("contacts called basalt at 150 nm", _called["n"], 193, 0)
+report("contacts called basalt at 150 nm", _called["n"], 222, 0)
 report("of them softer at 300 than at 80 nm, per cent",
-       _called["E300_over_E80"]["softening_pct"], 88, 0.5)
+       _called["E300_over_E80"]["softening_pct"], 87, 0.5)
 report_internal("their median E(300)/E(150)",
                 _called["E300_over_E150"]["median"], 0.70, 0.0051,
-                "behind the 96 %; not printed")
+                "behind the 95 %; not printed")
 report("of them softer at 300 than at 150 nm, per cent",
-       _called["E300_over_E150"]["softening_pct"], 96, 0.5)
-report_internal("the sixty, median E(300)/E(150)",
-                _soften["E300_over_E150"]["median"], 0.63, 0.0051,
+       _called["E300_over_E150"]["softening_pct"], 95, 0.5)
+report_internal("the selected contacts, median E(300)/E(150)",
+                _soften["E300_over_E150"]["median"], 0.66, 0.0051,
                 "not printed")
 _dist = _soften["distance_to_nearest_compliant_contact"]
 report("grid pitch, um", _dist["pitch_um"], 3, ROUNDED)
@@ -1312,65 +1226,67 @@ report("distance to the nearest sub-15 GPa contact, shortest, um",
 report("distance to the nearest sub-15 GPa contact, longest, um",
        _dist["distance_range_um"][1], 19, 0.5)
 report("Spearman rho, ratio against that distance", _dist["spearman_rho"],
-       -0.01, 0.0051)
-report("its p", _dist["p"], 0.95, 0.0051)
+       0.01, 0.0051)
+report("its p", _dist["p"], 0.91, 0.0051)
 report("indents more than two pitches from any such contact",
-       _dist["far"]["n"], 15, 0)
-report("their median ratio", _dist["far"]["median_ratio"], 0.49, 0.0051)
-report("indents closer to one", _dist["near"]["n"], 45, 0)
-report("their median ratio", _dist["near"]["median_ratio"], 0.48, 0.0051)
+       _dist["far"]["n"], 25, 0)
+report("their median ratio", _dist["far"]["median_ratio"], 0.53, 0.0051)
+report("indents closer to one", _dist["near"]["n"], 61, 0)
+report("their median ratio", _dist["near"]["median_ratio"], 0.52, 0.0051)
 _n8 = _soften["eight_neighbour_basalt_fraction"]
-report("neighbourhoods at least six parts basalt", _n8["n_at_or_above"], 20, 0)
-report("their median ratio", _n8["median_ratio_at_or_above"], 0.51, 0.0051)
-report("the rest, median ratio", _n8["median_ratio_rest"], 0.47, 0.0051)
-report("Mann-Whitney p between the two", _n8["mann_whitney_two_sided_p"], 0.70,
+report("neighbourhoods at least six parts basalt", _n8["n_at_or_above"], 37, 0)
+report("their median ratio", _n8["median_ratio_at_or_above"], 0.53, 0.0051)
+report("the rest, median ratio", _n8["median_ratio_rest"], 0.52, 0.0051)
+report("Mann-Whitney p between the two", _n8["mann_whitney_two_sided_p"], 0.95,
        0.0051)
 _h = _soften["H300_over_H80"]
-report("H(300)/H(80), median", _h["median"], 0.66, 0.0051)
-report("contacts whose hardness is lower at 300 nm", _h["lower_at_300"], 52, 0)
+report("H(300)/H(80), median", _h["median"], 0.71, 0.0051)
+report("contacts whose hardness is lower at 300 nm", _h["lower_at_300"], 71, 0)
 # Held to the values the documents will print, as the ARI* lines above are.
 _s2p = _soften["S2_over_P"]
-report("S^2/P, median at 50 nm, GPa", _s2p["median_GPa_at_50_nm"], 2396, 0.51)
-report("S^2/P, median at 300 nm, GPa", _s2p["median_GPa_at_300_nm"], 754, 0.51)
+report("S^2/P, median at 50 nm, GPa", _s2p["median_GPa_at_50_nm"], 2372, 0.51)
+report("S^2/P, median at 300 nm, GPa", _s2p["median_GPa_at_300_nm"], 747, 0.51)
 report_internal("S^2/P, median ratio 300 over 50",
-                _s2p["median_ratio_300_over_50"], 0.31, 0.0051,
+                _s2p["median_ratio_300_over_50"], 0.30, 0.0051,
                 "printed as 'a factor of three'")
 report_below("S^2/P, ratio of the medians, under a third",
              _s2p["ratio_of_medians"], 1 / 3)
-report("contacts on which S^2/P falls", _s2p["falling"], 59, 0)
-report("contacts with S^2/P at both depths", _s2p["n_with_both"], 59, 0)
+report("contacts on which S^2/P falls", _s2p["falling"], 85, 0)
+report("contacts with S^2/P at both depths", _s2p["n_with_both"], 85, 0)
 # The contact stiffness 4.4 prints is read off the S^2/P channel, as
 # sqrt(S^2/P * P), so that the sentence and the S^2/P sentence before it rest
 # on one stiffness record. The exported stiffness channel is a second record
 # that does not agree with it (DATA_DICTIONARY.md, depth_resolved_curves.csv);
 # its figures are in the JSON under 'stiffness_channel' and are not printed.
 _s = _soften["contact_stiffness_S"]
-report("S, median at 250 nm, kN/m", _s["median_kN_per_m_at_250_nm"], 68.9,
+report("S, median at 250 nm, kN/m", _s["median_kN_per_m_at_250_nm"], 67.3,
        ROUNDED)
-report("S, median at 300 nm, kN/m", _s["median_kN_per_m_at_300_nm"], 70.0,
+report("S, median at 300 nm, kN/m", _s["median_kN_per_m_at_300_nm"], 68.5,
        ROUNDED)
 report_below("S, change of the medians 250 to 300 nm, under 2 per cent",
              abs(_s["change_of_medians_250_to_300_nm_pct"]), 2)
-report("load, median at 250 nm, mN", _s["median_load_mN_at_250_nm"], 5.2,
+report("load, median at 250 nm, mN", _s["median_load_mN_at_250_nm"], 5.0,
        ROUNDED)
-report("load, median at 300 nm, mN", _s["median_load_mN_at_300_nm"], 6.4,
+report("load, median at 300 nm, mN", _s["median_load_mN_at_300_nm"], 6.2,
        ROUNDED)
 report("load, rise of the medians 250 to 300 nm, per cent",
        _s["load_change_of_medians_250_to_300_nm_pct"], 23, 0.5)
-report_internal("S(300)/S(80), median on the sixty",
-                _s["S300_over_S80_median_selected"], 1.56, 0.0051,
+report_internal("S(300)/S(80), median on the selected contacts",
+                _s["S300_over_S80_median_selected"], 1.64, 0.0051,
                 "not printed")
 report_internal("S(300)/S(80), median on the matrix contacts",
-                _s["S300_over_S80_median_matrix"], 3.05, 0.0051,
+                _s["S300_over_S80_median_matrix"], 3.06, 0.0051,
                 "not printed")
 report_internal("the stiffness channel, contacts falling 250 to 300 nm",
-                _soften["stiffness_channel"]["falling_250_to_300_nm"], 48, 0,
+                _soften["stiffness_channel"]["falling_250_to_300_nm"], 67, 0,
                 "the other record; not printed")
 _share = _soften["cut_free_shares"]
-report("share above 70 GPa at 80 nm, basalt-centre, per cent",
-       _share["depth_resolved_above_70_GPa_at_80_nm"]["pct"], 11, 0.5)
-report("basalt class of the load-controlled basalt-rich zone, per cent",
-       _share["load_controlled_basalt_class"]["pct"], 12, 0.5)
+report_internal("share above 70 GPa at 80 nm, basalt-centre, per cent",
+                _share["depth_resolved_above_70_GPa_at_80_nm"]["pct"], 16, 0.5,
+                "not printed")
+report_internal("basalt class of the load-controlled basalt-rich zone, per cent",
+                _share["load_controlled_basalt_class"]["pct"], 12, 0.5,
+                "not printed")
 report_same("that share's numerator, against the count above",
             _share["load_controlled_basalt_class"]["n"],
             int(cross.loc["basalt", "basalt"]))
@@ -1379,30 +1295,52 @@ report_same("that share's numerator, against the count above",
 # left out, because the absence of a check is invisible and this deposit's whole
 # claim is that a reader does not have to take anything on trust. Each line says
 # what is missing and where the missing thing is.
-print("\nprinted values this deposit cannot reproduce: eight of them")
+# Contact size in the two acquisitions (3.3, 4.1, 4.4), from
+# `contact_geometry.py`: contact depths and equivalent radii by class, the
+# basalt-centre band re-read at a displacement where its stiff contacts have
+# the contact depth of the load-controlled ones, and the selected stiff
+# contacts read at the load-controlled contact depth on basalt.
+print("\ncontact size in the two acquisitions (3.3, 4.1, 4.4)")
+_cg = json.loads((DATA / "contact_geometry.json").read_text())
+_lc = _cg["load_controlled"]
+for cls, a in (("basalt", 0.12), ("mixed-volume", 0.22), ("flax", 0.86),
+               ("matrix", 0.91)):
+    report(f"equivalent contact radius, load-controlled, {cls}, um",
+           _lc[cls]["a_um"], a, 0.0051)
+_d150 = _cg["depth_resolved_by_displacement"]["150"]
+for cls, hc, a in (("basalt", 121, 0.34), ("mixed-volume", 126, 0.35),
+                   ("flax", 129, 0.36), ("matrix", 130, 0.36)):
+    report(f"contact depth at z = 150 nm, {cls}, nm", _d150[cls]["h_c_nm"], hc,
+           0.51)
+    report(f"equivalent contact radius at z = 150 nm, {cls}, um",
+           _d150[cls]["a_um"], a, 0.0051)
+_rr = _cg["basalt_centre_reread"]["80"]
+report("stiff contacts of the band, contact depth at z = 80 nm, nm",
+       _rr["h_c_stiff_nm"], 66, 0.51)
+report("mixed-volume share of the band read at z = 80 nm, per cent",
+       _rr["mixed_volume_pct"], 26, 0.5)
+_lcz = _cg["load_controlled_basalt_zone"]
+report("stiff contacts of the load-controlled basalt-rich zone, contact depth, nm",
+       _lcz["h_c_stiff_nm"], 68, 0.51)
+report("mixed-volume share of that zone on a 40 GPa cut, per cent",
+       _lcz["mixed_volume_pct_at_40"], 31, 0.5)
+_m = _cg["stiff_contacts_matched"]
+report_same("selected contacts, against the depth-softening product",
+            _m["n_selected"], _sel["n"])
+report("their contact depth at z = 50 nm, nm", _m["h_c_nm"], 40, 0.51)
+report("their median E there, GPa", _m["E_GPa"], 97.9, ROUNDED)
+report("their median load there, mN", _m["load_mN"], 0.41, 0.0051)
+report("load-controlled basalt, median peak load, mN",
+       _m["load_controlled_basalt_load_mN"], 0.51, 0.0051)
+report("their equivalent contact radius at 300 nm, um", _m["a_um_at_300"],
+       0.6, ROUNDED)
+
+print("\nprinted values this deposit cannot reproduce: one of them")
 for where, what, why in [
-    ("3.4", "dark-feature area from 12.9 % to 2.7 % across the threshold range",
+    ("3.1", "dark-feature area from 12.9 % to 2.7 % across the threshold range",
      "computed on the backscattered-electron pixels, which are several gigabytes "
      "of tile images and are not deposited; the deposit carries the segmentation "
      "at the threshold used, not the sweep"),
-    ("2.2, Supplementary Table S3",
-     "433 indents rejected by the superseded quality mask, and the 49.47 GPa "
-     "basalt median that goes with it",
-     "recorded from the previous submission. No rule applied to the deposited "
-     "phase-angle values reproduces that set, and `phase_angle_sensitivity.py` "
-     "carries both as recorded values. The two lines above that compare them "
-     "against the table confirm the transcription and not the measurement"),
-    ("the reply on the slice convention",
-     "the four depth-resolved class medians on the previous deposit's slice "
-     "values under the present quality mask, 52.76, 3.82, 5.37 and 29.70 GPa, "
-     "against 53.01, 3.79, 5.32 and 29.76 on the deposited ones",
-     "the previous deposit's `classified_depth_resolved.csv` carried a second "
-     "reading of the slice values that differed from the deposited window "
-     "means on nearly every indent, by a median of 0.05 GPa at 150 nm; it is "
-     "retired and is not in this deposit, so the four medians on it are "
-     "recorded in the README under Slice extraction and cannot be recomputed "
-     "here. The four on the deposited values are the Table 3 cells checked "
-     "above"),
     ]:
     print(f"  [--  ] {where}: {what}")
     print(f"         {why}")

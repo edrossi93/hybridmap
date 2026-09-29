@@ -17,10 +17,9 @@ often not the boundary the rule draws, because the mechanical signal cannot see
 it. Merging removes a distinction the data do not support. Set it to 0 and ARI*
 is just ARI again.
 
-Both sides, and not one. Until this round only the clusters were merged, while
-the rule kept its two compliant labels, so ARI* still scored the partition on a
-distinction the merge existed to remove: on the paper's map that read 0.652
-where the two-sided merge the paper describes gives 0.832. There is no matching
+Both sides, and not one: merging only the clusters while the rule kept its two
+compliant labels would still score the partition on the distinction the merge
+exists to remove. There is no matching
 step of any kind in here. ARI is invariant to how either side numbers its
 classes, so nothing has to be aligned before it is computed; the renumbering in
 `order_by_stiffness` exists so that the labels read the same way between runs,

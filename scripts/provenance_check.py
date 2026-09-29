@@ -56,7 +56,8 @@ PRIMARY = {
     "depth_resolved_indents.csv":
         "depth-resolved acquisition, one row per indent: position, the slice "
         "values at 100, 150 and 200 nm as the 20 nm window means of "
-        "Supplementary Note S1, and the strain-rate index. Computed from the "
+        "Supplementary Note S1, the strain-rate index and the instrument's own "
+        "quality flag. Computed from the "
         "instrument record at export; not regenerable exactly from the "
         "resampled curves, see the README under Slice extraction",
     "depth_resolved_curves.csv":
@@ -96,6 +97,7 @@ DERIVED = {
     "flexural_comparisons.json": "flexural_comparisons.py",
     "basalt_input_sweep.json": "basalt_input_sweep.py",
     "depth_softening.json": "depth_softening.py",
+    "contact_geometry.json": "contact_geometry.py",
 }
 
 

@@ -25,13 +25,9 @@ the matrix/flax boundary, which the mechanical signal cannot see. Merging
 removes a distinction the data do not support and is the comparison reported
 as ARI* in the paper.
 
-Until this round the merge was one-sided. The two compliant clusters were
-collapsed and the rule kept its flax and matrix labels, so ARI* still scored
-the partition against the boundary the merge exists to set aside, and printed
-0.652 where the two-sided comparison §2.3 describes gives 0.832. The
-principal-component and Gaussian-mixture variants moved with it, 0.653 to
-0.830 and 0.713 to 0.722; the plain ARI, the seed sweep and the subsample
-stability, none of which merge anything, did not move. There is no Hungarian
+The merge is applied on both sides, as §2.3 describes: the two compliant
+clusters are collapsed, and so are the rule's flax and matrix labels. There is
+no Hungarian
 or other matching step here and there never needed to be one: ARI is invariant
 to how either partition numbers its classes.
 """

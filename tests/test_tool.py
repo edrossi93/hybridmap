@@ -216,11 +216,8 @@ def ari_star_merges_both_sides():
     ARI* must compare two partitions that have both had their compliant
     classes merged.
 
-    For two rounds the package merged the two most compliant clusters and left
-    the rule's flax and matrix labels in place, so the score still turned on
-    the boundary the merge exists to set aside, and printed 0.65 where the
-    comparison the paper describes gives 0.83. This holds the package to the
-    description: the score it returns has to equal an adjusted Rand index
+    Merging only the clusters would leave the score turning on the boundary
+    the merge exists to set aside. This holds the package to the description: the score it returns has to equal an adjusted Rand index
     computed here between the rule with flax and matrix collapsed and the
     clusters with their two lowest collapsed, and with nothing merged it has to
     collapse back to plain ARI.

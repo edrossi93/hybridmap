@@ -185,8 +185,7 @@ if __name__ == "__main__":
     print(f"identical              {np.allclose(g, z)}")
 
     # Read the depth-resolved basalt median from the data rather than typing it
-    # in. The literal that used to sit here, 49.47 GPa, was the median under a
-    # quality mask that has since been replaced.
+    # in.
     _dr = pd.read_csv(data / "classified_depth_resolved.csv")
     basalt_depth = float(_dr.loc[(_dr.qc_flag_strict == 0)
                                  & (_dr.constituent == "basalt"),
@@ -195,7 +194,7 @@ if __name__ == "__main__":
           f"depth-resolved value ({basalt_depth:.2f} GPa): "
           f"{substitute(tab, 'basalt', basalt_depth)[0]:.2f} GPa")
     print("  (Supplementary Table S4 makes the same substitution in the "
-          "two-level construction: 16.73 GPa)")
+          "two-level construction: 16.81 GPa)")
     for Em in (1.0, 1.2, 1.5):
         print(f"single-map sum with the matrix set to bulk PA-11 {Em} GPa: "
               f"{substitute(tab, 'matrix', Em)[0]:.2f} GPa")

@@ -105,7 +105,7 @@ def build(outdir):
     row_b = []
     y_top_b = TOP + ROW_H + ROW_GAP
     for i, (col, ylab, ylim) in enumerate(
-            (("E_GPa", fs.AXIS["E"], (0, 75)),
+            (("E_GPa", fs.AXIS["E"], (0, 100)),
              ("H_GPa", fs.AXIS["H"], (0, 5)),
              ("phase_angle_deg", fs.AXIS["PA"], (0, 10)))):
         ax = place(LEFT + i * (BW + GAP_B), BW, y_top_b)

@@ -3,18 +3,18 @@
   "pool": "every indent in the zone, including quality-rejected ones",
   "test": "Mann-Whitney U, one-sided, mixed-volume above matrix",
   "median_basalt_neighbour_fraction": {
-    "basalt": 0.5,
-    "mixed-volume": 0.25,
-    "matrix": 0.0
+    "basalt": 0.625,
+    "mixed-volume": 0.375,
+    "matrix": 0.125
   },
   "median_difference_ci95": [
     0.125,
     0.375
   ],
-  "p_depth_resolved": 2.2502865956848586e-12,
-  "p_max_over_k_3_to_20": 5.109411847478285e-10,
+  "p_depth_resolved": 2.6192214496006914e-15,
+  "p_max_over_k_3_to_20": 9.404283459765922e-13,
   "edge_band_um": 6.0,
-  "p_excluding_edge_bands": 6.516408217990247e-08,
+  "p_excluding_edge_bands": 9.074212755904383e-11,
   "n_after_edge_exclusion": 467,
   "p_load_controlled_map": 1.1081370007497942e-77,
   "n_load_controlled_zone": 2760

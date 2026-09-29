@@ -30,6 +30,7 @@ LABEL = {"flax": "flax", "matrix": "matrix",
          "mixed-volume": "mixed-volume", "basalt": "basalt"}
 E_LOWER, E_UPPER = 15.0, 40.0          # the modulus thresholds of the rule
 LIMS = {"E_150": (0, 100), "H_150": (0, 8), "PA_150": (0, 15)}
+SCATTER_E = (0, 150)   # panel (a) holds every kept indent
 
 
 def build(outdir):
@@ -120,9 +121,9 @@ def _draw_panels(lab, ax_a, ax_b, ax_c, ax_d):
     ax_a.set_xlabel(fs.AXIS["H"])
     ax_a.set_ylabel(fs.AXIS["E"])
     ax_a.set_xlim(*LIMS["H_150"])
-    ax_a.set_ylim(*LIMS["E_150"])
+    ax_a.set_ylim(*SCATTER_E)
     ax_a.set_xticks([0, 2, 4, 6, 8])          # as submitted; the default
-    ax_a.set_yticks([0, 20, 40, 60, 80, 100])  # locator gives only 0 and 5
+    ax_a.set_yticks([0, 30, 60, 90, 120, 150])  # every kept indent in range
     leg = ax_a.legend(loc="upper left", fontsize=5.2, frameon=False,
                       handletextpad=0.25, borderpad=0.15, labelspacing=0.28,
                       markerscale=2.6)

@@ -22,7 +22,7 @@
   "type_a_combined_sd_GPa": 1.418874941161959,
   "type_b_sd_GPa": {
     "classification_thresholds": 0.24268484222473222,
-    "poisson_ratio": 0.05583915133756523,
+    "poisson_ratio": 0.05564424124144961,
     "runaway_contacts": 0.036717271062445454
   },
   "type_b_ranges": {
@@ -30,21 +30,21 @@
       17.998337389541977,
       18.839022343462123
     ],
-    "poisson_specific_voigt_GPa": 18.304464060954338,
+    "poisson_specific_voigt_GPa": 18.3051392493331,
     "runaway_contacts_in_and_out_GPa": [
       18.49789655529072,
       18.625088913281587
     ]
   },
-  "combined_sd_GPa": 1.4410302564899076,
+  "combined_sd_GPa": 1.4410227169897794,
   "share_of_variance_pct": {
-    "medians": 5.721959803352904,
-    "fractions": 56.168176666418326,
-    "zone_share": 18.003455083382896,
-    "type_a_combined": 96.9487107883876,
-    "classification_thresholds": 2.8362147047353234,
-    "poisson_ratio": 0.15015210297067433,
-    "runaway_contacts": 0.06492240390638736
+    "medians": 5.7220196786470545,
+    "fractions": 56.168764417156765,
+    "zone_share": 18.003643473760647,
+    "type_a_combined": 96.94972527167225,
+    "classification_thresholds": 2.8362443832363184,
+    "poisson_ratio": 0.14910726182899217,
+    "runaway_contacts": 0.06492308326244094
   },
   "percentile_95_interval_GPa": [
     15.776416346459103,

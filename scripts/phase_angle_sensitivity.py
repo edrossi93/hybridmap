@@ -21,13 +21,12 @@ estimate is recomputed on the round-3 two-level construction: class fractions
 and class medians from the indents inside each zone, the share of the two zones
 from the imaged tiles, with only the basalt median replaced.
 
-The first row is the quality mask of the earlier submission, kept because the
-manuscript reports the move from that mask to this one. It rejected 433 indents
-and left a basalt median of 49.47 GPa. No rule applied to the deposited
-phase-angle values reproduces that set, so those two figures are carried here as
-recorded values and are labelled as not reproducible; the estimate they imply is
-computed like every other one. Nothing downstream may treat them as measurements
-of this deposit.
+The first row applies the instrument's own quality flag, which was computed on
+the full continuous-stiffness trace and is deposited as `qc_flag_instrument` in
+`depth_resolved_indents.csv`. It rejects 433 indents. No rule applied to the
+deposited phase-angle values reproduces that set, so the flag is carried as a
+recorded column; the class rule and the basalt median under it are computed
+here on the deposited slice values, like every other row.
 
 Run: python phase_angle_sensitivity.py
 """
@@ -48,13 +47,7 @@ import zone_share as zs                                            # noqa: E402
 THRESHOLDS = (10.0, 15.0, 20.0)
 CLASSES = zs.CLASSES
 
-# The superseded mask, as recorded in the previous submission. Not derivable
-# from anything in the deposit: it was computed on the full continuous-stiffness
-# trace, which is not deposited at the resolution it used, and no rule applied
-# to the deposited phase-angle values reproduces the same set of 433 indents.
-SUPERSEDED_LABEL = "15 (superseded flag, not reproducible)"
-SUPERSEDED_REJECTED = 433
-SUPERSEDED_BASALT_GPA = 49.47
+INSTRUMENT_LABEL = "15 (instrument flag, full CSM trace)"
 N_DEPTH_RESOLVED = 2000
 
 
@@ -89,23 +82,36 @@ def estimate_with_basalt(per_zone, medians, w_basalt, basalt_GPa):
     return float(zs.at_share(per_zone, swapped, w_basalt)[1][0])
 
 
-def superseded_move(basalt_at_limit=None):
-    """How far replacing the superseded mask with the stated rule moved the estimate.
+def instrument_flag_basalt(depth=None):
+    """Basalt median at 150 nm and its count under the instrument's own flag."""
+    if depth is None:
+        depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
+    flag = pd.read_csv(DATA / "depth_resolved_indents.csv")[
+        ["indent_id", "qc_flag_instrument"]]
+    d = depth.merge(flag, on="indent_id", validate="1:1")
+    zone = ["basalt" if "basalt" in str(b) else "flax" for b in d.zone]
+    label = classify(d.E_150.values, zone, e_upper=E_UPPER_DEPTH).values
+    basalt = (label == "basalt") & (d.qc_flag_instrument.to_numpy() == 0)
+    return (float(d.E_150[basalt].median()), int(basalt.sum()),
+            int(d.qc_flag_instrument.sum()))
 
-    Unrounded, which matters. The table prints the two estimates to two decimals,
-    16.53 and 16.73, and differencing those gives 0.20 where the paper says 0.19.
-    The 0.19 is the difference of the two estimates themselves; the 0.20 is an
-    artefact of subtracting after rounding. Anything comparing this move against
-    the page has to take it from here rather than from the table cells.
+
+def instrument_flag_move(basalt_at_limit=None):
+    """How far the estimate on the depth-resolved basalt input moves between the
+    instrument's flag and the stated rule at 15 degrees.
+
+    Unrounded: the difference of the two estimates themselves, not of the two
+    cells the table prints.
     """
     depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
     if basalt_at_limit is None:
         kept = depth[depth.qc_flag_strict == 0]
         basalt_at_limit = float(kept.loc[kept.constituent == "basalt",
                                          "E_150"].median())
+    flag_basalt, _, _ = instrument_flag_basalt(depth)
     per_zone, medians, w = reference_construction()
     return (estimate_with_basalt(per_zone, medians, w, basalt_at_limit)
-            - estimate_with_basalt(per_zone, medians, w, SUPERSEDED_BASALT_GPA))
+            - estimate_with_basalt(per_zone, medians, w, flag_basalt))
 
 
 def sweep():
@@ -129,16 +135,17 @@ def sweep():
 
     per_zone, medians, w = reference_construction()
 
+    flag_basalt, flag_n, flag_rejected = instrument_flag_basalt(depth)
     rows = [{
-        "phase_angle_limit_deg": SUPERSEDED_LABEL,
-        "rejected": SUPERSEDED_REJECTED,
-        "rejected_pct": 100.0 * SUPERSEDED_REJECTED / N_DEPTH_RESOLVED,
-        "alternative_basalt_input_GPa": SUPERSEDED_BASALT_GPA,
+        "phase_angle_limit_deg": INSTRUMENT_LABEL,
+        "rejected": flag_rejected,
+        "rejected_pct": 100.0 * flag_rejected / N_DEPTH_RESOLVED,
+        "n_basalt": flag_n,
+        "alternative_basalt_input_GPa": round(flag_basalt, 2),
         "Voigt_with_that_input_GPa": round(
-            estimate_with_basalt(per_zone, medians, w, SUPERSEDED_BASALT_GPA), 2),
-        "source": ("recorded from the previous submission; the count and the "
-                   "median are not reproducible from this deposit, the "
-                   "estimate is computed from the median"),
+            estimate_with_basalt(per_zone, medians, w, flag_basalt), 2),
+        "source": ("the instrument's flag as deposited; class rule and "
+                   "median recomputed from the deposited slice values"),
     }]
 
     for limit in THRESHOLDS:
@@ -150,6 +157,7 @@ def sweep():
             "phase_angle_limit_deg": limit,
             "rejected": int(rejected.sum()),
             "rejected_pct": 100.0 * float(rejected.mean()),
+            "n_basalt": int((kept == "basalt").sum()),
             **{f"E_{c}_GPa": round(med[c], 2) for c in CLASSES},
             "alternative_basalt_input_GPa": round(med["basalt"], 2),
             "Voigt_with_that_input_GPa": round(
@@ -172,7 +180,7 @@ def main():
     table = pd.DataFrame(rows).drop(columns="source")
     print(table.to_string(index=False))
 
-    swept = [r for r in rows if r["source"].startswith("recomputed")]
+    swept = rows[1:]
     est = [r["Voigt_with_that_input_GPa"] for r in swept]
     pct = [r["rejected_pct"] for r in swept]
     print(f"\nacross the sweep the rejected fraction moves "
@@ -181,16 +189,15 @@ def main():
           f"a range of {max(est) - min(est):.2f} GPa")
 
     # The two figures Table 2 quotes on the phase-angle row: what the sweep
-    # moves, and what replacing the superseded mask with the stated rule moved.
+    # moves, and how far the instrument's flag sits from the stated rule.
     at15 = next(r for r in swept if r["phase_angle_limit_deg"] == PA_QC)
     print(f"the stated rule at {PA_QC:g} degrees rejects {at15['rejected']} "
           f"indents and gives {at15['Voigt_with_that_input_GPa']:.2f} GPa, "
           f"against {rows[0]['rejected']} and "
           f"{rows[0]['Voigt_with_that_input_GPa']:.2f} GPa under the "
-          f"superseded mask, a move of {superseded_move():.2f} GPa")
+          f"instrument's flag, a move of {instrument_flag_move():.2f} GPa")
     print("  that move is taken before the two estimates are rounded into the "
-          "table, which is")
-    print("  why it reads 0.19 and not the 0.20 the printed cells would give")
+          "table")
 
     path = DATA / "phase_angle_sensitivity.json"
     path.write_text(json.dumps({

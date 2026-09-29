@@ -1,6 +1,6 @@
 {
   "indenter": {
-    "E_GPa": 1141.0,
+    "E_GPa": 1140.0,
     "nu": 0.07
   },
   "nu_uniform": 0.3,
@@ -8,40 +8,40 @@
     {
       "class": "flax",
       "median_Er_GPa": 5.14555,
-      "E_uniform_nu_GPa": 4.703558135486283,
-      "E_phase_specific_GPa": 4.703558135486283,
+      "E_uniform_nu_GPa": 4.703576734493959,
+      "E_phase_specific_GPa": 4.703576734493959,
       "nu_phase_specific": 0.3,
       "shift_pct": 0.0
     },
     {
       "class": "matrix",
       "median_Er_GPa": 5.09805,
-      "E_uniform_nu_GPa": 4.6599444810250565,
-      "E_phase_specific_GPa": 4.217505796233227,
+      "E_uniform_nu_GPa": 4.659962736810099,
+      "E_phase_specific_GPa": 4.217522318721755,
       "nu_phase_specific": 0.42,
-      "shift_pct": -9.494505494505495
+      "shift_pct": -9.494505494505503
     },
     {
       "class": "mixed-volume",
       "median_Er_GPa": 38.0251,
-      "E_uniform_nu_GPa": 35.789729332570914,
-      "E_phase_specific_GPa": 34.78289738651177,
+      "E_uniform_nu_GPa": 35.79080620617871,
+      "E_phase_specific_GPa": 34.783943965653236,
       "nu_phase_specific": 0.34,
-      "shift_pct": -2.8131868131868303
+      "shift_pct": -2.813186813186826
     },
     {
       "class": "basalt",
       "median_Er_GPa": 87.2965,
-      "E_uniform_nu_GPa": 85.98628366748356,
-      "E_phase_specific_GPa": 89.04777332773243,
+      "E_uniform_nu_GPa": 85.99249986195314,
+      "E_phase_specific_GPa": 89.05421084604905,
       "nu_phase_specific": 0.24,
-      "shift_pct": 3.5604395604395624
+      "shift_pct": 3.5604395604395562
     }
   ],
   "laminate_estimate_GPa": {
-    "uniform": 18.497243977069772,
-    "phase_specific": 18.304464060954338,
-    "shift_pct": 1.0422088628685162
+    "uniform": 18.49791666366508,
+    "phase_specific": 18.3051392493331,
+    "shift_pct": 1.042157437711073
   },
   "mixed_volume_nu": {
     "assumed": 0.34,
@@ -52,10 +52,10 @@
         "reuss": 0.3054545454545455,
         "hill": 0.31772727272727275
       },
-      "0.55": {
-        "voigt": 0.32099999999999995,
-        "reuss": 0.2973451327433628,
-        "hill": 0.3091725663716814
+      "0.54": {
+        "voigt": 0.3228,
+        "reuss": 0.29893238434163694,
+        "hill": 0.31086619217081846
       },
       "0.67": {
         "voigt": 0.2994,

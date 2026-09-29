@@ -69,66 +69,66 @@
     "depth": {
       "zone": "basalt-centre",
       "n_indents": 534,
-      "e_basalt_end_member_GPa": 53.143,
-      "e_matrix_end_member_GPa": 5.324,
-      "phi_linear": 0.5489,
+      "e_basalt_end_member_GPa": 54.629,
+      "e_matrix_end_member_GPa": 5.501,
+      "phi_linear": 0.5722,
       "phi_linear_ci95": [
-        0.5181,
-        0.5776
+        0.5409,
+        0.6012
       ],
-      "phi_compliance": 0.7751,
+      "phi_compliance": 0.7843,
       "phi_compliance_ci95": [
-        0.746,
-        0.8023
+        0.7554,
+        0.8112
       ],
       "endpoint_sensitivity": [
         {
-          "e_basalt": 50.64,
+          "e_basalt": 52.13,
           "e_matrix": 1.0,
-          "phi_compliance": 0.9407
+          "phi_compliance": 0.946
         },
         {
-          "e_basalt": 50.64,
+          "e_basalt": 52.13,
           "e_matrix": 2.5,
-          "phi_compliance": 0.8644
+          "phi_compliance": 0.8735
         },
         {
-          "e_basalt": 50.64,
-          "e_matrix": 5.32,
-          "phi_compliance": 0.7784
+          "e_basalt": 52.13,
+          "e_matrix": 5.5,
+          "phi_compliance": 0.7872
         },
         {
-          "e_basalt": 53.14,
+          "e_basalt": 54.63,
           "e_matrix": 1.0,
-          "phi_compliance": 0.94
+          "phi_compliance": 0.9454
         },
         {
-          "e_basalt": 53.14,
+          "e_basalt": 54.63,
           "e_matrix": 2.5,
-          "phi_compliance": 0.8627
+          "phi_compliance": 0.8721
         },
         {
-          "e_basalt": 53.14,
-          "e_matrix": 5.32,
-          "phi_compliance": 0.7751
+          "e_basalt": 54.63,
+          "e_matrix": 5.5,
+          "phi_compliance": 0.7843
         },
         {
-          "e_basalt": 55.64,
+          "e_basalt": 57.13,
           "e_matrix": 1.0,
-          "phi_compliance": 0.9393
+          "phi_compliance": 0.9448
         },
         {
-          "e_basalt": 55.64,
+          "e_basalt": 57.13,
           "e_matrix": 2.5,
-          "phi_compliance": 0.8612
+          "phi_compliance": 0.8707
         },
         {
-          "e_basalt": 55.64,
-          "e_matrix": 5.32,
-          "phi_compliance": 0.7721
+          "e_basalt": 57.13,
+          "e_matrix": 5.5,
+          "phi_compliance": 0.7814
         }
       ],
-      "mixed_class_fraction": 0.4064
+      "mixed_class_fraction": 0.3689
     }
   },
   "two_class_sum_GPa": {
@@ -137,13 +137,13 @@
     "e_matrix_GPa": 4.66,
     "linear": {
       "shallow": 33.57,
-      "depth": 49.3,
-      "spread_pct": 38.0
+      "depth": 51.2,
+      "spread_pct": 41.6
     },
     "compliance": {
       "shallow": 61.04,
-      "depth": 67.7,
-      "spread_pct": 10.3
+      "depth": 68.45,
+      "spread_pct": 11.4
     }
   },
   "cross_acquisition_agreement": {
@@ -152,52 +152,52 @@
         "e_matrix_GPa": 1.0,
         "e_basalt_offset_GPa": -2.5,
         "phi_shallow": 0.9102,
-        "phi_depth": 0.9407,
-        "gap_pct": 3.3
+        "phi_depth": 0.946,
+        "gap_pct": 3.9
       },
       {
         "e_matrix_GPa": 1.0,
-        "e_basalt_offset_GPa": -0.0,
+        "e_basalt_offset_GPa": 0.0,
         "phi_shallow": 0.9099,
-        "phi_depth": 0.94,
-        "gap_pct": 3.3
+        "phi_depth": 0.9454,
+        "gap_pct": 3.8
       },
       {
         "e_matrix_GPa": 1.0,
         "e_basalt_offset_GPa": 2.5,
         "phi_shallow": 0.9096,
-        "phi_depth": 0.9393,
-        "gap_pct": 3.2
+        "phi_depth": 0.9448,
+        "gap_pct": 3.8
       },
       {
         "e_matrix_GPa": 2.5,
         "e_basalt_offset_GPa": -2.5,
         "phi_shallow": 0.7889,
-        "phi_depth": 0.8644,
-        "gap_pct": 9.1
+        "phi_depth": 0.8735,
+        "gap_pct": 10.2
       },
       {
         "e_matrix_GPa": 2.5,
-        "e_basalt_offset_GPa": -0.0,
+        "e_basalt_offset_GPa": 0.0,
         "phi_shallow": 0.7882,
-        "phi_depth": 0.8627,
-        "gap_pct": 9.0
+        "phi_depth": 0.8721,
+        "gap_pct": 10.1
       },
       {
         "e_matrix_GPa": 2.5,
         "e_basalt_offset_GPa": 2.5,
         "phi_shallow": 0.7876,
-        "phi_depth": 0.8612,
-        "gap_pct": 8.9
+        "phi_depth": 0.8707,
+        "gap_pct": 10.0
       }
     ],
     "phi_span_over_sweep": [
       0.692,
-      0.941
+      0.946
     ],
     "gap_span_pct": [
-      3.2,
-      9.1
+      3.8,
+      10.2
     ]
   },
   "independent_comparison": {

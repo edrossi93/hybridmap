@@ -8,7 +8,7 @@
 # coordinate, because they were marked before this analysis and re-deriving
 # them would be inventing agreement. And the upper cut is 40 GPa rather than
 # 70: the stiff contacts of this map read above 70 GPa at 80 nm and fall to a
-# median of 44 GPa by 300 nm (Supplementary Figure S7), for a reason the data
+# median of 46 GPa by 300 nm (Supplementary Figure S7), for a reason the data
 # do not settle, so a 70 GPa cut at 150 nm would reject almost every genuine
 # basalt contact.
 

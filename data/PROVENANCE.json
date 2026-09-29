@@ -1,29 +1,30 @@
 {
   "derived": {
     "classified_shallow.csv": "44888b0df6c73996dacfe199709de3cf486a94d5d1d914dbc015473350283629",
-    "classified_depth_resolved.csv": "a9154c1585aa508fb5cf2c49b882947a361246fc07cbcfcccd88b86810302c7c",
+    "classified_depth_resolved.csv": "7b52c3fe4f5a9c4bee30a8adbbea6f366df59579f874e2aa0d1e83290167f54e",
     "flexural_moduli.csv": "0abb2811ade40dae872e8fc6009d582ae7e9cbc79e909e20826ddbcf06642cf4",
-    "uncertainty_budget.json": "82d41f0481e97f6d7f8108a1ea63ba5ba07b26fc111f3d77dbda7b2eb6ddc3ad",
-    "phase_angle_sensitivity.json": "eaaa133b73c482ce2082abec0568ff80ad1e8df1a8e25fc490499d5279b3d9b3",
-    "spacing_compliance.json": "c09b034cd69a0e8d34e3a38fbb7fc93801c70576f9e879b4c861b7f09aa4d101",
-    "mixed_class_deconvolution.json": "3be3e82eba949e66431c6df4fe0f22462a8f0e42faeadce6b6f5e99928122f22",
-    "spatial_localisation.json": "1fcb03399d8075f9c0e17eff1e30f6b427c8dbc02e3a5283b8792f2b1a9c0f22",
+    "uncertainty_budget.json": "8f2c039e3bd0033dade1b8da4a7a33f9958e445b307acdf32a51ae57311304b4",
+    "phase_angle_sensitivity.json": "6a0d4fb915ac2415c8f08969a3f938267a128a7c542b85dae1ee2710d6301f34",
+    "spacing_compliance.json": "e9c86f0fed758e6e3c298ad6cda010695674b4ba013ede15c26176b3b054d995",
+    "mixed_class_deconvolution.json": "102c3022239c09f383724ef838830ed0f70de5858b0124a01bde27b6fb94a33b",
+    "spatial_localisation.json": "805dea6a30d942eecc1c68133c373fd75306f91bd7bcf9ba415191dbca93efdd",
     "zone_share_sensitivity.json": "68bedd09129aaa1e433c2c24661ac991cb3e62325d665eb7f242edbfd9ccaed2",
-    "poisson_sensitivity.json": "8aa14920ea6553a62e6cfb25d535c72d0cc0c4fe8cd386ca15c4366b3ac77ead",
+    "poisson_sensitivity.json": "f9c5657249f3cfedaa002915731afeb1553667b010a58c661f08a1612567be3c",
     "flexural_comparisons.json": "421ba4d3e81b076cc7f3d3ea00c99e9f9446ef468ff4faada9310087cdfe2125",
-    "basalt_input_sweep.json": "f3c143b6d1210a0b92f9d2cdfd6da66362e6faf20a9c71283e6a1779c32417df",
-    "depth_softening.json": "51c371e8fce71e57d4e73593bd6aa11d0123e49a11fe76d913a7903c13c683f1"
+    "basalt_input_sweep.json": "5135733e3e1b1b3ff317e477c49d27772502628b6cc960ad4e36bccf02ccce36",
+    "depth_softening.json": "65b82dc3417982091d1f5248900fcede61513b61cffc6f9af788fd553f716657",
+    "contact_geometry.json": "cf9b554669b381a31ee7939828faf6f89588f523c1a31ed2a197b6cec66ded19"
   },
   "primary": {
     "shallow_map.csv": "01d3fa536b400f2201afca8207e86926c6a4605cc0198cfbdadaccc5fee24976",
-    "depth_resolved_indents.csv": "909525ea2c3249e43bba5dc73dfe6c88dae885c74bb9500df97e8b1b73e98165",
-    "depth_resolved_curves.csv": "947cadf8e557fa30384bf34836687e82839caf64a7075be9a3c16ec027cae392",
+    "depth_resolved_indents.csv": "037d5f0961923d8ae4ee3cad8212efd044c4a96aef86f7465997013018a2372d",
+    "depth_resolved_curves.csv": "7857fb347f470ea63b4bc63a1d9a9c21b30c7ec0294ed4dce2448f93bf335c44",
     "flexural_curves.csv": "99cbd7d3c3cbae7c343a837486f79fa6924c50edb942cd357e260591cd36d10c",
     "bse_segmentation_tiles.csv": "09f170e8e3f3248f528de400103875011abb399f00940202a7f74074b5aefd98",
     "bse_segmentation_summary.json": "26d8fea9afd2695560ff6ac789be359394fc5ae67c2dede26c5ddbc5b56d1400",
     "zone_mask_rle.json": "d315b4085b9855b52084cafd22560f96692e5c5bd06cbf356854c33ea75e9b34",
     "bse_validation_metrics.json": "6fa1683607ecd44d1f9069057d38ea92190c1daea39249e3024bf2eb2a8e4aa3",
-    "DATA_DICTIONARY.md": "6e45355d31caf397912d1e910ead5fc97dfd30cb1b971dadea319e37d0191885",
+    "DATA_DICTIONARY.md": "7c31a3b75b54348c07d39fb4f166870846f15f2bee75a84d7dffe26c3aa810ed",
     "LICENSE": "230ca33bbb6f23e98cfdb831d5d45e277cc64160a7ae046c6ca91609c3adfbe4"
   }
 }

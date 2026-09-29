@@ -1,15 +1,16 @@
 """Do indents on the edge of the grid read differently from those inside it?
 
-The indent spacing on the short axis of the load-controlled map is below the ten
-contact depths that Phani and Oliver ask for, and the paper says so. The
+The indent spacing of the load-controlled map is below the ten maximum depths
+that Phani and Oliver ask for on most flax and matrix indents along the short
+axis, and on a minority of them along the long axis, and the paper says so. The
 question that follows is whether the shortfall shows up in the data. If adjacent
 plastic zones or elastic fields were interacting, an indent on the outer row of
 the grid would feel it less than one surrounded on both sides, so the two
 populations of the same class in the same zone would differ.
 
 The border is defined on the short axis alone, the outermost row at each end,
-because that is the axis whose pitch breaches the criterion; on the long axis the
-pitch satisfies it for every class and there is nothing to test. Classes are
+because that is the axis on which the criterion is breached most; along the
+long axis the pitch is twice as large. Classes are
 compared within their own architectural zone, since a class can sit in a
 different neighbourhood on either side of the zone boundary.
 

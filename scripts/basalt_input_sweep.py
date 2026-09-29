@@ -14,11 +14,10 @@ pure-basalt median and the number of indents behind it, for the shallow map and
 for the depth-resolved one, beside the laminate figure at both zone weightings.
 
 A third block reads the basalt input at a different depth rather than above a
-different cut. The sixty contacts of the basalt-centre band that read above
-70 GPa at 80 nm, the population Supplementary Figure S7 follows and
-`depth_softening.py` computes, have a median of 82.5 GPa at 80 nm, where the
-two acquisitions agree, and 98.4 GPa at 50 nm, the shallowest point of the
-deposited grid. Each is substituted for the basalt input in the two-level
+different cut. The contacts of the basalt-centre band that read above 70 GPa
+at 80 nm, the population Supplementary Figure S7 follows and
+`depth_softening.py` computes, have a median of 84.7 GPa at 80 nm and
+97.9 GPa at 50 nm, the shallowest point of the deposited grid. Each is substituted for the basalt input in the two-level
 construction with everything else held, exactly as Supplementary Table S4
 substitutes the depth-resolved class median, so that the table can carry the
 reading depth as a sensitivity beside the cut.
@@ -82,7 +81,7 @@ def depth_rows(d):
 def reading_depth_rows(shallow, tiles):
     """The estimate with the basalt input read at 80 and at 50 nm.
 
-    The input is the median of the sixty basalt-centre contacts that read above
+    The input is the median of the basalt-centre contacts that read above
     70 GPa at 80 nm, taken from `depth_softening.py` so that this file and
     `depth_softening.json` cannot disagree about it. Everything else in the
     construction, the class fractions, the other three medians and the zone
@@ -137,7 +136,7 @@ def main():
     print(dr.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
 
     print("\n  the estimate with the basalt input read at a shallower contact: "
-          "the sixty basalt-centre\n  contacts above 70 GPa at 80 nm, "
+          "the basalt-centre contacts\n  above 70 GPa at 80 nm, "
           "substituted for the basalt median with everything else held")
     print(rd.to_string(index=False, float_format=lambda v: f"{v:.2f}"))
 
@@ -148,9 +147,8 @@ def main():
                     "its median moves with the cut by construction. Reported "
                     "here so that the agreement with single-fibre values can "
                     "be read against the range rather than at one cut."),
-           "reading_depth_note": ("The basalt input read from the same sixty "
-                                  "traces at 80 nm, where the two acquisitions "
-                                  "agree, and at 50 nm, substituted into the "
+           "reading_depth_note": ("The basalt input read from the same "
+                                  "traces at 80 nm and at 50 nm, substituted into the "
                                   "two-level construction as Supplementary "
                                   "Table S4 substitutes the depth-resolved "
                                   "class median. The contacts are those of "

@@ -53,7 +53,7 @@ the standard uncertainty is the half-range divided by root three:
               by less than a thousandth of a GPa
 
 One term stays outside the budget on purpose. Which basalt input to use, the
-shallow 86.0 GPa or the depth-resolved 53.0 GPa, is a choice rather than an
+shallow 86.0 GPa or the depth-resolved 54.7 GPa, is a choice rather than an
 uncertainty, and folding it in would report a decision as noise. The choice
 rests on the two acquisitions agreeing on the same contacts at 80 nm and on the
 deeper reading then falling with depth (Supplementary Figure S7), for a reason

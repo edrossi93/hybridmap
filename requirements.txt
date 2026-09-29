@@ -28,3 +28,7 @@ matplotlib>=3.7
 # the reason for its value on the line above it. Configs written as JSON are
 # read too, and need nothing beyond the standard library.
 pyyaml>=6.0
+
+# Writes the supplementary animation as a GIF. Already installed with
+# matplotlib, which depends on it; named here because a script imports it.
+pillow>=9.0

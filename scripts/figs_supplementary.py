@@ -83,11 +83,9 @@ def s1(outdir):
     fs.panel_label(ax2, "b", dx=-0.30, dy=1.10)
     fs.save(fig, "FigS5_rule_vs_kmeans", outdir)
     # ARI* merges the compliant pair on both sides, the two lowest clusters and
-    # flax with matrix. The caption printed 0.65 for two rounds, which was the
-    # one-sided merge; on the two-sided comparison it describes, 0.83.
+    # flax with matrix.
     print(f"  S1: ARI {ari:.3f}, ARI* after merging the compliant pair on "
-          f"both sides {ari_star:.3f}  (the caption prints 0.40 and, "
-          f"corrected, 0.83)")
+          f"both sides {ari_star:.3f}")
 
 
 def s2(outdir):
@@ -189,10 +187,8 @@ def neighbour_fraction(sub, pool, k):
     The neighbours are drawn from every indent in the zone, including those the
     quality filter rejected. A rejected indent still occupies its place on the
     grid, and leaving it out would move its neighbours' neighbours. Using only
-    the classified indents instead moves p at k = 8 from the published
-    2.3e-12 to 4.9e-10, on the quality mask deposited now; on the superseded
-    mask the same pair read 8.5e-11 and 7.4e-11, which is how the published
-    figure was identified.
+    the classified indents instead would change p at k = 8; the pool is part of
+    the definition of the statistic.
     """
     xy = sub[["x_um", "y_um"]].to_numpy()
     pxy = pool[["x_um", "y_um"]].to_numpy()

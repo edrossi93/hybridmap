@@ -21,11 +21,11 @@ table's own caption: basalt 0.24, flax 0.30, PA-11 0.42, and 0.34 for the
 mixed-volume class.
 
 The 0.34 is an assumed intermediate value between the basalt and the matrix
-figures, and nothing more. The caption used to call it a Voigt-Reuss-Hill
-average of 0.24 and 0.42 at a basalt fraction of 0.50, which it is not: at
-0.50 the Voigt mean is 0.330, the Reuss mean 0.306 and the Hill average 0.318,
-and at the fractions the deconvolution of 4.1 puts on the mixed-volume contact,
-0.55 and 0.67, the Hill average is 0.309 and 0.290. `hill_average_nu` computes
+figures, and nothing more. It is not a Voigt-Reuss-Hill average of 0.24 and
+0.42: at a basalt fraction of 0.50 the Voigt mean is 0.330, the Reuss mean
+0.305 and the Hill average 0.318, and at the fractions the deconvolution of 4.1
+puts on the mixed-volume contact, 0.54 and 0.67, the Hill average is 0.311 and
+0.289. `hill_average_nu` computes
 those and the JSON carries them, so that the description can be checked rather
 than believed. The value itself is not changed: the table tests the sensitivity
 of the estimate to a plausible phase-specific set, and 0.34 is inside the
@@ -50,7 +50,7 @@ DATA = HERE.parent / "data"
 
 # Diamond, the values the Oliver-Pharr analysis uses throughout. They are
 # properties of the indenter, not of this specimen.
-E_INDENTER = 1141.0
+E_INDENTER = 1140.0
 NU_INDENTER = 0.07
 
 # The uniform convention the paper adopts, and the phase-specific alternative
@@ -64,7 +64,7 @@ NU_PHASE = {"flax": 0.30, "matrix": 0.42, "mixed-volume": 0.34, "basalt": 0.24}
 # The basalt fractions at which the Hill average of the two end-member Poisson
 # ratios is reported: the 0.50 the caption used to name, and the two fractions
 # the deconvolution of 4.1 puts on the mixed-volume contact.
-HILL_FRACTIONS = (0.50, 0.55, 0.67)
+HILL_FRACTIONS = (0.50, 0.54, 0.67)
 
 CLASSES = ["flax", "matrix", "mixed-volume", "basalt"]
 

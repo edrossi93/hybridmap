@@ -5,7 +5,8 @@ Three of them are stiffness levels, compliant, mixed-volume and pure fibre. The
 fourth exists because the compliant level holds two constituents that stiffness
 cannot tell apart, so flax and PA-11 are separated by where they sit instead.
 The depth-resolved acquisition corroborates that split from the other side: the
-two compliant medians are 3.86 and 5.37 GPa at 150 nm, p = 8.2e-8.
+two compliant medians are 4.10 and 5.50 GPa at 150 nm, p = 1.8e-5 (two-sided
+Mann-Whitney).
 
 This is the paper's configuration of the general rule in `hybridmap.classify`:
 the same zone-and-threshold machinery, with our thresholds, our zone boundaries
@@ -36,12 +37,12 @@ mean the numbers should not be read as constituent volume fractions.
 
 Thresholds (GPa):
 
-    lower  15    compliant / stiff split, from the gap in the basalt-zone
-                 modulus histogram
+    lower  15    compliant / stiff split, from the shallow dip in the
+                 basalt-zone modulus histogram
     upper  70    shallow map, pure-axial basalt above this
            40    depth-resolved map, lower because the stiff contacts read
                  lower with depth there: the contacts above 70 GPa at 80 nm
-                 have a median of 82.5 GPa there and 44.3 GPa at 300 nm
+                 have a median of 84.7 GPa there and 46.3 GPa at 300 nm
                  (Supplementary Figure S7), for a reason the data do not
                  settle
 """
