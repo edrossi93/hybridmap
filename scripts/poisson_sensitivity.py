@@ -62,8 +62,8 @@ NU_UNIFORM = 0.30
 NU_PHASE = {"flax": 0.30, "matrix": 0.42, "mixed-volume": 0.34, "basalt": 0.24}
 
 # The basalt fractions at which the Hill average of the two end-member Poisson
-# ratios is reported: the 0.50 the caption used to name, and the two fractions
-# the deconvolution of 4.1 puts on the mixed-volume contact.
+# ratios is reported: 0.50, an equal split, and the two fractions the
+# deconvolution of 4.1 puts on the mixed-volume contact.
 HILL_FRACTIONS = (0.50, 0.54, 0.67)
 
 CLASSES = ["flax", "matrix", "mixed-volume", "basalt"]
@@ -167,12 +167,11 @@ def main(out=None):
 
 if __name__ == "__main__":
     # Writes the product by default, like every other generator in the
-    # deposit. Until this round the file was written only when --out was
-    # given, so `provenance_check.py --rebuild`, which runs each generator
-    # with no arguments, ran this one, found the product untouched and
-    # reported it reproduced without ever having regenerated it. The flag
-    # remains for writing a copy elsewhere; `--no-write` prints the table
-    # and leaves the deposit alone.
+    # deposit. `provenance_check.py --rebuild` runs each generator with no
+    # arguments, so a generator that wrote only when --out was given would
+    # leave the product untouched and be reported as reproduced without ever
+    # having regenerated it. --out writes a copy elsewhere; `--no-write`
+    # prints the table and leaves the deposit alone.
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=str(DATA / "poisson_sensitivity.json"))
     ap.add_argument("--no-write", action="store_true")

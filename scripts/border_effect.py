@@ -30,15 +30,12 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 MIN_N = 10                      # below this the test says nothing either way
 
 
-def main():
+def comparisons():
+    """(zone, class, n border, n inside, E border, E inside, p, Holm p), by p."""
     d = pd.read_csv(DATA / "classified_shallow.csv")
     d = d[d.constituent != "QC/invalid"]
-
     y = np.sort(d.y_um.unique())
     d = d.assign(border=(d.y_um == y.min()) | (d.y_um == y.max()))
-    print(f"short-axis pitch {np.diff(y).mean() * 1000:.0f} nm, "
-          f"{len(y)} rows, {int(d.border.sum())} indents on the two outer rows")
-
     rows = []
     for (zone, cls), g in d.groupby(["zone", "constituent"]):
         b, i = g[g.border], g[~g.border]
@@ -47,17 +44,25 @@ def main():
         p = mannwhitneyu(b.E_GPa, i.E_GPa, alternative="two-sided").pvalue
         rows.append((zone, cls, len(b), len(i),
                      b.E_GPa.median(), i.E_GPa.median(), p))
-
     # Holm: sort by p, and each is compared against alpha / (m - rank).
     rows.sort(key=lambda r: r[-1])
-    m = len(rows)
+    m, running, out = len(rows), 0.0, []
+    for k, r in enumerate(rows):
+        running = max(running, min(1.0, r[-1] * (m - k)))
+        out.append(r + (running,))
+    return out, d
+
+
+def main():
+    rows, d = comparisons()
+    y = np.sort(d.y_um.unique())
+    print(f"short-axis pitch {np.diff(y).mean() * 1000:.0f} nm, "
+          f"{len(y)} rows, {int(d.border.sum())} indents on the two outer rows")
     print(f"\n{'zone':14s} {'class':13s} {'n border':>8s} {'n inside':>8s} "
           f"{'E border':>9s} {'E inside':>9s} {'p':>7s} {'Holm p':>8s}")
-    running = 0.0
-    for k, (zone, cls, nb, ni, eb, ei, p) in enumerate(rows):
-        running = max(running, min(1.0, p * (m - k)))
+    for zone, cls, nb, ni, eb, ei, p, holm in rows:
         print(f"{zone:14s} {cls:13s} {nb:8d} {ni:8d} {eb:9.2f} {ei:9.2f} "
-              f"{p:7.3f} {running:8.3f}")
+              f"{p:7.3f} {holm:8.3f}")
 
     print("\nAn interaction between neighbouring indents would make the border "
           "population\nthe stiffer of the two, since it has fewer neighbours. "

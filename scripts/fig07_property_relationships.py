@@ -34,9 +34,9 @@ SCATTER_E = (0, 150)   # panel (a) holds every kept indent
 
 
 def build(outdir):
-    # Created here rather than assumed. Run from a fresh checkout with an
-    # output directory that does not exist yet, these scripts used to fail
-    # on the savefig at the end, after doing all the work.
+    # Created here rather than assumed, so that a run from a fresh checkout,
+    # with an output directory that does not exist yet, cannot fail on the
+    # savefig at the end after doing all the work.
     Path(outdir).mkdir(parents=True, exist_ok=True)
     lab = pd.read_csv(DATA / "classified_depth_resolved.csv")
     named = lab[lab.constituent.isin(ORDER)]

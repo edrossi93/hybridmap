@@ -24,10 +24,10 @@ def class_table(df, classes, modulus_col, label_col="constituent",
     Counts, fractions and median modulus per phase, in the config's order.
 
     An empty phase has no median, and a bound computed with it comes out as
-    nan. That used to happen quietly, so a cut placed where the user has no
-    population produced a printed nan and nothing else. `on_empty` is "allow"
-    only for the cut sweep, which is entitled to explore cuts that empty a
-    phase and reports those rows as nan.
+    nan. Left unchecked, a cut placed where the user has no population would
+    produce a printed nan and nothing else, so by default it is an error.
+    `on_empty` is "allow" only for the cut sweep, which is entitled to explore
+    cuts that empty a phase and reports those rows as nan.
     """
     # Dropped here, so the fractions are over classified indents only: a
     # quality failure does not vote, and neither does an indent no phase

@@ -1,15 +1,15 @@
 """What the upper threshold does to the basalt input, not just to the sum.
 
 Supplementary Table S2 sweeps the classification thresholds and reports how
-little the laminate figure moves. Reviewer 3 points out that this is not the
-question he asked: the pure-basalt class is defined as the tail above the upper
+little the laminate figure moves. That is not the same question as how the
+basalt input moves: the pure-basalt class is defined as the tail above the upper
 cut, so its median is the median of that tail and must move with the cut even
 where the laminate sum does not. That matters because the agreement between the
 measured 86 GPa and single-fibre tensile values is used as supporting evidence,
 and a number that is an artefact of where the cut was placed cannot support
 anything.
 
-So this reports, across the same grid, the quantity he asked for: the
+So this reports, across the same grid, the basalt input itself: the
 pure-basalt median and the number of indents behind it, for the shallow map and
 for the depth-resolved one, beside the laminate figure at both zone weightings.
 

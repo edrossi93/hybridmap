@@ -13,7 +13,7 @@
     "flexural_comparisons.json": "421ba4d3e81b076cc7f3d3ea00c99e9f9446ef468ff4faada9310087cdfe2125",
     "basalt_input_sweep.json": "5135733e3e1b1b3ff317e477c49d27772502628b6cc960ad4e36bccf02ccce36",
     "depth_softening.json": "65b82dc3417982091d1f5248900fcede61513b61cffc6f9af788fd553f716657",
-    "contact_geometry.json": "cf9b554669b381a31ee7939828faf6f89588f523c1a31ed2a197b6cec66ded19"
+    "contact_geometry.json": "552451278f0337d215649ad3f0c0cedea156868c54d31066a50189a1c76ece55"
   },
   "primary": {
     "shallow_map.csv": "01d3fa536b400f2201afca8207e86926c6a4605cc0198cfbdadaccc5fee24976",
@@ -24,7 +24,7 @@
     "bse_segmentation_summary.json": "26d8fea9afd2695560ff6ac789be359394fc5ae67c2dede26c5ddbc5b56d1400",
     "zone_mask_rle.json": "d315b4085b9855b52084cafd22560f96692e5c5bd06cbf356854c33ea75e9b34",
     "bse_validation_metrics.json": "6fa1683607ecd44d1f9069057d38ea92190c1daea39249e3024bf2eb2a8e4aa3",
-    "DATA_DICTIONARY.md": "119edb348927a8a5abd0350c35cb1e4291c4e6f87d0df81b13db77c39f6ace57",
+    "DATA_DICTIONARY.md": "844462b945211dac36341b5508c8dda8b31b91a4a85b70b13afb5f67a5735d78",
     "LICENSE": "230ca33bbb6f23e98cfdb831d5d45e277cc64160a7ae046c6ca91609c3adfbe4"
   }
 }

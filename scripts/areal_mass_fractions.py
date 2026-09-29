@@ -4,13 +4,13 @@
 the segmented section, but the fabric specification. Sixteen plies of a 360 g/m2
 fabric at a 50/50 mass split, spread through a 4.60 mm laminate, fix the basalt
 and flax volumes from their densities; the matrix follows by difference and so
-absorbs whatever porosity there is. Until this script existed, nothing in the
-deposit computed it.
+absorbs whatever porosity there is. This script is where the deposit computes
+it.
 
 Two things about the imaging it is compared against also live here, because
 the comparison is where they are needed: `imaged()` reads the segmented
 fractions, and `imaged_intervals()` computes the +/- printed beside them in
-Figure 2e and 3.4, whose recipe was not in the deposit until this round.
+Figure 2e and 3.4, so that their recipe is in the deposit.
 
 What the route needs, and where each input comes from:
 
@@ -21,9 +21,8 @@ What the route needs, and where each input comes from:
     2.70 g/cm3 basalt        3.4, the nominal datasheet density
     1.50 g/cm3 flax          3.4, the nominal datasheet density
 
-The two densities went unprinted for two rounds, and this file inferred them
-from the four fractions the paper printed and said so. The manuscript now states
-them in 3.4, so they are read from the page like the other inputs. They return
+The manuscript states the two densities in 3.4, so they are read from the page
+like the other inputs. They return
 23.2, 41.7 and 35.1 % and a fibre volume fraction of 0.649, which are the four
 figures 3.4 and Figure 8 print, all four from one pair of inputs.
 
@@ -31,10 +30,9 @@ The same pair also fixes the volume split between the two fibres, which the
 lamination-theory comparison of 3.4, Figure 8 and 4.2 needs: at a 50/50 mass
 split the basalt takes 1/2.70 of the fibre volume for every 1/1.50 the flax
 takes. `basalt_share_of_fibre_volume()` is that number, and it is the one place
-in the deposit it is computed. A second density pair, 2.67 and 1.45 g/cm3, used
-to sit in `reply_figures.py` for that split alone and gave a second value of
-the panel's own lamination-theory prediction, 26.25 against 27.23 GPa. There is
-one pair now, and one prediction.
+in the deposit it is computed. Every script that needs the split takes it from
+here, directly or through `fig08_rom`, so there is one density pair and one
+lamination-theory prediction.
 
 Run: python areal_mass_fractions.py
 """

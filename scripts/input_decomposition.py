@@ -1,7 +1,6 @@
 """Which input drives the difference between a tabulated and a measured prediction.
 
-Reviewer 3 asked for this: the comparison between the two constructions changes
-the constituent moduli and the volume fractions at the same time, so it cannot be
+The comparison between the two constructions changes the constituent moduli and the volume fractions at the same time, so it cannot be
 read as evidence about either. The decomposition holds one set fixed while the
 other changes.
 

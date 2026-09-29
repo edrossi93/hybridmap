@@ -1,8 +1,8 @@
 """Figure 9 - three-point bending response, all nine specimens.
 
-Reviewer 3 comment 22 asked for every replicate instead of one specimen, and for
-the removal of the +/- 1 sigma envelope that had been drawn around a single
-curve. Both are done here. Every curve the deposit holds is drawn: five
+Every replicate is drawn rather than one representative specimen, and no
++/- 1 sigma envelope is drawn around a single curve. Every curve the deposit
+holds is drawn: five
 basalt-longitudinal and four flax-longitudinal, the flax configuration being four
 because the source workbook held one of its curves twice and the duplicate is not
 deposited.
@@ -74,9 +74,9 @@ def find_crossover(per_config, lo=0.15, hi=0.55):
 
 
 def build(outdir):
-    # Created here rather than assumed. Run from a fresh checkout with an
-    # output directory that does not exist yet, these scripts used to fail
-    # on the savefig at the end, after doing all the work.
+    # Created here rather than assumed, so that a run from a fresh checkout,
+    # with an output directory that does not exist yet, cannot fail on the
+    # savefig at the end after doing all the work.
     Path(outdir).mkdir(parents=True, exist_ok=True)
     curves = pd.read_csv(DATA / "flexural_curves.csv")
     moduli = pd.read_csv(DATA / "flexural_moduli.csv").set_index("specimen_id")
@@ -152,10 +152,10 @@ def build(outdir):
              .groupby("configuration")["E_D790_toe_compensated_GPa"].agg(["mean", "std"]))
 
     # Each strip is printed at the precision its own caption sentence uses. The
-    # caption gives the strength to one decimal and the chord modulus to two, and
-    # (b) used to print one for both, so the panel read 18.8 +/- 0.5 beside a
-    # caption saying 18.85 +/- 0.54. Figure 8 carries the same moduli and made the
-    # same move for the same reason. Two decimals cost two glyphs, which the
+    # caption gives the strength to one decimal and the chord modulus to two, so
+    # the panel and the caption print the same digits (18.85 +/- 0.54, not
+    # 18.8 +/- 0.5). Figure 8 carries the same moduli at the same precision for
+    # the same reason. Two decimals cost two glyphs, which the
     # containment check below measures against the strip width rather than
     # assuming; at 7 pt they fit with room to spare in a 0.62 in strip.
     strip_labels = []

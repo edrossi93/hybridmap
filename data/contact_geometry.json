@@ -174,7 +174,9 @@
     "E_GPa": 97.9282,
     "load_mN": 0.4131,
     "n_with_reading": 85,
-    "a_um_at_300": 0.6397907610066099
+    "a_um_at_300": 0.6397907610066099,
+    "phase_angle_median_deg_50_to_80": 1.0111,
+    "phase_angle_above_15_deg_50_to_80": 0
   },
   "mixed_volume_fall_vs_distance": {
     "n": 197,

@@ -74,10 +74,8 @@ def fibre_modulus_by_volume(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX):
 
     The fabric specification splits the two fibres by mass, and the densities
     §3.4 states turn that into a split by volume: `areal_mass_fractions` owns
-    both and this is read from it. The plain mean of the two tabulated values,
-    70 GPa, was what this panel used for two rounds while the §4.2 comparison
-    used the volume-weighted value at a different density pair, so the paper
-    carried two predictions for the same panel; there is one now.
+    both and this is read from it. The panel and the §4.2 comparison both use
+    this value, so the paper carries one prediction for the panel.
     """
     vb = areal_mass_fractions.basalt_share_of_fibre_volume()
     return vb * e_basalt + (1.0 - vb) * e_flax
@@ -116,12 +114,9 @@ def halpin_tsai_balanced(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
 
 
 # The Halpin-Tsai baseline of the panel, derived from the inputs §3.4 states
-# rather than copied out of the text. It used to be the literal 27.1, which no
-# convention applied to those inputs reproduces; then 27.23 from the plain mean
-# of the two fibre moduli, while §4.2 implied 26.25 for the same panel from a
-# volume-weighted fibre modulus at densities the paper had stopped using. The
-# line below is now the only source of the value, the bar and both sentences
-# come from it, and it rounds to the figure §3.4 prints.
+# rather than copied out of the text. The line below is the only source of the
+# value: the bar and both sentences come from it, and it rounds to the figure
+# §3.4 prints.
 TABULATED_HT = halpin_tsai_balanced()[2]
 
 
@@ -129,8 +124,8 @@ def report_halpin_tsai(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
                        e_matrix=HT_E_MATRIX, v_fibre=HT_V_FIBRE, xi=HT_XI):
     """Print the baseline with every input beside it.
 
-    The point of doing this on every run is that the baseline has inputs at all,
-    which the literal it replaced did not.
+    The point of doing this on every run is that the baseline is shown to follow
+    from stated inputs rather than from a copied number.
     """
     longitudinal, transverse, balanced = halpin_tsai_balanced(
         e_basalt, e_flax, e_matrix, v_fibre, xi)
@@ -177,9 +172,9 @@ def zone_table(depth, modulus_col="E_150"):
 
 
 def build(outdir):
-    # Created here rather than assumed. Run from a fresh checkout with an
-    # output directory that does not exist yet, these scripts used to fail
-    # on the savefig at the end, after doing all the work.
+    # Created here rather than assumed, so that a run from a fresh checkout,
+    # with an output directory that does not exist yet, cannot fail on the
+    # savefig at the end after doing all the work.
     Path(outdir).mkdir(parents=True, exist_ok=True)
     depth = pd.read_csv(DATA / "classified_depth_resolved.csv")
     shallow = pd.read_csv(DATA / "classified_shallow.csv")
@@ -242,12 +237,11 @@ def build(outdir):
     ax_a.tick_params(axis="x", which="minor", bottom=False, top=False)
 
     # ---- panel b ----------------------------------------------------------
-    # Vertical bars, as submitted. Reviewer 3 comment 22 asked only for the
-    # tabulated-input Voigt to be added beside the measured-input one, so the two
-    # tabulated baselines are inserted and nothing else about the panel changes.
-    # The bars are labelled with the term the paper uses for that construction,
-    # a Voigt sum built from tabulated constituent moduli, so that the artwork
-    # and the text cannot drift apart again.
+    # Vertical bars. The tabulated-input Voigt and Halpin-Tsai baselines sit
+    # beside the measured-input constructions so the two sets of inputs can be
+    # compared directly. The bars are labelled with the term the paper uses for
+    # that construction, a Voigt sum built from tabulated constituent moduli, so
+    # that the artwork and the text cannot drift apart.
     # Hatched bars are predictions, solid bars are measurements.
     labels = ["Voigt", "Voigt (window-weighted)", "Hill", "Reuss",
               "Voigt (tabulated inputs)", "Halpin-Tsai (tabulated inputs)",

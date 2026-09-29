@@ -1,11 +1,10 @@
 """How much of the laminate figure is decided by where the map was placed.
 
-Reviewer 3 asked for three things in one comment: the Voigt sum of each
-architectural zone on its own, the sensitivity of the laminate figure to the
-share of the two zones, and that share as a term in the uncertainty budget. He
-also observed that the mosaic and the indentation window seem to disagree about
-how much of the section is basalt-rich. They do, and the disagreement matters
-more than anything already in the budget.
+Three things are computed here: the Voigt sum of each architectural zone on its
+own, the sensitivity of the laminate figure to the share of the two zones, and
+that share as a term in the uncertainty budget. The mosaic and the indentation
+window disagree about how much of the section is basalt-rich, and the
+disagreement matters more than anything else in the budget.
 
 The construction is two-level, and the two levels come from different
 measurements:
@@ -21,12 +20,12 @@ the section at 36.2 % of the marked area.
 That share is read from `bse_segmentation_tiles.csv`, the tile counts at the
 imaging resolution, and not from the run-length mask, which is the same marking
 downsampled for the sliding window below. The two disagree by half a point, 36.2
-against 36.7, purely because downsampling redraws the zone boundary. Both used
-to be in circulation: the headline of 18.50 GPa rests on the tile count, while
-this script published the mask value and its own 18.60 GPa beside it. One
-quantity, one source: the tiles are the measurement, the mask is a rendering of
-it, and the mask is used here only for the geometric question of where a window
-could have sat. Those are not the same quantity: one
+against 36.7, purely because downsampling redraws the zone boundary. The
+headline of 18.50 GPa rests on the tile count. One quantity, one source: the
+tiles are the measurement, the mask is a rendering of it, and the mask is used
+here only for the geometric question of where a window could have sat.
+
+The indent-count share and the section share are not the same quantity: one
 describes where the map sat, the other describes the section. This script
 computes the laminate figure under both, and then asks how much the figure
 would move if the same window had been placed elsewhere, by sliding a window of
@@ -35,19 +34,14 @@ the map's own footprint over the mosaic.
 The class medians are held fixed throughout. Only the zone share moves, which
 is what isolates the term.
 
-The sliding window was swept with its footprint transposed for two rounds, and
-the numbers it printed were wrong. The map's long axis, 1086 um, runs through
-the laminate thickness (2.2), which in the mosaic is the vertical direction, the
-rows of the mask. `WINDOWS` used to be written long x short and `sliding` read
-that as width x height, so the 1086 um lay along the plane of the section and
-the 98 um through the thickness: a thin strip lying along one tow instead of a
-column crossing nearly four of the sixteen plies. That window saw one zone or
-the other far more often than a real placement can, and the spread it
-reported, 0.373 +/- 0.342 in
-share and 18.72 +/- 7.18 GPa in the Voigt sum over 67 025 placements, was about
-five times what the map as it lies is worth. The footprint is now written as
-(along the thickness, in the plane) and slid that way. A third window is also
-swept: the map's own 704 um of laminate after the resin cut, since that is the
+The sliding window's footprint is written as (along the thickness, in the
+plane) and slid that way. The map's long axis, 1086 um, runs through the
+laminate thickness (2.2), which in the mosaic is the vertical direction, the
+rows of the mask. Read the other way round, as width x height, the 1086 um
+would lie along the plane of the section and the 98 um through the thickness: a
+thin strip lying along one tow instead of a column crossing nearly four of the
+sixteen plies, which would see one zone or the other far more often than a real
+placement can and would overstate the spread. A third window is also swept: the map's own 704 um of laminate after the resin cut, since that is the
 span the retained indents cover and the indent-count share of 0.497 belongs to
 it. For each window the share of placements at or below the share that window
 saw is recorded, so that the mapped window can be placed on the distribution

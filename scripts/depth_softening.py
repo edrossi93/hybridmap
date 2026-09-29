@@ -6,8 +6,8 @@ depth-resolved one, 55 GPa, on the grounds that the two acquisitions agree on
 the same contacts at 80 nm and that the deeper reading of those contacts then
 falls with depth. Supplementary Figure S7 draws that fall; this script is the
 arithmetic behind every figure 4.4 quotes about it, and behind a few more that
-bear on what the fall is not. Until this round those figures were computed by
-hand and printed, and nothing in the deposit could reproduce them.
+bear on what the fall is not, so that every one of them can be reproduced from
+the deposit.
 
 The selection is the figure's: every indent of the basalt-centre band whose
 trace reads above the load-controlled map's own 70 GPa cut at 80 nm. It is made

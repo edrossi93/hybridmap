@@ -2,15 +2,14 @@
 The per-class confidence intervals of Table 3, recomputed from the deposited
 tables.
 
-The file keeps its name from the round in which that table was numbered 2. The
-table it reproduces is the one carrying the per-class medians, counts and
-intervals.
+Despite the file name, the table it reproduces is Table 3, the one carrying the
+per-class medians, counts and intervals.
 
 Table 3's caption declares the construction: "95 % bootstrap confidence
 intervals on the medians (10^4 resamplings, seed 42)". That is a complete
-recipe, so it should be runnable, and until this script existed it was the one
-column of the paper that no deposited code produced. The medians beside it come
-from `rule_of_mixtures.class_table`; the intervals had no such route.
+recipe, so it should be runnable, and this script runs it, so that the column
+is produced by deposited code. The medians beside it come from
+`rule_of_mixtures.class_table`; the intervals come from here.
 
 The recipe is followed exactly as the caption states it: resample the indents
 within a class with replacement, take the median of each resample, and report

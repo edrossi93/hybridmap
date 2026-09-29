@@ -23,7 +23,8 @@ This script writes, for §3.3, §4.1, §4.3.6 and §4.4:
   * the mixed-volume share of the load-controlled basalt-rich zone on the
     same 40 GPa upper cut;
   * the reading of the §4.4 stiff contacts at the displacement where their
-    contact depth equals the load-controlled contact depth on basalt;
+    contact depth equals the load-controlled contact depth on basalt, and
+    their phase angle between 50 and 80 nm, against the 15 degree limit;
   * whether the fall of the mixed-volume contacts between 100 and 300 nm
     follows the distance to the nearest compliant contact.
 
@@ -141,7 +142,12 @@ def main():
         "z_nm": zm, "h_c_nm": float(per_z.loc[zm, "h_c"]),
         "E_GPa": float(per_z.loc[zm, "E"]), "load_mN": float(per_z.loc[zm, "P"]),
         "n_with_reading": int(per_z.loc[zm, "n"]),
-        "a_um_at_300": RADIUS_FACTOR * float(per_z.loc[300.0, "h_c"]) / 1e3}
+        "a_um_at_300": RADIUS_FACTOR * float(per_z.loc[300.0, "h_c"]) / 1e3,
+        # the shallow readings pass the same quality rule as the slices
+        "phase_angle_median_deg_50_to_80": float(
+            s[s.depth_nm.between(50, 80)].phase_angle_deg.median()),
+        "phase_angle_above_15_deg_50_to_80": int(
+            (s[s.depth_nm.between(50, 80)].phase_angle_deg.abs() > 15).sum())}
 
     # ---- mixed-volume fall against distance to compliant contacts ---------
     b = kept[kept.zone == BAND].set_index("indent_id")

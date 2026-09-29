@@ -1,13 +1,13 @@
-"""Diagnostic figures for the response to reviewers.
+"""Diagnostic figures on how particular numbers were obtained.
 
-These support the reply rather than the paper. They answer questions about how
-a number was obtained, which is exactly the material a reviewer wants to see
-once and which would clutter the manuscript.
+These document methods rather than results. They show how a number was
+obtained, which is worth seeing once and would clutter the manuscript. The
+output files carry the prefix `Reply_` and the panel labels below.
 
-  R2  the CLT-normalised comparison against the prior laminates (R3-10)
-  R3  the ASTM D790 Annex A1.1 toe-compensation construction (R3-17)
+  R2  the CLT-normalised comparison against the prior laminates
+  R3  the ASTM D790 Annex A1.1 toe-compensation construction
 
-The reply's R1 panel, the void-threshold sensitivity, is not here. It is built
+The R1 panel, the void-threshold sensitivity, is not here. It is built
 from the backscattered-electron pixels rather than from any deposited table, so
 it cannot run on this data and is kept with the micrographs.
 """
@@ -35,10 +35,9 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 # The lamination-theory prediction each laminate is normalised by comes from
 # `fig08_rom.lamination_theory`, the same function that draws the Figure 8
 # baseline and prints the §3.4 value, with the two fibre moduli combined by
-# volume at the densities §3.4 states. This file used to carry its own copy of
-# the calculation and its own density pair, 2.67 and 1.45 g/cm3, and the paper
-# came to print two predictions for one panel: 27.2 GPa in §3.4 and Figure 8,
-# and the 26.25 implied by the 0.72 and 0.75 of §4.2. One route now.
+# volume at the densities §3.4 states. This file carries no copy of the
+# calculation and no density pair of its own, so §3.4, Figure 8 and §4.2 print
+# one prediction for the panel, by one route.
 # ---------------------------------------------------------------------------
 PRIOR = [
     ("PA11 flax, [0]",            0.377,  5.13, "flax"),
@@ -285,8 +284,8 @@ def r5_deconvolution(outdir):
 if __name__ == "__main__":
     import sys
     # Same convention as the paper figure scripts: an optional output directory,
-    # defaulting to the current one. Previously both arguments were required and
-    # the script raised IndexError when run the way the README describes.
+    # defaulting to the current one, so the script runs the way the README
+    # describes.
     out = sys.argv[1] if len(sys.argv) > 1 else "."
     r2_clt(out)
     r3_toe(out)

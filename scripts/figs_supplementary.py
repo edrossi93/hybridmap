@@ -1,17 +1,13 @@
 """Supplementary Figures S1, S2 and S4, rebuilt from the deposited tables.
 
-The three of them were still the artwork submitted with the first version, and
-their labels had not followed the paper. S1's legend read "basalt-mixed" and
-"linen", S2's panel titles called the load-controlled map a "3D acquisition", and S4
-carried "basalt mixed" in its legend and "mixed-mode" in a panel title. All three
-names were retired in this revision, and the reply tells the reviewer that the
-class is called mixed-volume "in the manuscript, the supplement and the figures".
-Nothing had read the figures, because the names live inside a raster.
+Their labels follow the paper's terminology: the class is called mixed-volume
+and the load-controlled map is called the load-controlled map, in the
+manuscript, the supplement and the figures alike. Because the labels live inside
+a raster, only a rebuild from the deposit can guarantee that.
 
-Rebuilding them from the deposit rather than editing the pixels also puts them
-under the same reproducibility as the paper's own figures, which is where they
-should have been: until now they were the only figures in the package that no
-script could produce.
+Building them from the deposit rather than as fixed artwork also puts them
+under the same reproducibility as the paper's own figures, so that every figure
+in the package is produced by a script.
 
 Every number the captions and the Discussion quote is recomputed here and
 printed, so a disagreement shows up rather than being drawn.
@@ -99,8 +95,8 @@ def s2(outdir):
     for ax, (zone, title, logy) in zip(axes, zones):
         e = d.loc[d.zone == zone, "E_GPa"].dropna()
         # Both panels run to 130 GPa and both are logarithmic in count.
-        # Reviewer 3 pointed out that the flax panel used to stop at 25 GPa,
-        # which hid the 492 indents above 15 GPa: on a linear count axis they
+        # A flax panel stopped at 25 GPa would hide the 492 indents above
+        # 15 GPa: on a linear count axis they
         # are invisible beside the compliant peak, and on a truncated modulus
         # axis they are not drawn at all. The stiff tail of the flax-rich zone
         # is the mixed-volume population, and it is the point of the figure.
@@ -135,9 +131,8 @@ def s3(outdir):
 
     The same three curves the manuscript describes: the sum of squares, the
     silhouette and the Gaussian-mixture BIC, over k = 2 to 8, on the same nine
-    features and the same quality-controlled indents as everything else. It was
-    the one supplementary figure with no stale label, and the one no script
-    could produce.
+    features and the same quality-controlled indents as everything else, built
+    here so that this supplementary figure too is produced by a script.
     """
     from sklearn.cluster import KMeans
     from sklearn.metrics import silhouette_score

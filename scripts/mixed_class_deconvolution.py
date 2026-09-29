@@ -1,23 +1,21 @@
 """
 Inverting the mixed-volume class back onto the basalt/matrix tie line.
 
-Reviewer 3's objection is that the mixed-volume fraction depends on the contact
-footprint, so it is a property of the measurement and not of the laminate. He is
-right, and the test he proposed is the one worth running: deconvolve the mixed
-class into its two end members and ask whether what comes out is the same in
-both acquisitions, whose footprints differ by roughly a factor of four in
-contact depth.
+The mixed-volume fraction depends on the contact footprint, so it is a property
+of the measurement and not of the laminate. The test worth running is therefore
+to deconvolve the mixed class into its two end members and ask whether what
+comes out is the same in both acquisitions, whose footprints differ by roughly a
+factor of four in contact depth.
 
 The inversion is applied to every indent in the basalt-rich zone, not only to
 those the rule called mixed-volume. That is deliberate. A class fraction is
 built out of the thresholds, so any quantity derived from the class counts
-inherits the very parameter under objection. Inverting each indent from its own
+inherits the very parameter under test. Inverting each indent from its own
 modulus removes the thresholds from the calculation entirely, which makes the
 result a fair test rather than a restatement.
 
 Two inversions are reported because the contact does not tell us which one it
-obeys, and choosing the one that agrees best would be the circular reasoning the
-same reviewer objected to elsewhere.
+obeys, and choosing the one that agrees best would be circular reasoning.
 
     linear      E = f E_b + (1 - f) E_m
     compliance  1/E = f/E_b + (1 - f)/E_m
@@ -141,8 +139,7 @@ def endpoint_sensitivity(e, e_b, e_m):
 
     The basalt end member is swept over the interval the paper already carries
     on it, and the matrix end member from the bulk tensile value of PA-11 up to
-    the measured one, which is the full span the other reviewer's comment
-    on matrix stiffness puts in play.
+    the measured one, which is the full span of plausible matrix stiffness.
     """
     out = []
     for b in (e_b - 2.5, e_b, e_b + 2.5):

@@ -252,8 +252,7 @@ mosaic tiles beside them, in the same pass, so that the correlation between the
 three sampling terms is carried rather than assumed away.
 
 The classification thresholds are **in** this budget, as its largest Type B
-term, and so, since the third round, are the fifty-nine runaway contacts, as
-its smallest. What stays out is the choice of basalt input, which is a
+term, and so are the fifty-nine runaway contacts, as its smallest. What stays out is the choice of basalt input, which is a
 discriminated choice on contact mechanics and is reported as the sensitivity of
 Supplementary Table S4 instead, and cross-section representativeness, which one
 section cannot bound.
@@ -328,9 +327,6 @@ The gap between the first two numbers is why the estimate moved from 21.33 to
 29 880 placements, a share of 0.369 ± 0.070 and a sum of 18.65 ± 1.46 GPa;
 over the retained 704 µm span, 52 290 placements, 0.360 ± 0.141 and
 18.47 ± 2.96 GPa, with the mapped window's 0.497 at or above 85 % of them.
-For two rounds this sweep ran with the footprint transposed and the file
-carried 0.373 ± 0.342 and 18.72 ± 7.18 GPa over 67 025 placements; the
-script's docstring records the error.
 
 ## `basalt_input_sweep.json`
 
@@ -422,10 +418,8 @@ Hill average is 0.311 and 0.289. The value is kept, because the table tests a pl
 phase-specific set and 0.34 lies inside the interval the two end members
 bound; the file carries the averages so that the description can be checked.
 
-The four percentages in this file used to be copied by hand into
-`uncertainty_budget.py`. Two routes to one quantity disagreed in the fourth
-decimal, which was enough to move the printed estimate across a rounding
-boundary; the budget now calls this script.
+`uncertainty_budget.py` reads the four percentages from this script rather
+than holding its own copy, so the two cannot disagree.
 
 ## `bse_validation_metrics.json`
 
@@ -524,9 +518,9 @@ Written by `scripts/contact_geometry.py`, and the source of the contact sizes
 
 ## `mixed_class_deconvolution.json`
 
-Written by `scripts/mixed_class_deconvolution.py`. Reviewer 3 asked whether the
-mixed-volume class survives a change of contact footprint. It does not; what it
-is built out of does, and this is that calculation.
+Written by `scripts/mixed_class_deconvolution.py`. The mixed-volume class does
+not survive a change of contact footprint; what it is built out of does, and
+this is that calculation.
 
 | key | meaning |
 |---|---|

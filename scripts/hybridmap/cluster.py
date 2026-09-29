@@ -108,10 +108,9 @@ def run(df, features, modulus_col, k=4, seed=0, n_init=10, model="kmeans",
     modulus = d[modulus_col].to_numpy()
     lab = order_by_stiffness(lab, modulus, k)
     rule = d[label_col].to_numpy()
-    # The merge is applied to both partitions. Merging the clusters alone, which
-    # is what this line did until this round, leaves the rule's two compliant
-    # classes in the comparison and scores the partition on the very boundary
-    # the merge is meant to set aside.
+    # The merge is applied to both partitions. Merging the clusters alone would
+    # leave the rule's two compliant classes in the comparison and score the
+    # partition on the very boundary the merge is meant to set aside.
     merged_lab = merge_most_compliant(lab, modulus, merge_lowest)
     merged_rule = merge_most_compliant(rule, modulus, merge_lowest)
     return {"n": len(d),

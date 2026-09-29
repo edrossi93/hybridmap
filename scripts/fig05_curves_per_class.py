@@ -10,9 +10,9 @@ element:
   row (b) median and +/- 1 sigma band of elastic modulus, hardness and phase
       angle against indentation depth, all four classes on shared axes.
 
-The sigma band is retained here. Reviewer 3 comment 22 objects to a +/- 1 sigma
-envelope drawn around a single specimen, which is Figure 9; over a population of
-hundreds of indents it is a legitimate summary.
+The sigma band is retained here. A +/- 1 sigma envelope drawn around a single
+specimen would say nothing, which is why Figure 9 shows every replicate instead;
+over a population of hundreds of indents it is a legitimate summary.
 
 Axes are placed explicitly, so there is room outside each panel for its letter.
 """
@@ -49,9 +49,9 @@ def resample(curves, ids, column, grid=GRID):
 
 
 def build(outdir):
-    # Created here rather than assumed. Run from a fresh checkout with an
-    # output directory that does not exist yet, these scripts used to fail
-    # on the savefig at the end, after doing all the work.
+    # Created here rather than assumed, so that a run from a fresh checkout,
+    # with an output directory that does not exist yet, cannot fail on the
+    # savefig at the end after doing all the work.
     Path(outdir).mkdir(parents=True, exist_ok=True)
     lab = pd.read_csv(DATA / "classified_depth_resolved.csv")
     cur = pd.read_csv(DATA / "depth_resolved_curves.csv")

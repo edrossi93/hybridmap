@@ -407,9 +407,8 @@ def save(fig, stem, outdir="."):
     """Write a figure as PDF and PNG under one stem.
 
     The paper figures each call savefig twice with the same 400 dpi and the
-    same pair of extensions. The reply figures called a helper for it that was
-    never actually written, so they raised AttributeError on their last line.
-    This is that helper, doing exactly what the paper scripts do inline.
+    same pair of extensions. This helper does exactly what the paper scripts do
+    inline, for the scripts that call it, `reply_figures.py` among them.
     """
     out = Path(outdir)
     out.mkdir(parents=True, exist_ok=True)

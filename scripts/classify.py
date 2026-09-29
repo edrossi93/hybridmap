@@ -205,10 +205,9 @@ if __name__ == "__main__":
     counts = got.constituent.value_counts()
     print(counts.to_string())
 
-    # Write it. Until round 3 this block only compared the labels against a
-    # deposited file that nothing produced, so a disagreement could be read
-    # and shrugged at. The file is a product now, and this is what makes it
-    # one.
+    # Write it. `classified_shallow.csv` is a product of this script, not a
+    # record: any existing copy is compared against the new labels and then
+    # overwritten, so a disagreement cannot persist in the deposit.
     out = data / "classified_shallow.csv"
     if out.exists():
         ref = pd.read_csv(out)

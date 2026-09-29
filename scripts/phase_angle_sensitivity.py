@@ -11,13 +11,13 @@ any of the three analysis depths, or when one of those depths has no valid
 window. At 15 degrees that rule is what `qc_flag_strict` carries in
 `classified_depth_resolved.csv`. The sweep checks that the two agree indent by
 indent rather than assuming it, because the whole point of the table is that the
-rule is now stated and applied in one place.
+rule is stated and applied in one place.
 
 What the limit cannot move, and why the table says so. The reference estimate is
 built on the load-controlled acquisition, which has no phase-angle channel at
 all, so no choice of limit reaches it. What moves is the depth-resolved basalt
 median, and with it the alternative input of Supplementary Table S4. The
-estimate is recomputed on the round-3 two-level construction: class fractions
+estimate is recomputed on the two-level construction: class fractions
 and class medians from the indents inside each zone, the share of the two zones
 from the imaged tiles, with only the basalt median replaced.
 

@@ -3,12 +3,12 @@ Check this deposit's prose against this deposit's files.
 
     python tests/test_deposit.py
 
-Run it after any change. It exists because the README drifted: it said the
-flexural replicates were missing when every one of them was present, it gave the
-zone boundaries of a partition that had been removed, it listed six scripts out
-of eighteen, and it named 25 reproduced values where the script prints 34.
-Every one of those was true when it was written. Prose does not fail a test
-suite, so it rots quietly while the code around it is kept honest.
+Run it after any change. It exists because prose drifts: a README can go on
+saying that files are missing when they are present, give the boundaries of a
+partition the analysis does not use, list only some of the scripts, or name the
+wrong number of reproduced values, each of them true when it was written. Prose
+does not fail a test suite, so it rots quietly while the code around it is kept
+honest.
 
 So this is the test suite for the prose. It reads the claims out of the two
 documents and puts each one against the file it describes:
@@ -47,10 +47,10 @@ DISTRIBUTIONS = {"sklearn": "scikit-learn", "PIL": "pillow",
 
 
 # The counts in the README and the dictionary are spelled out, because that is
-# how they read on the page. Both checks used to carry their own short list and
-# both lists ran out as the deposit grew, which made the checks stop checking
-# rather than fail: an unknown word gave None, and None never equals a count.
-# One list, long enough to have room, and an unreadable word is now a failure.
+# how they read on the page. Both checks share this one list, long enough to
+# have room as the deposit grows. A short list would make the checks stop
+# checking rather than fail, since an unknown word gives None and None never
+# equals a count, so an unreadable word is a failure.
 NUMBER_WORDS = {w: n for n, w in enumerate(
     ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
      "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
@@ -174,9 +174,9 @@ class Deposit:
 
         Only the FIRST cell of each table row is read. That is where the column
         name sits; later cells hold units, ranges and prose, and those carry
-        backticked *values*, `basalt`, `flax_face`, which are not columns. An
-        earlier version of this check read every backtick in the section and
-        reported three constituent labels as undocumented columns.
+        backticked *values*, `basalt`, `flax_face`, which are not columns.
+        Reading every backtick in the section would report constituent labels
+        as undocumented columns.
 
         One cell can declare several columns: | `E_100`, `E_150`, `E_200` | GPa |
         """
@@ -327,12 +327,11 @@ class Deposit:
         The README promises a specific last line from reproduce_paper_values.py.
         Run the script and hold the promise against what it prints.
 
-        Until this round the check read the promise and compared it against
-        nothing, so the README could promise any number at all and pass as long
-        as it promised the same one in both places, and it also passed when the
-        README promised nothing. Both of those are failures now. The cost is the
-        time the script takes, half a minute, and it buys the only check in here
-        that reaches past the prose and into the analysis.
+        Comparing the promise against nothing would let the README promise any
+        number at all and pass as long as it promised the same one in both
+        places, or promise nothing and pass. Both of those are failures here.
+        The cost is the time the script takes, half a minute, and it buys the
+        only check in here that reaches past the prose and into the analysis.
         """
         text = self.text(self.readme)
         quoted = set(re.findall(r"(\d+) of \1 values reproduce", text))
@@ -480,15 +479,14 @@ class Deposit:
     # contain one in order to match it. Such a line says so by carrying this
     # marker after a hash, where it reads as a comment on the line rather than
     # as part of the data, so the exemption is a claim somebody made and a
-    # reviewer can see who made it and where.
+    # reader can see who made it and where.
     #
-    # The exemption used to be `"re." not in line`, aimed at the two pattern
-    # lines that happen to call the re module. But "re." is a substring of
+    # The exemption is not keyed on something like `"re." not in line`, aimed
+    # at pattern lines that call the re module, because "re." is a substring of
     # ordinary English: "measure.", "Figure.", "structure.", "before." and
-    # "more." all contain it, so a sentence ending in any of those words carried
-    # an em-dash straight past this check. An exemption has to name what it
-    # exempts; that one described it by coincidence, and the coincidence was
-    # commoner than the thing it meant to describe.
+    # "more." all contain it, so a sentence ending in any of those words would
+    # carry an em-dash straight past this check. An exemption has to name what
+    # it exempts rather than describe it by coincidence.
     EM_DASH_MARKER = "house-style: em-dash literal"
 
     def marks_em_dash(self, line):

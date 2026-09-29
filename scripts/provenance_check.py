@@ -1,12 +1,10 @@
 """Every deposited file is either a measurement or a product of one. Nothing else.
 
-This exists because of a specific failure. `classified_depth_resolved.csv` was
-written once by hand-run code that was never kept, and then read by everything
-downstream. Nobody could regenerate it, so three defects lived inside it
-undetected across two rounds of review: a quality mask matching no stated rule,
-slice values that had drifted away from the file they were supposed to equal,
-and a cluster column that had already needed one repair. A reviewer found the
-edge of it from the outside, which is the worst way to find it.
+It guards against a specific failure. A file written once by code that is not
+kept, and then read by everything downstream, cannot be regenerated, so defects
+can live inside it undetected: a quality mask matching no stated rule, slice
+values that drift away from the file they are supposed to equal, a column that
+needs repair. The only way to find them is then from the outside.
 
 The rule this gate enforces is simple. Each file under `data/` is declared as
 exactly one of:
@@ -20,17 +18,15 @@ A file that is in neither list fails the gate, so a new file cannot be added
 quietly. A derived file that changes when its own script is re-run fails too,
 which catches a stale product before a reader does.
 
-That last sentence was false until this round, which is worth recording because
-it is the failure this file exists to prevent, committed by this file. `rebuild`
-ran every generator, looked only at the exit status, and then wrote the manifest
-from the files as they stood afterwards. So a product whose bytes had drifted
-was re-recorded under its new hash, `rebuild` returned 0, and the fast check
-then compared the file against that new hash and passed for ever. The
-byte-identity promised above was tested nowhere. `record` did the same without
-even running the scripts.
+For that last sentence to hold, the manifest must not follow the files. A
+`rebuild` that ran every generator, looked only at the exit status and then
+wrote the manifest from the files as they stood afterwards would re-record a
+drifted product under its new hash, return 0, and let the fast check pass
+against that new hash for ever, so the byte-identity promised above would be
+tested nowhere. The same holds for `record`, which does not run the scripts.
 
-Both are now held to one rule: a hash is written to the manifest only when the
-script reproduced the file byte for byte and that is the hash the manifest
+Both are therefore held to one rule: a hash is written to the manifest only when
+the script reproduced the file byte for byte and that is the hash the manifest
 already carried, or when someone passed `--accept-changes` to record bytes that
 were not proved. So a plain run of this tool cannot change what any file is
 held to. It either confirms the manifest or fails.
@@ -109,8 +105,8 @@ MANIFEST = DATA / "PROVENANCE.json"
 # was not run or because the file is a measurement with no script at all, this
 # flag is how a person states that they are recording the bytes anyway. It is
 # spelled out on the command line so that accepting drift is a decision someone
-# takes and can be found afterwards in a shell history, rather than the silent
-# side effect of running the tool that it used to be.
+# takes and can be found afterwards in a shell history, rather than a silent
+# side effect of running the tool.
 ACCEPT = "--accept-changes"
 FLAGS = {"--rebuild", "--record", ACCEPT}
 
@@ -268,9 +264,8 @@ def rebuild(accept):
 
     # A measurement has no script, so re-running is not available as evidence
     # and the only thing to hold it to is the hash the manifest already carries.
-    # Rewriting that hash unasked would launder a changed measurement exactly as
-    # the products used to be laundered, and a measurement is the one kind of
-    # file in here that nothing can reconstruct.
+    # Rewriting that hash unasked would launder a changed measurement, and a
+    # measurement is the one kind of file in here that nothing can reconstruct.
     for name in PRIMARY:
         path = DATA / name
         if not path.exists():

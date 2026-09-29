@@ -21,7 +21,7 @@ something compares them, so this compares them.
 
 And the unsupervised cross-check scores what the paper says it scores: ARI*
 with the compliant classes merged on both sides of the comparison, not on the
-cluster side alone, which is what it did for two rounds.
+cluster side alone.
 """
 
 import subprocess
@@ -151,9 +151,9 @@ def macro_routes(generated):
                    - from_raw.chord_toe_compensated).abs().max())
     check("force and displacement give the same chord as stress and strain",
           worst < 1e-9, f"largest difference {worst:.2e} MPa per per cent")
-    # Counted from the curves rather than written down. The literal 10 that used
-    # to sit here was a second copy of a fact the file already carries, and it
-    # went stale the moment the file lost a specimen.
+    # Counted from the curves rather than written down. A literal count would be
+    # a second copy of a fact the file already carries, and would go stale the
+    # moment the file gained or lost a specimen.
     n = curves.specimen_id.nunique()
     check("both routes cover every specimen",
           len(from_raw) == len(from_reduced) == n, f"{len(from_raw)} specimens")
@@ -236,7 +236,7 @@ def ari_star_merges_both_sides():
           abs(r["ARI_star"] - direct) < 1e-12,
           f"{r['ARI_star']:.4f} against {direct:.4f}")
     one_sided = adjusted_rand_score(r["rule"], clusters)
-    check("and is not the one-sided value the package used to return",
+    check("and is not the one-sided value",
           abs(r["ARI_star"] - one_sided) > 0.01,
           f"one-sided {one_sided:.4f}")
     merged = set(r["merged_rule"])

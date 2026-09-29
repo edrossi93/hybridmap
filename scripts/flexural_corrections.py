@@ -32,9 +32,8 @@ the paper prints 7. And the paper's own bracket is printed to the unit, so the
 gaps it quotes next, 5 % and 14 %, follow from the rounded 3 and 7 % rather than
 from the exact 3.0 and 6.6: carrying the exact correction through gives 5.0 and
 13.8 %. Both chains are printed below. The shear coefficient, 6/5 for a
-rectangular section, and the exact inversion are both stated in 4.3.5 now; for
-two rounds the paragraph gave neither, and the bracket could not be reproduced
-from the page.
+rectangular section, and the exact inversion are both stated in 4.3.5, so the
+bracket can be reproduced from the page.
 
 Run: python flexural_corrections.py
 """

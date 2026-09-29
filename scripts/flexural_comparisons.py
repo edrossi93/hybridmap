@@ -1,31 +1,28 @@
 """The planned flexural comparisons, their effect sizes, and three corrections.
 
 Supplementary Table S7 reports four comparisons under one Holm correction.
-Reviewer 3 raised two objections to that in his second report, and both are
-answered here by computing rather than by argument.
+Two alternative families are computed beside it, so that the dependence of the
+conclusion on the choice of family is shown by computing rather than by
+argument.
 
-His 4(b): the chord modulus and the peak tangent modulus are two measures of
-the same property on the same specimens, so putting both in one family is
-conservative, and because Holm enforces monotonicity the corrected value for
-the chord follows from the tangent rather than from its own evidence. He asks
-what the correction gives if the two stiffness measures are treated as one
-comparison.
+Stiffness as one comparison: the chord modulus and the peak tangent modulus are
+two measures of the same property on the same specimens, so putting both in one
+family is conservative, and because Holm enforces monotonicity the corrected
+value for the chord follows from the tangent rather than from its own evidence.
+This family treats the two stiffness measures as one comparison.
 
-His 4(c): the family changed between submissions. The first version compared
-flexural modulus, flexural strength and strain at break. He asks for the
-corrected values under the original family as well, so that a reader can see
-how much the conclusion depends on the choice.
+The three-measure family, labelled "the original family" in the output: the
+chord modulus, flexural strength and strain at break.
 
-Both are reported below, beside the current family. The answer is not
-comfortable and is stated plainly in the paper: under either of the other two
-families the stiffness difference corrects to p = 0.0357 rather than 0.0675,
-on the nine specimens deposited now. The paper therefore no longer rests
-anything on a non-significant test. It reports that a difference of about 5 %
-cannot be excluded and that it lies below what the construction itself can
-resolve.
+Both are reported below, beside the family of Table S7. The answer is stated
+plainly in the paper: under either of the other two families the stiffness
+difference corrects to p = 0.0357 rather than 0.0675, on the nine specimens
+deposited. The paper therefore rests nothing on a non-significant test. It
+reports that a difference of about 5 % cannot be excluded and that it lies
+below what the construction itself can resolve.
 
-Every quantity is defined here rather than inherited, because the previous
-table's peak tangent modulus and softening had no script behind them:
+Every quantity is defined here rather than inherited, so that each one has a
+script behind it:
 
   chord modulus    ASTM D790 chord over 0.05 to 0.25 % strain with the A1.1
                    toe compensation, as tabulated in flexural_moduli.csv

@@ -8,13 +8,12 @@ The construction has two levels and they are measured by different instruments:
     between zones   the share of the two architectural zones, from the operator
                     tow marking of the backscattered-electron mosaic
 
-The second level is new in this revision. Previously the zone share came from
-the indent counts, which describe the window that happened to be mapped rather
-than the section. Reviewer 3 asked in his second report for the zone share to
-appear in this budget. As a term it is the second largest of the three sampling
-terms, 0.61 GPa against 1.08 for the class fractions; what made the estimate
-move to the mosaic share is not the size of the term but the 2.83 GPa between
-the two weightings, which is a correction and not an uncertainty and is
+The zone share is taken from the mosaic because indent counts would describe
+the window that happened to be mapped rather than the section, and it appears in
+this budget as a term of its own. As a term it is the second largest of the
+three sampling terms, 0.61 GPa against 1.08 for the class fractions; what puts
+the estimate on the mosaic share is not the size of the term but the 2.83 GPa
+between the two weightings, which is a correction and not an uncertainty and is
 reported as the alternative in Table 2. See `zone_share.py` for that
 measurement and for how far the figure moves.
 
@@ -26,9 +25,9 @@ independent terms added afterwards, so that their correlations are carried:
   zone share  resampled over the 91 mosaic tiles
 
 The indent resampling is a **spatial block bootstrap**, not a draw over
-individual indents. Reviewer 3's comment 3(c) is correct that a Dirichlet on
-the raw counts treats neighbouring indents as independent observations, which
-at a 5.1 x 2.5 um pitch on 10 to 20 um fibres they are not: adjacent contacts
+individual indents, because a Dirichlet on the raw counts treats neighbouring
+indents as independent observations, which at a 5.1 x 2.5 um pitch on 10 to
+20 um fibres they are not: adjacent contacts
 frequently sample the same fibre or the same matrix pocket. The blocks here are
 contiguous groups of grid columns spanning the full short axis of the map, four
 columns wide, about 20 um, or one fibre diameter. Blocks are resampled with
@@ -48,9 +47,9 @@ the standard uncertainty is the half-range divided by root three:
               Supplementary Figure S3 caption argues are failed contacts and
               which the load-controlled map keeps because it carries no
               filter: the estimate with them in against the estimate with
-              them out, 18.50 against 18.63 GPa. Added in the third round; it
-              is the smallest term in the budget and moves the combined value
-              by less than a thousandth of a GPa
+              them out, 18.50 against 18.63 GPa. It is the smallest term in
+              the budget and moves the combined value by less than a
+              thousandth of a GPa
 
 One term stays outside the budget on purpose. Which basalt input to use, the
 shallow 86.0 GPa or the depth-resolved 54.7 GPa, is a choice rather than an
@@ -101,12 +100,11 @@ BLOCK_COLS = 4
 BLOCK_SWEEP = (2, 4, 8)
 
 # The per-class shift when the uniform Poisson ratio of 0.30 is replaced by
-# phase-specific values used to be written here as four percentages copied from
-# Supplementary Table S1. They are derivable, so they are derived:
-# poisson_sensitivity.py inverts the Oliver-Pharr relation on the deposited
-# reduced modulus at each nu. Two routes to one quantity disagreed in the
-# fourth decimal, which was enough to move the printed value across a rounding
-# boundary, and a hard-coded table cannot be checked against anything.
+# phase-specific values is derived rather than copied from Supplementary
+# Table S1: poisson_sensitivity.py inverts the Oliver-Pharr relation on the
+# deposited reduced modulus at each nu. Two routes to one quantity can disagree
+# in the fourth decimal, which is enough to move a printed value across a
+# rounding boundary, and a hard-coded table cannot be checked against anything.
 
 RECTANGULAR = 3 ** 0.5
 

@@ -100,19 +100,19 @@ def substitute(table, cls, new_modulus):
 # measured the way this work measures flax. The cell-wall values are taken on
 # the fibre's cross-section, so the probe presses along the fibre axis; here
 # the flax yarns lie in the plane of the section and the indenter presses
-# across it, the opposite geometry (2.2, 4.3.4). Calling the cell-wall input
-# "transverse", as this list did for two rounds, was the conflation Reviewer 3
-# named. The value this work measures is none of the three: it is the
+# across it, the opposite geometry (2.2, 4.3.4). So the cell-wall input is not a
+# "transverse" modulus, and calling it one would conflate the two geometries.
+# The value this work measures is none of the three: it is the
 # compliant response of the flax-rich tow as consolidated, pressed across its
 # axis, with lumen, middle lamella and impregnating matrix inside the probed
 # volume.
 #
-# The third value read 52.47 here for two rounds, against the 45.30 GPa of
-# Supplementary Table S8 and the "about 45 GPa along the fibre axis" of §4.3.4.
-# The source settles it: that paper measures 45.3 +/- 9.7 GPa on its own mature
-# elementary fibres, and 52.47 is a figure it quotes from earlier work in its
-# introduction. So the table and §4.3.4 carry the measurement and this list
-# carried the quotation. It carries the measurement now. The column printed by
+# The third value is the 45.30 GPa of Supplementary Table S8 and the "about
+# 45 GPa along the fibre axis" of §4.3.4: that paper measures 45.3 +/- 9.7 GPa
+# on its own mature elementary fibres. The 52.47 GPa it also gives is a figure
+# quoted from earlier work in its introduction, not its measurement, so it is
+# not used. The table, §4.3.4 and this list all carry the measurement. The
+# column printed by
 # the block at the foot of this file still reads lower than Table S8 for every
 # input, because it is built on the whole-map class fractions and the table is
 # built on the two-level construction; that difference is in the heading it is
@@ -129,9 +129,9 @@ def flax_input_sensitivity(table, measured, inputs=FLAX_INPUTS):
     """
     Rebuild the bound with the flax term set to each published value in turn.
 
-    Reviewer 3 objects that a modulus measured normal to a cross-section cannot
-    carry the axial contribution the iso-strain term asks of it. This answers
-    by arithmetic rather than by argument: the Voigt sum is recomputed across
+    A modulus measured normal to a cross-section may not carry the axial
+    contribution the iso-strain term asks of it. This tests that by arithmetic
+    rather than by argument: the Voigt sum is recomputed across
     every defensible flax input, from the tow value measured here to the axial
     modulus of a single fibre, and the closure to each measured flexural
     modulus is reported beside it.
@@ -162,9 +162,8 @@ if __name__ == "__main__":
     # 18.50 GPa weights the zones by the 36.2 % share the basalt-rich zone
     # occupies on the imaged section; `zone_share.py` builds it, and the only
     # single-map figure the paper carries is the 21.33 GPa Voigt sum, printed as
-    # the comparison that motivates the section weighting. Until this round the
-    # lines below carried no label at all, so the retired construction read as
-    # the result.
+    # the comparison that motivates the section weighting. The lines below are
+    # labelled as such so that this construction cannot be read as the result.
     print("single-map construction: whole-map class fractions, zones weighted "
           "by indent count.\nNot the paper's estimate, which weights the zones "
           "by the imaged section (zone_share.py).\n")

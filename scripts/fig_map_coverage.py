@@ -1,13 +1,9 @@
-"""Reply figure: where the measurements sit, and in what geometry.
+"""Schematic: where the measurements sit, and in what geometry.
 
-Reviewer 3 asked for a schematic showing where both mapped windows sit within
-the full stack. The first version of this figure answered a narrower question
-than the one asked: it put three bars side by side, so it compared the sizes of
-the windows without showing them on the laminate, and it said nothing about the
-geometry that relates the indentation to the bending test.
-
-This version draws the specimen, the polished face and the footprints, all to
-scale, and takes the same care over what is not known.
+A schematic showing where both mapped windows sit within the full stack, and
+the geometry that relates the indentation to the bending test. It draws the
+specimen, the polished face and the footprints, all to scale, rather than
+comparing window sizes alone, and takes the same care over what is not known.
 
   (a) The bending specimen in elevation. The polished face is the plane of the
       page: it contains the thickness and the span axis, so the indentation

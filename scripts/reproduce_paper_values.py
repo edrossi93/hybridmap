@@ -73,13 +73,9 @@ INTERNAL = []
 # applies to the low end of the tabulated range in 3.4, which is exactly 28.25
 # and is printed 28.3.
 #
-# A second and looser tolerance used to sit here, for three cells that the
-# documents rounded away from the recomputation: the same 28.25, the modulus term
-# of 3.4 at 10.746, and the last gap cell of Supplementary Table S8, which was
-# 50.653 when the table's flax input was 52.47 GPa. The documents now print 10.7
-# for the modulus term, and the table's last gap cell is 50.4 on the corrected
-# 45.30 GPa input, where the recomputation gives 50.40; so one tolerance covers
-# every cell and the looser one is gone.
+# One tolerance covers every cell: the modulus term of 3.4, 10.746, is printed
+# 10.7, and the last gap cell of Supplementary Table S8 is printed 50.4 on the
+# 45.30 GPa flax input, which the recomputation reproduces.
 ROUNDED = 0.051
 
 
@@ -181,11 +177,10 @@ for cls, E, lo, hi in [("flax", 4.70, 4.56, 4.84), ("matrix", 4.66, 4.31, 4.99),
 
 # The depth-resolved column of Table 3, and the quality mask it depends on.
 #
-# This block was missing, and its absence is why the manuscript carried the old
-# mask's counts through two rounds while the supplement carried the new ones:
-# nothing compared the printed column against the data. Every cell of that
-# column is checked here, the interval included, because an interval is as much
-# a published number as a median.
+# Without this block nothing would compare the printed column against the data,
+# and the manuscript and the supplement could print different counts for the
+# same mask. Every cell of that column is checked here, the interval included,
+# because an interval is as much a published number as a median.
 print("\nper-class values, depth-resolved map at z = 150 nm (Table 3)")
 _dr_all = pd.read_csv(DATA / "classified_depth_resolved.csv")
 report("depth-resolved indents acquired", len(_dr_all), 2000, 0)
@@ -283,8 +278,8 @@ _flax_bands = _bands[_bands.zone != "basalt-centre"]
 report("the two flax-rich bands above 40 GPa, about, per cent",
        100 * float((_flax_bands.E_150 > 40).mean()), 2, 0.5)
 
-# Supplementary Table S1, which had no script behind it until the census of
-# every printed number found 89.05 GPa with no route to it.
+# Supplementary Table S1 has a script behind it, so every figure it prints,
+# 89.05 GPa included, has a route from the data.
 # Where the rejections fall, which 2.2 reports in two sentences. The border
 # definition is imported rather than repeated: `border_rejection.py` owns it, and
 # `border_effect.py` uses the same one on the other map.
@@ -345,12 +340,12 @@ _est = _poi.estimates(_poi.table())
 report("estimate at phase-specific Poisson ratios", _est["phase_specific"],
        18.31, 0.005)
 
-# Eq. (1) as the paper now builds it. The fractions are mixed inside each zone
-# and the two zones are weighted by the share they occupy on the imaged section,
-# not by how many indents landed in each. Weighting by indent counts is the
-# construction of the previous submission; it is kept below because Table 2, 3.4
-# and the Figure 8 caption all print what it gives, as the comparison that
-# motivates the change.
+# Eq. (1) as the paper builds it. The fractions are mixed inside each zone and
+# the two zones are weighted by the share they occupy on the imaged section, not
+# by how many indents landed in each. Weighting by indent counts is the
+# alternative construction; it is kept below because Table 2, 3.4 and the
+# Figure 8 caption all print what it gives, as the comparison that motivates
+# the section weighting.
 print("\nEq. (1): the two-level construction (Table 2, Table 3, 2.4, 3.4)")
 per_zone, medians, w_indents = zs.zone_fractions(sh)
 w_tiles = zs.tile_share()
@@ -458,7 +453,7 @@ report("u, classification thresholds",
        budget["type_b_sd_GPa"]["classification_thresholds"], 0.243, 0.001)
 report("u, Poisson ratio", budget["type_b_sd_GPa"]["poisson_ratio"], 0.056,
        0.001)
-# The sixth row, added in this round: the fifty-nine runaway contacts of the
+# The sixth row: the fifty-nine runaway contacts of the
 # Supplementary Figure S3 caption, as a rectangular term over the estimate with
 # them in and with them out. The range is held to the two estimates computed
 # live above, so the budget cannot carry a stale pair; the standard uncertainty
@@ -689,15 +684,12 @@ E_tab, f_nominal = _dec.TABULATED_E, _dec.NOMINAL_F
 E_measured, f_measured = _dec.measured_moduli(), _dec.MEASURED_F
 tabulated = _dec.voigt(E_tab, f_nominal)
 report("Voigt sum, tabulated moduli and nominal fractions", tabulated, 35.8, 0.05)
-# 3.4 printed these two gaps until 28 September; it now gives the 35.8 GPa
-# against the two measurements, because a gap taken on the prediction reads,
-# to anyone who does not know the convention, as a gap on the measurement.
+# 3.4 gives the 35.8 GPa beside the two measurements rather than as a gap,
+# because a gap taken on the prediction reads, to anyone who does not know the
+# convention, as a gap on the measurement. The gaps are held internally only.
 for cfg, published in (("basalt_face", 47.3), ("flax_face", 44.7)):
     report_internal(f"that sum overshoots {cfg} by", gap(tabulated, cfg),
                     published, 0.05, "the 35.8 GPa is printed; not the gap")
-# The same comparison with the measurement as the denominator, 89.7 % and
-# 80.9 %, was printed by 3.4 until this round and was checked here. The
-# sentence is gone and so is the check.
 # What the tabulated route leaves open: the same fractions with the constituent
 # moduli anywhere inside the ranges the Introduction cites.
 for label, basalt, flax, published in (("low", 70.0, 40.0, 28.3),
@@ -719,15 +711,11 @@ for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.4)):
     report_internal(f"the measured-fraction construction overshoots {cfg} by",
                     gap(both, cfg), published, 0.05,
                     "24.5 GPa is printed; not the gap")
-# The Halpin-Tsai baseline of the same paragraph and of the Figure 8 panel. Until
-# this round it was a literal in fig08_rom.py and had no check here, because
-# there was nothing to check it against. The function is imported from the figure
-# script rather than rewritten here so that the bar and this line cannot come to
-# disagree, which is how the literal survived two rounds in the first place.
-# The value moved from 27.2 to 26.3 when the two fibre moduli were combined by
-# volume at the densities 3.4 states rather than by a plain mean, so that 3.4
-# and 4.2 stop giving two predictions for one panel; this line holds the deposit
-# to the new value until 3.4 and Figure 8 are reprinted.
+# The Halpin-Tsai baseline of the same paragraph and of the Figure 8 panel. The
+# function is imported from the figure script rather than rewritten here so that
+# the bar and this line cannot come to disagree. The two fibre moduli are
+# combined by volume at the densities 3.4 states, so that 3.4 and 4.2 give one
+# prediction for the panel; this line holds the deposit to that value.
 from fig08_rom import halpin_tsai_balanced as _ht, fibre_modulus_by_volume  # noqa: E402
 report_internal("fibre modulus by volume at the stated densities, GPa",
                 fibre_modulus_by_volume(), 67.1, ROUNDED,
@@ -735,12 +723,9 @@ report_internal("fibre modulus by volume at the stated densities, GPa",
 report("Halpin-Tsai lamina, balanced 0/90 average", _ht()[2], 26.3, ROUNDED)
 
 # 4.2: each laminate normalised by its own lamination-theory prediction, and
-# the decomposition of the ratio against the prior hybrids. These six figures
-# were printed and unchecked, and the prediction behind them was a second
-# implementation with its own density pair; `reply_figures.r2_table` now calls
-# the same route as the line above. At two decimals none of the six moved when
-# the route was unified: 0.7172 and 0.7518 against the 0.7178 and 0.7525 the old
-# pair gave.
+# the decomposition of the ratio against the prior hybrids. All six figures are
+# checked here, and `reply_figures.r2_table` calls the same lamination-theory
+# route as the line above, so there is one prediction behind them.
 print("\nthe normalised comparison against the prior laminates (4.2)")
 import reply_figures as _reply                                  # noqa: E402
 _rows, _ = _reply.r2_table()
@@ -774,15 +759,15 @@ report("imaged tiles", seg["n_tiles"], 91, 0)
 # No document prints a figure for the unmarked interface band. The 4.0 % is stated
 # in the README and in this file's own method note, so comparing against it holds
 # the note to the array beside it, which is worth doing and is not a check on the
-# paper. It was counted as one until this round.
+# paper, so it is reported as an internal check.
 report_internal("unmarked interface band, per cent",
                 100 * seg["zone_area_from_mosaic_mask"]["unmarked"], 4.0, 0.05,
                 "the figure the file's own method note states")
 report_internal("the three mosaic zone shares, sum",
                 sum(seg["zone_area_from_mosaic_mask"].values()), 1.0, 1e-9,
                 "they partition the mosaic")
-# The intervals on the two fibre fractions are recorded in the summary file and,
-# until this round, were computed nowhere in the deposit. `imaged_intervals()`
+# The intervals on the two fibre fractions are recorded in the summary file and
+# computed live here. `imaged_intervals()`
 # in `areal_mass_fractions.py` is the recipe: per zone, the tiles that zone
 # covers by at least 5 % of their pixels, the (n - 1) standard deviation of the
 # in-zone fibre fraction over them, 1.96 standard errors, times the zone's share
@@ -811,14 +796,13 @@ report("basalt packing inside its own zone",
        0.0005)
 
 # The second route to the same fractions, from the fabric specification, which
-# 3.4, the Figure 2e caption, 4.3.3 and the Conclusions all report and which
-# nothing in this deposit computed until `areal_mass_fractions.py` was written.
+# 3.4, the Figure 2e caption, 4.3.3 and the Conclusions all report, computed by
+# `areal_mass_fractions.py`.
 # The agreement, 2.2 percentage points, is quoted in all four places and is the
 # worst of the three phase differences, so it is checked as the maximum it is
 # rather than phase by phase.
 #
-# The densities that route needs, 2.70 and 1.50 g/cm3, went unprinted for two
-# rounds and had to be inferred from the four fractions; 3.4 now states them as
+# The densities that route needs, 2.70 and 1.50 g/cm3, are stated in 3.4 as
 # the nominal datasheet values, and the script reads them as inputs.
 print("\nthe areal-mass route to the same fractions (3.4, Figure 2e, 4.3.3)")
 _calc = _am.fractions()
@@ -1036,7 +1020,7 @@ print("\nthree-point bending (3.4, Supplementary Table S7)")
 spec = _fx.per_specimen()
 a_all = spec[spec.configuration == "basalt_face"]
 f_all = spec[spec.configuration == "flax_face"]
-# One line per configuration, because the two counts are no longer the same and
+# One line per configuration, because the two counts are not the same and
 # one line checking one of them would leave the other unchecked. The flax
 # configuration is four because the source workbook held one of its curves twice;
 # see the data dictionary under `flexural_curves.csv`.
@@ -1046,8 +1030,8 @@ report("flax-longitudinal specimens", len(f_all), 4, 0)
 # The Hedges g of the strain at break is None rather than a number, because
 # Supplementary Table S7 prints n/a in that cell: the comparison was not
 # pre-specified, so the table reports the two means and declines the effect size.
-# A check against the 8.79 the data give would have been a check against nothing
-# on the page, and was one until this round.
+# A check against the 8.79 the data give would be a check against nothing on
+# the page.
 for label, column, ba, bs, fa, fsd, g_pub in [
         ("chord modulus", "chord_GPa", 18.85, 0.54, 19.76, 0.50, -1.54),
         ("peak tangent modulus", "peak_tangent_GPa", 20.01, 0.55, 20.78, 0.26,
@@ -1121,22 +1105,18 @@ for label, members in families.items():
         report_below("Holm p on the softening, same family",
                      corrected["softening to 0.55 % strain (%)"], 0.001)
 
-# Two lines used to sit here, the mean modulus over the window above the
-# tangent-modulus crossover in each configuration, compared against 19.91 and
-# 18.48 GPa. Neither figure is in any of the seven documents, and neither is the
-# crossover: the paper does not report that the ranking reverses above it. The
-# window itself is deposited as `E_window_0p28_0p43_GPa` and the data dictionary
-# and `make_flexural_moduli.py` both document what it is, so a reader who wants
-# the comparison has it. It is not a published value and is no longer reported as
-# one. The 18.48 was the sharper warning of the two: it is also a cell of
-# Supplementary Table S2, for an unrelated quantity, so a search of the documents
-# finds it and a careless audit calls it published. On the specimens deposited
-# now the flax window mean is 18.52 and the coincidence has gone, which is luck
-# and not a reason to put the check back.
+# The mean modulus over the window above the tangent-modulus crossover in each
+# configuration is deliberately not checked here. It is in none of the seven
+# documents, and neither is the crossover: the paper does not report that the
+# ranking reverses above it. The window itself is deposited as
+# `E_window_0p28_0p43_GPa` and the data dictionary and `make_flexural_moduli.py`
+# both document what it is, so a reader who wants the comparison has it. It is
+# not a published value and is not reported as one; a matching number found by
+# searching the documents, for an unrelated quantity, would not make it one.
 
 print("\nASTM D790 departures and the bound that follows (2.5)")
-# All four follow from the specimen geometry and the standard, and none of them
-# had a script. The rate bound also needs the strain-rate sensitivity, which is
+# All four follow from the specimen geometry and the standard, and all four are
+# computed by a script. The rate bound also needs the strain-rate sensitivity, which is
 # measured and is checked above where it is measured.
 report("overhang per end, mm", _flex.overhang_mm(), 3.20, 0.005)
 report("overhang the standard requires, mm", _flex.required_overhang_mm(), 7.36,
@@ -1154,8 +1134,7 @@ print("\nTimoshenko shear correction (4.3.5)")
 # assumption rather than on a measurement. They are reported as published values
 # because the bracket and the widened gaps are printed, and the assumption they
 # rest on is printed beside them, as are the shear coefficient, 6/5 for a
-# rectangular section, and the exact inversion, both of which 4.3.5 now states
-# and for two rounds did not.
+# rectangular section, and the exact inversion, both of which 4.3.5 states.
 _means = _flex.measured_means()
 _low, _high = _flex.bracket(_means)
 report("correction at the stiff end of the assumed shear modulus", _low, 3, 0.5)
@@ -1352,6 +1331,51 @@ report("matrix share of the band from 80 to 300 nm, highest, per cent",
 _gap = [v["z_minus_h_c_nm"] for v in _d150.values()]
 report("z - h_c at z = 150 nm, smallest class median, nm", min(_gap), 20, 0.5)
 report("z - h_c at z = 150 nm, largest class median, nm", max(_gap), 30, 0.5)
+
+# The remaining printed values of 2.2, 3.4, 4.4 and Supplementary Table S2.
+print("\nfurther printed values (2.2, 3.4, 4.4, Supplementary Table S2)")
+_sweep_rows = {r["upper_GPa"]: r for r in _sweep["shallow"] if r["lower_GPa"] == 15}
+for upper, median, n in ((60, 76.70, 575), (65, 81.47, 457), (70, 85.99, 380),
+                         (75, 89.19, 313), (80, 93.07, 249)):
+    report(f"pure-basalt median at a {upper} GPa cut", 
+           _sweep_rows[upper]["basalt_median_GPa"], median, 0.005)
+    report(f"pure-basalt count at a {upper} GPa cut",
+           _sweep_rows[upper]["n_basalt"], n, 0)
+_pct = window["windows"]["load-controlled map"]["voigt_percentiles_5_25_50_75_95"]
+report("full footprint, 5th percentile of placements", _pct[0], 16.31, 0.005)
+report("full footprint, 95th percentile of placements", _pct[-1], 21.16, 0.005)
+_pct = window["windows"]["load-controlled map, laminate span after the resin "
+                         "cut"]["voigt_percentiles_5_25_50_75_95"]
+report("indented span, 5th percentile of placements", _pct[0], 12.82, 0.005)
+report("indented span, 95th percentile of placements", _pct[-1], 22.62, 0.005)
+_z1 = float(zs.at_share(per_zone, medians, 1.0)[1][0])
+_z0 = float(zs.at_share(per_zone, medians, 0.0)[1][0])
+report("Voigt sum of the basalt-rich zone alone", _z1, 31.9, ROUNDED)
+report("Voigt sum of the flax-rich zone alone", _z0, 10.9, ROUNDED)
+report("estimate per percentage point of basalt-rich share", (_z1 - _z0) / 100,
+       0.21, 0.005)
+import border_effect as _border_effect                              # noqa: E402
+_bord = _border_effect.comparisons()[0]
+report("border test, comparisons the populations support", len(_bord), 5, 0)
+report("border test, smallest p before correction", _bord[0][6], 0.037, 0.0005)
+report("border test, the same after Holm", _bord[0][7], 0.18, 0.005)
+report_same("border test, the smallest runs the other way (border softer)",
+            bool(_bord[0][4] < _bord[0][5]), True)
+from fig09_flexural import find_crossover as _crossover, tangent_modulus as _tm  # noqa: E402
+_curves_f = pd.read_csv(DATA / "flexural_curves.csv")
+_mod_f = pd.read_csv(DATA / "flexural_moduli.csv").set_index("specimen_id")
+_per = {"basalt_face": [], "flax_face": []}
+for _spec, _g in _curves_f.groupby("specimen_id", sort=True):
+    _e = _g.strain_pct.to_numpy() - _mod_f.loc[_spec, "toe_intercept_pct"]
+    _s = _g.stress_MPa.to_numpy()
+    _k = _e >= 0
+    _per[_g.configuration.iloc[0]].append(_tm(_e[_k], _s[_k]))
+report("strain at which the tangent moduli cross, per cent",
+       _crossover(_per), 0.28, 0.005)
+report("phase angle of the selected contacts at 50 to 80 nm, median, deg",
+       _m["phase_angle_median_deg_50_to_80"], 1, 0.5)
+report("of them, readings above the 15 degree limit at 50 to 80 nm",
+       _m["phase_angle_above_15_deg_50_to_80"], 0, 0)
 
 print("\nprinted values this deposit cannot reproduce: two of them")
 for where, what, why in [

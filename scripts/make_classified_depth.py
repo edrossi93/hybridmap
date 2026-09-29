@@ -1,16 +1,15 @@
 """Build the classified depth-resolved table from the primary measurements.
 
-`classified_depth_resolved.csv` used to be both a record and a product. It
-carried the indent coordinates and the strain-rate index, which exist nowhere
-else, alongside the zone labels, the quality mask, the constituent class and
-the cluster index, which are all decisions taken about those measurements.
-Because it was written once and then read forever, nothing could regenerate it,
-its slice values drifted away from `depth_resolved_slices.csv`, and a quality
-mask that matches no stated rule survived two rounds of review inside it.
-
-The two roles are separated now. `depth_resolved_indents.csv` holds the primary
-quantities and is declared as a measurement input. This script derives
-everything else from it, so every column below can be rebuilt and checked:
+The record and the product are kept apart. `depth_resolved_indents.csv` holds
+the primary quantities, the indent coordinates and the strain-rate index among
+them, and is declared as a measurement input. `classified_depth_resolved.csv`
+carries the zone labels, the quality mask, the constituent class and the
+cluster index, which are all decisions taken about those measurements. A file
+written once and then only read could not be regenerated, could let its slice
+values drift away from `depth_resolved_slices.csv`, and could hide a quality
+mask that matches no stated rule. This script therefore derives every decision
+column from the measurement input, so every column below can be rebuilt and
+checked:
 
     zone          which architectural band the indent sits in, from y
     qc_keep       the phase-angle quality decision
