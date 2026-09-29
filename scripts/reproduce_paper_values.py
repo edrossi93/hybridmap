@@ -25,9 +25,9 @@ itself: a stored product against the live computation of the same quantity, or
 an invariant of printed numbers. A check against a value no document carries is
 not kept, because it would report success on nothing.
 
-One printed value cannot be recomputed from what is deposited, the dark-feature
-area across the threshold sweep of §3.1, which is computed on the raw tile
-images. It is named at the end of the run rather than passed over, so that a
+Two printed values cannot be recomputed from what is deposited, the two ends of
+the dark-feature area across the threshold sweep of §3.1, which is computed on
+the raw tile images. It is named at the end of the run rather than passed over, so that a
 reader does not have to find the boundary of the deposit by looking for a check
 that is not there.
 """
@@ -325,7 +325,8 @@ _edge = _border.rejection_rates(_dr_all, "x_um")
 report("rejected on the two outer rows of the short axis",
        _edge["border"]["pct"], 15.5, ROUNDED)
 report("rejected inside them", _edge["interior"]["pct"], 15.2, ROUNDED)
-for zone, published in (("basalt-centre", 11.0), ("flax-bottom", 20.2)):
+for zone, published in (("basalt-centre", 11.0), ("flax-bottom", 20.2),
+                        ("flax-top", 15.0)):
     g = _dr_all[_dr_all.zone == zone]
     report(f"rejected in the {zone} band", 100 * g.qc_flag_strict.mean(),
            published, ROUNDED)
@@ -512,16 +513,20 @@ for cols, um, alone, combined in (("2", 10, 1.21, 1.23), ("4", 20, 1.38, 1.41),
 # a window of the load-controlled map's own footprint slid over the mosaic.
 # Written by zone_share.py, read here.
 #
-# For two rounds the sweep ran with the footprint transposed, the map's 1086 um
-# lying along the plane of the section instead of through the thickness, and
-# the paper printed what it gave: 67 025 placements, 0.373 +/- 0.342, 18.72 +/-
-# 7.18 GPa. The checks below hold the product to the corrected sweep, and until
-# 2.4 and the reply are reprinted they hold it to values the page does not yet
-# carry: 29 880 placements, 0.369 +/- 0.070 and 18.65 +/- 1.46 GPa for the full
-# footprint, and for the 704 um of laminate the retained indents cover, 52 290
-# placements, 0.360 +/- 0.141 and 18.47 +/- 2.96 GPa, with the mapped window's
-# 0.497 at or above 85 % of placements.
+# The sliding windows of 3.4: the full footprint of the load-controlled map
+# and the 704 um of laminate its retained indents cover, slid over the
+# downsampled mosaic mask, whose own whole-mosaic share and estimate the means
+# sit at.
 window = json.loads((DATA / "zone_share_sensitivity.json").read_text())
+report("basalt-rich share of the downsampled mask",
+       window["w_basalt_downsampled_mask"], 0.367, 0.0005)
+report("estimate at that share",
+       float(zs.at_share(per_zone, medians,
+                         window["w_basalt_downsampled_mask"])[1][0]),
+       18.60, 0.005)
+report("placements of the span at or below the mapped share, per cent",
+       window["windows"]["load-controlled map, laminate span after the resin cut"]
+       ["placements_at_or_below_mapped_share_pct"], 85, 0.5)
 placements = window["windows"]["load-controlled map"]
 report("placements of the load-controlled footprint on the mosaic",
        placements["n_placements"], 29880, 0)
@@ -1335,7 +1340,20 @@ report("load-controlled basalt, median peak load, mN",
 report("their equivalent contact radius at 300 nm, um", _m["a_um_at_300"],
        0.6, ROUNDED)
 
-print("\nprinted values this deposit cannot reproduce: one of them")
+_rr300 = _cg["basalt_centre_reread"]["300"]
+report("mixed-volume share of the band read at z = 300 nm, per cent",
+       _rr300["mixed_volume_pct"], 56, 0.5)
+_mat = [v["matrix_pct"] for k, v in _cg["basalt_centre_reread"].items()
+        if float(k) >= 80]
+report("matrix share of the band from 80 to 300 nm, lowest, per cent",
+       min(_mat), 21, 0.5)
+report("matrix share of the band from 80 to 300 nm, highest, per cent",
+       max(_mat), 24, 0.5)
+_gap = [v["z_minus_h_c_nm"] for v in _d150.values()]
+report("z - h_c at z = 150 nm, smallest class median, nm", min(_gap), 20, 0.5)
+report("z - h_c at z = 150 nm, largest class median, nm", max(_gap), 30, 0.5)
+
+print("\nprinted values this deposit cannot reproduce: two of them")
 for where, what, why in [
     ("3.1", "dark-feature area from 12.9 % to 2.7 % across the threshold range",
      "computed on the backscattered-electron pixels, which are several gigabytes "

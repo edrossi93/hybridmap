@@ -2,7 +2,7 @@
 
 Data and code behind *Estimating the flexural modulus of a hybrid flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a rule of mixtures*.
 
-Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed values this deposit cannot reproduce and what each of them would need. There is one of those, the dark-feature range across the threshold sweep of §3.1, which is computed on the raw tile images, and the script names it rather than leaving it to be noticed.
+Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed values this deposit cannot reproduce and what each of them would need. There are two of those, the two ends of the dark-feature range across the threshold sweep of §3.1, which is computed on the raw tile images, and the script names them rather than leaving them to be noticed.
 
 ---
 
@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `466 of 466 values reproduce`. The line above it reports forty-six internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
+Expected last line: `475 of 475 values reproduce`. The line above it reports forty-six internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
 
 Needs Python 3.8 or newer, and the seven packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -114,7 +114,7 @@ Thirty-five files, in three groups, plus the `hybridmap/` package and the exampl
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 466 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 475 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
 
 **Analysis.**
 
