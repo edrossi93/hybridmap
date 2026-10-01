@@ -1520,6 +1520,7 @@ report("lower threshold over 10 to 20 GPa, largest change, GPa",
 print("\nthe flexural comparisons, remaining cells (2.5, Supplementary Table S7)")
 report_below("raw p, flexural strength", raw_p["flexural strength (MPa)"], 0.0001)
 report_below("raw p, softening", raw_p["softening to 0.55 % strain (%)"], 0.001)
+report_below("raw p, strain at break", raw_p["strain at break (%)"], 0.0001)
 _sab = dict(zip(families["strain at break in place of softening: three"],
                 _fx.holm(np.array([raw_p[n] for n in
                          families["strain at break in place of softening: three"]]))))
