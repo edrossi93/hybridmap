@@ -6,7 +6,7 @@ each zone the within-zone class fractions and the class median moduli at
 z = 150 nm give Voigt, Hill and Reuss. A fourth bar shows the Hill value with
 the basalt input replaced by the 86 GPa median of the load-controlled map: 86 GPa
 lies within what the stiff depth-resolved contacts read between 50 and 100 nm,
-and their reading falls with depth for a reason the data do not settle (4.4), so
+and their reading falls with depth as the surroundings of the fibre enter the measurement with load (4.4), so
 the load-controlled value is the one taken as the fibre modulus. The
 zone-averaged modulus actually measured is marked so the reader can see which
 bound lands closest.

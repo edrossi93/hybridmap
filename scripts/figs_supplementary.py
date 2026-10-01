@@ -43,6 +43,7 @@ def fig_s5(outdir):
     """The rule against the unsupervised partition, on the same indents."""
     d = depth_resolved()
     fs.apply()
+    fs.use_arial()
     fig, (ax1, ax2) = plt.subplots(
         1, 2, figsize=(fs.ONE_HALF, 1.02 * fs.ONE_HALF),
         layout="constrained")
@@ -90,6 +91,7 @@ def fig_s3(outdir):
     zones = [("basalt", "Basalt-rich zone", True),
              ("flax", "Flax-rich zone", False)]
     fs.apply()
+    fs.use_arial()
     fig, axes = plt.subplots(1, 2, figsize=(fs.DOUBLE, 0.42 * fs.DOUBLE),
                              layout="constrained")
     for ax, (zone, title, logy) in zip(axes, zones):
@@ -165,6 +167,7 @@ def fig_s4(outdir):
     ks = diag["k"]
 
     fs.apply()
+    fs.use_arial()
     fig, axes = plt.subplots(1, 3, figsize=(fs.DOUBLE, 0.40 * fs.DOUBLE),
                              layout="constrained")
     for ax, y, label, title in (
@@ -213,6 +216,7 @@ def fig_s6(outdir):
     qc = zone[zone.constituent == "QC/invalid"]
 
     fs.apply()
+    fs.use_arial()
     fig, (ax1, ax2, ax3) = plt.subplots(
         1, 3, figsize=(fs.DOUBLE, 0.46 * fs.DOUBLE),
         gridspec_kw={"width_ratios": [1.5, 1.0, 1.0]}, layout="constrained")

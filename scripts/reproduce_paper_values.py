@@ -1339,8 +1339,8 @@ report("their median E there, GPa", _m["E_GPa"], 97.9, ROUNDED)
 report("their median load there, mN", _m["load_mN"], 0.41, 0.0051)
 report("load-controlled basalt, median peak load, mN",
        _m["load_controlled_basalt_load_mN"], 0.51, 0.0051)
-report_internal("their equivalent contact radius at 300 nm, um",
-                _m["a_um_at_300"], 0.6, ROUNDED, "not printed")
+report("their equivalent contact radius at 300 nm, um", _m["a_um_at_300"],
+       0.6, ROUNDED)
 
 _rr300 = _cg["basalt_centre_reread"]["300"]
 report("mixed-volume share of the band read at z = 300 nm, per cent",

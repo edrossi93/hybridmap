@@ -88,7 +88,8 @@ E_LOWER = 15.0
 # Above this, a contact is taken as pure axial basalt. The two maps need
 # different values because the stiff contacts read differently at the two
 # depths: the contacts that read above 70 GPa at 80 nm in the depth-resolved
-# map have fallen to a median of 46.3 GPa by 300 nm (Supplementary Figure S7), for a reason the data do not settle, so a
+# map have fallen to a median of 46.3 GPa by 300 nm (Supplementary Figure S7),
+# as the surroundings of the fibre enter the measurement with load, so a
 # 70 GPa cut at 150 nm would reject almost every genuine basalt contact.
 E_UPPER_SHALLOW = 70.0
 E_UPPER_DEPTH = 40.0

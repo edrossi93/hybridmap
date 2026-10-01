@@ -54,13 +54,13 @@ the standard uncertainty is the half-range divided by root three:
 One term stays outside the budget on purpose. Which basalt input to use, the
 shallow 86.0 GPa or the depth-resolved 54.7 GPa, is a choice rather than an
 uncertainty, and folding it in would report a decision as noise. The choice
-rests on the two acquisitions agreeing on the same contacts at 80 nm and on the
-deeper reading then falling with depth (Supplementary Figure S7), for a reason
-the data do not settle; the depth-resolved median is therefore not a second
-estimate of the fibre modulus. It is reported as a sensitivity instead.
+rests on the stiff depth-resolved contacts reading 86 GPa near the surface and
+then falling with depth (Supplementary Figure S7), as the surroundings of the
+fibre enter the measurement with load; the depth-resolved median is therefore
+not a second estimate of the fibre modulus. It is reported as a sensitivity instead.
 
-The block-size sweep at the end is printed in two forms, because the caption
-of Supplementary Table S5 quoted one as the other. The sweep resamples 1000
+The block-size sweep at the end is printed in two forms, as the caption of
+Supplementary Table S5 gives both. The sweep resamples 1000
 draws at each block width and its standard deviation is the joint sampling
 term alone, Type A; the caption's "combined value" is that term in quadrature
 with the Type B terms. Both are printed with their draw counts. The

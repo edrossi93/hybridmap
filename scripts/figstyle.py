@@ -106,6 +106,23 @@ def apply():
     })
 
 
+def use_arial():
+    """Set the text of the supplementary figures in Arial.
+
+    Called after apply() or set_style(). Where Arial is not installed it falls
+    back to Liberation Sans, which has Arial's metrics; mathematical text
+    follows the same family.
+    """
+    mpl.rcParams.update({
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Arial", "Liberation Sans", "Arimo", "Helvetica"],
+        "mathtext.fontset": "custom",
+        "mathtext.rm": "sans",
+        "mathtext.it": "sans:italic",
+        "mathtext.bf": "sans:bold",
+    })
+
+
 def panel_label(ax, letter, dx=-0.175, dy=1.075):
     """Lowercase bold panel letter, placed outside the axes box.
 

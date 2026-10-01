@@ -99,6 +99,7 @@ def build(outdir):
     ply = THICKNESS_MM / N_PLIES
 
     fs.apply()
+    fs.use_arial()
     fig = plt.figure(figsize=(fs.DOUBLE, 0.62 * fs.DOUBLE), layout="constrained")
     gs = fig.add_gridspec(2, 2, width_ratios=[2.6, 1.0],
                           height_ratios=[1.0, 1.9])

@@ -35,8 +35,8 @@ the point of the test is whether the two acquisitions agree once each is read on
 its own scale. The two-class sum is then rebuilt on one common pair of end
 members, the shallow one, because that is the constituent input the paper uses:
 86 GPa lies within what the stiff depth-resolved contacts read between 50 and
-100 nm, and their reading falls with depth for a reason the data do not settle
-(4.4), so the depth-resolved basalt median is not taken as a second estimate of
+100 nm, and their reading falls with depth as the surroundings of the fibre
+enter the measurement with load (4.4), so the depth-resolved basalt median is not taken as a second estimate of
 the fibre modulus.
 
 The independent number to compare against is the packing of basalt inside the

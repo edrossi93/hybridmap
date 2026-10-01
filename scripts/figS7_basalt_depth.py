@@ -6,12 +6,13 @@ the class median, that establishes that the depth-resolved basalt median is not
 a second estimate of the fibre modulus: 86 GPa lies within what these contacts
 read between 50 and 100 nm, and their reading falls with depth.
 
-They do. What the fall is caused by, the data do not settle. The basalt yarns
-are cut end-on, so there is fibre beneath each of these contacts for
-micrometres and matrix only around it; the softening does not follow distance
-to a fibre edge (4.4); a compliance in series with the contact, at a weakly
-bonded interface or in the mount, is stated in 4.4 as an untested hypothesis. The figure shows the fall and claims no mechanism for
-it. The panel on the left follows every indent in the basalt-centre zone
+They do. Section 4.4 reads the fall as the surroundings of the fibre entering
+the measurement as the load grows: the elastic field extends over several
+contact radii, and the fibre is a stiff column held by a weakly bonded
+interface in a compliant matrix, within an epoxy mount, all in series with the
+contact. The softening does not follow the distance to compliant material at
+the surface, which on fibres 10 to 20 um across excludes only a lateral
+proximity effect at the scale of the 3 um grid. The panel on the left follows every indent in the basalt-centre zone
 that reads above the shallow map's own 70 GPa cut at 80 nm, one line each, from
 50 to 300 nm. The panel on the right is the same population as a median with an
 interquartile band, beside the class the depth-resolved classification itself
@@ -53,6 +54,7 @@ def build(outdir):
     called = zone.loc[zone.constituent == "basalt", "indent_id"]
 
     fs.set_style("bold", font_scale=0.78)
+    fs.use_arial()
     W, H = 6.30, 2.95
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(W, H), layout="constrained")
 
