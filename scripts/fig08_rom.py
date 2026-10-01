@@ -3,15 +3,15 @@
 Panel (a) works inside the depth-resolved strip, which is banded into three
 architectural zones (flax-rich bottom, basalt-rich centre, flax-rich top). For
 each zone the within-zone class fractions and the class median moduli at
-z = 150 nm give Voigt, Hill and Reuss. A fourth bar shows the shallow-corrected
-Hill bound, in which the basalt input is replaced by the 86 GPa median measured
-in the shallow map: the two acquisitions agree on the same contacts at 80 nm,
-and the deeper reading then falls with depth for a reason the data do not
-settle (4.4), so the shallow value is the one taken as the fibre modulus. The
+z = 150 nm give Voigt, Hill and Reuss. A fourth bar shows the Hill value with
+the basalt input replaced by the 86 GPa median of the load-controlled map: the
+two acquisitions agree on the same contacts at 80 nm, and the deeper reading
+then falls with depth for a reason the data do not settle (4.4), so the
+load-controlled value is the one taken as the fibre modulus. The
 zone-averaged modulus actually measured is marked so the reader can see which
 bound lands closest.
 
-Panel (b) is the laminate-scale construction from the shallow map. It has two
+Panel (b) is the laminate-scale construction from the load-controlled map. It has two
 levels: the class fractions and medians inside each zone come from the indents,
 and the share the two zones occupy comes from the imaging of the same section.
 A second Voigt bar shows what the indent counts give instead, which describes
@@ -223,8 +223,8 @@ def zone_table(depth, modulus_col="E_150"):
 
         rows.append({"zone": zone, "n": int(n.sum()),
                      "voigt": v, "hill": h, "reuss": r,
-                     "voigt_shallow_corrected": v_corr,
-                     "hill_shallow_corrected": h_corr,
+                     "voigt_load_controlled_basalt": v_corr,
+                     "hill_load_controlled_basalt": h_corr,
                      "observed": sub[modulus_col].mean()})
     return pd.DataFrame(rows)
 
@@ -271,12 +271,12 @@ def build(outdir):
     ax_b = fig.add_axes([(LEFT + A_W + GAP) / W, BOTTOM / H, B_W / W, PANEL_H / H])
 
     # ---- panel a ----------------------------------------------------------
-    # solid bars use the depth-resolved basalt median; hatched bars swap in the
-    # shallow-map basalt value, which is the comparison the text discusses
+    # the first three bars use the depth-resolved basalt median; the fourth
+    # swaps in the load-controlled basalt value, which the text discusses
     series = [("voigt", "Voigt", fs.PAPER["voigt"], ""),
               ("hill", "Hill", fs.PAPER["hill"], ""),
               ("reuss", "Reuss", fs.PAPER["reuss"], ""),
-              ("hill_shallow_corrected", "Hill (shallow-corr.)", fs.PAPER["corrected"], ""),
+              ("hill_load_controlled_basalt", "Hill, basalt 86 GPa", fs.PAPER["corrected"], ""),
               ("observed", "Observed", fs.PAPER["observed"], "")]
     x = np.arange(len(zt))
     w = 0.16

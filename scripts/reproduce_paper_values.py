@@ -982,15 +982,15 @@ report("indents in the load-controlled basalt-rich zone",
 print("\nthe within-band construction (3.4, Figure 8a)")
 from fig08_rom import zone_table as _zone_table                     # noqa: E402
 _zt = _zone_table(_dr_all).set_index("zone")
-report("basalt-centre, shallow-corrected Voigt",
-       float(_zt.voigt_shallow_corrected["basalt-centre"]), 47.8, ROUNDED)
-report("basalt-centre, shallow-corrected Hill",
-       float(_zt.hill_shallow_corrected["basalt-centre"]), 32.8, ROUNDED)
+report("basalt-centre, Voigt with the load-controlled basalt",
+       float(_zt.voigt_load_controlled_basalt["basalt-centre"]), 47.8, ROUNDED)
+report("basalt-centre, Hill with the load-controlled basalt",
+       float(_zt.hill_load_controlled_basalt["basalt-centre"]), 32.8, ROUNDED)
 report("basalt-centre, observed zone mean",
        float(_zt.observed["basalt-centre"]), 36.7, ROUNDED)
 for zone, printed in (("basalt-centre", 12), ("flax-bottom", 16),
                       ("flax-top", 19)):
-    hill_c, obs = (float(_zt.hill_shallow_corrected[zone]),
+    hill_c, obs = (float(_zt.hill_load_controlled_basalt[zone]),
                    float(_zt.observed[zone]))
     report(f"{zone}, Hill below the observed mean, per cent of Hill",
            100 * (obs - hill_c) / hill_c, printed, 0.5)
