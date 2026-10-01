@@ -1578,8 +1578,7 @@ for where, what, why in [
      "a setting, read from a moving-median profile of the modulus along the long "
      "axis; it is carried as X_ZONE_SPLIT in classify.py and resin_profile() "
      "returns the profile"),
-    ("Table 1", "loading-rate ratios of about 3 and 0.05 per second, and "
-     "'about sixty times faster' in 4.4, which is their ratio",
+    ("Table 1", "loading-rate ratios of about 3 and 0.05 per second",
      "acquisition settings of the two methods, not results"),
     ]:
     print(f"  [--  ] {where}: {what}")
