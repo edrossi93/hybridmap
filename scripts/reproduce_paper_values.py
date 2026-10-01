@@ -1563,6 +1563,22 @@ report_same("BIC turns up at k = 8", bool(_bic[_ks.index(8)] > _bic[_ks.index(7)
 report_same("indents in the diagnostics, against the classified count",
             _diag["n_indents"], len(_dr_classified))
 
+print("\nthe basalt input against the indent-count weighting (4.4, 4.2)")
+_dr_basalt_med = float(_dr_all.loc[_dr_all.constituent == "basalt", "E_150"].median())
+_alt = float(zs.at_share(per_zone, {**medians, "basalt": _dr_basalt_med},
+                         w_indents)[1][0])
+report("depth-resolved basalt input with the zones weighted by indent counts",
+       _alt, 19.19, 0.005)
+report_same("that value lies between the two measured moduli",
+            bool(min(_means.values()) < _alt < max(_means.values())), True)
+_u = budget["combined_sd_GPa"]
+_alts = (float(zs.at_share(per_zone, medians, w_indents)[1][0]),
+         float(zs.at_share(per_zone, {**medians, "basalt": _dr_basalt_med},
+                           w_tiles)[1][0]), 24.5)
+report_same("each alternative alone puts both measured moduli outside the "
+            "uncertainty",
+            all(abs(a - e) > _u for a in _alts for e in _means.values()), True)
+
 # Printed, and not reproducible from what is deposited. Named rather than left
 # out, because the absence of a check is invisible. Each line says what is
 # missing and where the missing thing is.
