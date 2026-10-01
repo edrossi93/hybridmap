@@ -7,7 +7,7 @@ basalt-longitudinal and four flax-longitudinal, the flax configuration being fou
 because the source workbook held one of its curves twice and the duplicate is not
 deposited.
 
-Panel (a) is the stress-strain family with the ASTM D790 chord window shaded.
+Panel (a) is the stress-strain family with the chord window, 0.05 to 0.25 %, shaded.
 Panel (b) is the tangent modulus of the same specimens, which is where the two
 configurations actually differ: they cross at about 0.28 % strain and the
 flax-longitudinal laminate softens first.

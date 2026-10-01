@@ -5,8 +5,7 @@ and the load-controlled map is called the load-controlled map, in the
 manuscript, the supplement and the figures alike. Because the labels live inside
 a raster, only a rebuild from the deposit can guarantee that.
 
-Every figure in the paper and the supplement is produced by a script; these
-four are produced here.
+These four figures are produced here.
 
 Every number the captions and the Discussion quote is recomputed here and
 printed. The k-means diagnostics of Figure S4 are written to

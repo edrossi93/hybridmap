@@ -21,7 +21,13 @@ description = "Rule of mixtures from an indentation map, with measured inputs"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
-authors = [{name = "Edoardo Rossi"}]
+authors = [
+    {name = "Edoardo Rossi"},
+    {name = "Pietro Russo"},
+    {name = "Fabrizio Sarasini"},
+    {name = "Jacopo Tirillò"},
+    {name = "Edoardo Bemporad"},
+]
 
 # Kept in step with requirements.txt by tests/test_deposit.py, which fails if
 # the two ever name different packages.

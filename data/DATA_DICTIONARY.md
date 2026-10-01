@@ -24,7 +24,7 @@ differs.
 | `classified_depth_resolved.csv` | `y_um` | `x_um` |
 
 In the backscattered-electron mosaic of Figure 2 the thickness direction is
-**vertical**, rotated ninety degrees from the property maps of Figures 3 to 5.
+**vertical**, rotated ninety degrees from the property maps of Figures 3 and 4.
 
 ---
 
@@ -157,7 +157,7 @@ Near zero on the mineral fibre, several times higher on the two organic
 constituents, as viscoelasticity predicts. About 1 % of values are slightly
 negative: noise on near-rate-independent contacts.
 
-The flax and matrix figures are the two §4.3.2 prints, and they are checked by
+The four medians are printed in §3.2, and the flax and matrix ones again in §4.3.4; and they are checked by
 `reproduce_paper_values.py`; the flax one also bounds the rate departure of §2.5.
 
 ## `flexural_curves.csv` - 7621 rows
@@ -174,7 +174,7 @@ statement of that record; the other files point here.
 | column | unit | notes |
 |---|---|---|
 | `specimen_id` | - | e.g. `16Hybr_Bas_Long_1` |
-| `configuration` | - | `basalt_face` or `flax_face`, the yarn aligned with the load |
+| `configuration` | - | `basalt_face` (basalt-longitudinal) or `flax_face` (flax-longitudinal): which yarn runs along the span |
 | `strain_pct` | % | raw, **not** toe-compensated |
 | `stress_MPa` | MPa | |
 
@@ -217,8 +217,19 @@ excluded from the fractions.
 
 The aggregation of the above into the volume fractions of Figure 2e. Zone areas
 are taken from the stitched mask and renormalised over the marked zones only,
-then multiplied by the pooled in-zone fibre fraction. **Reproducible** from the
-tile file.
+then multiplied by the pooled in-zone fibre fraction. A primary input: the mask
+step is not repeated by any script here.
+
+| key | meaning |
+|---|---|
+| `area_mm2` | area the 91 tiles cover, 6.65 mm² |
+| `n_tiles` | 91 |
+| `zone_area_from_mosaic_mask` | marked area of each zone on the stitched mask, and the basalt-rich share it gives, 36.7 % |
+| `in_zone_fibre_fraction_pooled_over_tiles` | fibre fraction of the solid phases inside each zone, pooled over its tiles |
+| `volume_fraction` | the constituent volume fractions of Figure 2e |
+| `published` | the same fractions at the precision the paper prints them |
+| `ci_95_on_the_mean_pct` | the tile-to-tile intervals on the two fibre fractions |
+| `method`, `note` | how the fractions are built, in one sentence each |
 
 ## `uncertainty_budget.json`
 
@@ -367,6 +378,7 @@ afterwards.
 | `H300_over_H80` | the hardness of the selected contacts between 80 and 300 nm: the median ratio and how many read lower at 300 |
 | `S2_over_P` | S²/P, which does not pass through the area function: its median at 50 and at 300 nm, the median of the per-indent ratio and the ratio of the medians, how many indents have both values and on how many it falls |
 | `contact_stiffness_S` | the contact stiffness itself between 250 and 300 nm, where the load is still rising: the median at each depth in kN m⁻¹, on how many of the selected contacts it falls, the median load at each depth, and S(300)/S(80) on the selection against the same ratio on the 115 matrix contacts of the band |
+| `stiffness_channel` | the instrument's exported stiffness channel for the same contacts, kept for the record and not printed: medians at 250 and 300 nm, how many fall between them, the median loads, and S(300)/S(80) on the selection and on the matrix contacts |
 | `cut_free_shares` | two shares that involve no classification cut at 150 nm: the selection as a share of the band's 534 classified contacts, and the contacts the load-controlled map's own 70 GPa cut calls basalt as a share of the 2759 classified in its basalt-rich zone |
 
 `reproduce_paper_values.py` holds the selection to a live recomputation from
@@ -386,7 +398,7 @@ correction applied to the family it belongs to.
 The three families are reported because the conclusion depends on which one is
 used: the stiffness comparison corrects to 0.0675 in the family as
 pre-specified and to 0.0357 in either alternative. The manuscript reports the
-difference itself, about 5 %, rather than a verdict that moves with the
+difference itself, 4.6 % of the flax-longitudinal mean, rather than a verdict that moves with the
 grouping.
 
 ## `poisson_sensitivity.json`
@@ -475,7 +487,7 @@ The first row applies the instrument's own quality flag, deposited as
 `qc_flag_instrument` in `depth_resolved_indents.csv`: it rejects 433 indents.
 The class rule and the basalt median under it are computed on the deposited
 slice values like every other row. The estimate on that basalt median differs
-from the one under the stated rule at 15° by 0.14 GPa, the figure §4.3.3 gives.
+from the one under the stated rule at 15° by 0.14 GPa, the figure Table 2 gives.
 
 ## `spacing_compliance.json`
 
@@ -518,6 +530,7 @@ this is that calculation.
 
 | key | meaning |
 |---|---|
+| `seed`, `n_bootstrap` | the generator seed, 42, and the 4000 resamplings behind every interval in the file |
 | `acquisitions` | per acquisition: the zone, the indent count, the two end members, the deconvolved basalt fraction under each mixing rule with its 95 % interval, the class fraction for comparison, and the end-member sweep |
 | `two_class_sum_GPa` | the two-class Voigt sum under each rule, both acquisitions rebuilt on one common pair of end members, with the spread between them |
 | `cross_acquisition_agreement` | the same sweep read the other way: how far the absolute fraction moves with the end members, against how far the two acquisitions move apart |

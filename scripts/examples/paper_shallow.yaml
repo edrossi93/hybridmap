@@ -98,7 +98,7 @@ macro:
       group: configuration
       strain: strain_pct
       stress: stress_MPa
-    # ASTM D790 chord limits, in per cent strain.
+    # Chord limits, in per cent strain: the ISO 178 / ISO 14125 interval.
     chord: [0.05, 0.25]
     # Width of the sliding window that locates the steepest linear region, in
     # per cent strain. Wide enough to average out digitisation noise, narrow

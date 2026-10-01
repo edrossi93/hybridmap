@@ -24,7 +24,7 @@ The linear form treats the two phases beneath the tip as loaded in parallel; the
 compliance-weighted form treats them as loaded in series. Neither is exact for a
 stiff fibre embedded in a compliant medium, but they are not equally plausible.
 The load path under a Berkovich tip runs down through whatever lies beneath it,
-so a compliant layer under or beside a stiff one governs the displacement out of
+so a compliant layer under or beside a stiff one governs the indentation depth out of
 proportion to its volume, which is why the modulus of a stiff film on a
 compliant substrate falls away with depth far faster than any linear mixing
 predicts. The compliance-weighted inversion is the closer first-order picture on
@@ -34,8 +34,8 @@ End members are each acquisition's own basalt and matrix class medians, since
 the point of the test is whether the two acquisitions agree once each is read on
 its own scale. The two-class sum is then rebuilt on one common pair of end
 members, the shallow one, because that is the constituent input the paper uses:
-the two acquisitions agree on the same contacts at 80 nm, and the deeper reading
-of those contacts then falls with depth for a reason the data do not settle
+86 GPa lies within what the stiff depth-resolved contacts read between 50 and
+100 nm, and their reading falls with depth for a reason the data do not settle
 (4.4), so the depth-resolved basalt median is not taken as a second estimate of
 the fibre modulus.
 

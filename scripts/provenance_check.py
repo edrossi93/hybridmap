@@ -197,7 +197,7 @@ def rebuild(accept):
     acceptance flag only when the script reproduced the file byte for byte and
     that is the hash the manifest already carried. Everything else is unproved:
     a product whose bytes moved when its script ran, a product that reproduces
-    but no longer matches the record, a file the manifest has never held, a
+    but does not match the record, a file the manifest has never held, a
     measurement whose bytes moved. An unproved file keeps whatever hash it
     already had, and minting a new one for it takes the flag.
 
@@ -377,7 +377,7 @@ def main():
                 problems.append(f"{name} has changed since it was recorded; "
                                 f"{who}")
 
-    # A hash for something no longer declared, or recorded under the wrong kind.
+    # A hash for something not declared, or recorded under the wrong kind.
     for kind, declarations in KINDS:
         for name in sorted(set(manifest[kind]) - set(declarations)):
             problems.append(f"the manifest records {name} as a {NOUN[kind]}, "

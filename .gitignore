@@ -8,6 +8,12 @@ __pycache__/
 # after them, so the rendered files are outputs rather than sources.
 Fig*.pdf
 Fig*.png
+*.gif
+
+# What the command-line tool writes when run from here.
+figs/
+results/
+.pytest_cache/
 
 # The synthetic map the tool tests itself on. The generator ships; the file it
 # writes never does, so that nothing in here can be mistaken for a measurement.

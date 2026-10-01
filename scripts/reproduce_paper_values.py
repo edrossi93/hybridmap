@@ -28,7 +28,7 @@ not kept, because it would report success on nothing.
 A few printed statements cannot be recomputed from what is deposited: the
 dark-feature figures of §3.1, which are measured on the raw tile images; the
 zone boundary at x = 730 µm, a setting read from a moving-median profile; and
-the loading strain rates of Table 1, which are acquisition settings. They are
+the loading-rate ratios of Table 1, which are acquisition settings. They are
 named at the end of the run, so that a reader does not have to find the
 boundary of the deposit by looking for a check that is not there.
 """
@@ -224,7 +224,7 @@ _dr_basalt = _dr_all[_dr_all.constituent == "basalt"]
 report("basalt contacts of the depth-resolved class a 70 GPa cut would reject",
        int((_dr_basalt.E_150 <= 70).sum()), 197, 0)
 
-# The four strain-rate sensitivity medians of 3.2, of which 4.3.2 quotes the
+# The four strain-rate sensitivity medians of 3.2, of which 3.2 and 4.3.4 quote the
 # flax and matrix ones as the evidence that the compliant classes are separable
 # where the measurement can resolve them. The flax one is also what bounds the
 # rate departure of 2.5 below, so it is checked where it is measured.
@@ -613,19 +613,21 @@ for row, (n, pct, basalt, estimate) in zip(rows_S3, published_S3):
            row["Voigt_with_that_input_GPa"], estimate, 0.005)
 swept = [r["Voigt_with_that_input_GPa"] for r in rows_S3[1:]]
 report("what the 10 to 20 deg sweep moves", max(swept) - min(swept), 0.01, 0.005)
-# 4.3.3 prints this move. It is the difference of the two estimates before
+# Table 2 prints this move. It is the difference of the two estimates before
 # they are rounded into the table.
 report("the estimate between the instrument's flag and the stated rule",
        _pas.instrument_flag_move(), 0.14, 0.005)
 _flags = pd.read_csv(DATA / "depth_resolved_indents.csv")[
     ["indent_id", "qc_flag_instrument"]].merge(
     _dr_all[["indent_id", "qc_flag_strict"]], on="indent_id")
-report("indents the stated rule readmits against the instrument's flag",
-       int(((_flags.qc_flag_instrument == 1) & (_flags.qc_flag_strict == 0)).sum()),
-       132, 0)
-report("indents it newly rejects",
-       int(((_flags.qc_flag_instrument == 0) & (_flags.qc_flag_strict == 1)).sum()),
-       3, 0)
+report_internal("indents the stated rule readmits against the instrument's flag",
+                int(((_flags.qc_flag_instrument == 1)
+                     & (_flags.qc_flag_strict == 0)).sum()), 132, 0,
+                "433 - 132 + 3 = 304; not printed")
+report_internal("indents it newly rejects",
+                int(((_flags.qc_flag_instrument == 0)
+                     & (_flags.qc_flag_strict == 1)).sum()), 3, 0,
+                "not printed")
 
 print("\ninput substitutions (Supplementary Tables S4 and S8, 3.4)")
 flex = pd.read_csv(DATA / "flexural_moduli.csv")
@@ -736,7 +738,7 @@ for cfg, published in (("basalt_face", 23.1), ("flax_face", 19.4)):
 # The Halpin-Tsai baseline of the same paragraph and of the Figure 8 panel. The
 # function is imported from the figure script rather than rewritten here so that
 # the bar and this line cannot come to disagree. The two fibre moduli are
-# combined by volume at the densities 3.4 states, so that 3.4 and 4.2 give one
+# combined by volume at the densities 3.1 states, so that 3.4 and 4.2 give one
 # prediction for the panel; this line holds the deposit to that value.
 from fig08_rom import halpin_tsai_balanced as _ht, fibre_modulus_by_volume  # noqa: E402
 report_internal("fibre modulus by volume at the stated densities, GPa",
@@ -770,7 +772,7 @@ report("and from the share of the prediction realised",
 report("their product recovers the ratio to within, per cent",
        _d["residual_pct"], 2, 0.5)
 
-print("\nsegmentation of the mosaic (Figure 2, 3.4, Supplementary Table S6)")
+print("\nsegmentation of the mosaic (Figure 2, 3.1, Supplementary Table S6)")
 # Both files here are primary measurements: the tile statistics and the
 # leave-one-field-out validation need the tile images, which are not deposited.
 # The lines below are therefore a check on the transcription into the paper, which
@@ -818,15 +820,15 @@ report("basalt packing inside its own zone",
        0.0005)
 
 # The second route to the same fractions, from the fabric specification, which
-# 3.4, the Figure 2e caption, 4.3.3 and the Conclusions all report, computed by
+# 3.1, the Figure 2e caption, 4.3.3 and the Conclusions all report, computed by
 # `areal_mass_fractions.py`.
 # The agreement, 2.2 percentage points, is quoted in all four places and is the
 # worst of the three phase differences, so it is checked as the maximum it is
 # rather than phase by phase.
 #
-# The densities that route needs, 2.70 and 1.50 g/cm3, are stated in 3.4 as
+# The densities that route needs, 2.70 and 1.50 g/cm3, are stated in 3.1 as
 # the nominal datasheet values, and the script reads them as inputs.
-print("\nthe areal-mass route to the same fractions (3.4, Figure 2e, 4.3.3)")
+print("\nthe areal-mass route to the same fractions (3.1, Figure 2e, 4.3.3)")
 _calc = _am.fractions()
 _diffs, _worst = _am.agreement(_calc, _am.imaged())
 for cls, pct in (("basalt", 23.2), ("flax", 41.7), ("matrix", 35.1)):
@@ -924,7 +926,7 @@ report("mixed-volume share of the basalt zone, load-controlled",
        100 * acq["shallow"]["mixed_class_fraction"], 55, 0.5)
 report("mixed-volume share of the basalt zone, depth-resolved",
        100 * acq["depth"]["mixed_class_fraction"], 37, 0.5)
-# The two fibre fractions 4.1 and 2.3 print for the mixed-volume contact, 0.54
+# The two fibre fractions 4.1, 4.2 and Table S1 print for the mixed-volume contact, 0.54
 # and 0.67. They are the Hill inversion: the
 # class median placed on the arithmetic mean of the Voigt and Reuss curves
 # between the two shallow end members, 86.0 and 4.66 GPa, and solved for the
@@ -1309,8 +1311,14 @@ for cls, a in (("basalt", 0.12), ("mixed-volume", 0.22), ("flax", 0.86),
 _d150 = _cg["depth_resolved_by_depth"]["150"]
 for cls, hc, a in (("basalt", 121, 0.34), ("mixed-volume", 126, 0.35),
                    ("flax", 129, 0.36), ("matrix", 130, 0.36)):
-    report(f"contact depth at z = 150 nm, {cls}, nm", _d150[cls]["h_c_nm"], hc,
-           0.51)
+    # Table 1 prints the range, 121 to 130 nm, so its two ends are published
+    # and the two inner values are held as internal checks.
+    if cls in ("basalt", "matrix"):
+        report(f"contact depth at z = 150 nm, {cls}, nm", _d150[cls]["h_c_nm"],
+               hc, 0.51)
+    else:
+        report_internal(f"contact depth at z = 150 nm, {cls}, nm",
+                        _d150[cls]["h_c_nm"], hc, 0.51, "inside 121 to 130 nm")
     report(f"equivalent contact radius at z = 150 nm, {cls}, um",
            _d150[cls]["a_um"], a, 0.0051)
 _rr = _cg["basalt_centre_reread"]["80"]
@@ -1331,8 +1339,8 @@ report("their median E there, GPa", _m["E_GPa"], 97.9, ROUNDED)
 report("their median load there, mN", _m["load_mN"], 0.41, 0.0051)
 report("load-controlled basalt, median peak load, mN",
        _m["load_controlled_basalt_load_mN"], 0.51, 0.0051)
-report("their equivalent contact radius at 300 nm, um", _m["a_um_at_300"],
-       0.6, ROUNDED)
+report_internal("their equivalent contact radius at 300 nm, um",
+                _m["a_um_at_300"], 0.6, ROUNDED, "not printed")
 
 _rr300 = _cg["basalt_centre_reread"]["300"]
 report("mixed-volume share of the band read at z = 300 nm, per cent",
@@ -1395,7 +1403,7 @@ report("of them, readings above the 15 degree limit at 50 to 80 nm",
 # ---------------------------------------------------------------------------
 # Geometry, coverage and the remaining printed figures.
 # ---------------------------------------------------------------------------
-print("\nwhat the windows cover (2.6, 3.1, 4.5, Supplementary Figure S2)")
+print("\nwhat the windows cover (2.2, 3.1, 4.3.3, Supplementary Figure S2)")
 import figS2_map_coverage as _cov                                 # noqa: E402
 _c = _cov.coverage()
 _win = _c["windows"]
@@ -1426,7 +1434,7 @@ print("\nthe resin edge and the depth-resolved bands (2.2, 2.3)")
 from classify import resin_profile as _resin, X_RESIN as _x_resin    # noqa: E402
 _prof = _resin(raw)
 report("median modulus of the resin rows, x below 300 um, GPa",
-       float(_prof[_prof.index < 300].median()), 5.5, 0.15)
+       float(_prof[_prof.index < 300].median()), 5.4, ROUNDED)
 _rise = float(_prof[(_prof.index >= 300) & (_prof > 15)].index.min())
 report_internal("first row above 15 GPa past the resin, um", _rise, 315, 15,
                 "inside the printed 300 to 330 um")
@@ -1475,7 +1483,7 @@ _first = (_cv[_cv.indent_id.isin(_ids)].dropna(subset=["E_GPa"])
           .groupby("indent_id").depth_nm.min())
 report("selected traces starting at 55 nm", int((_first == 55.0).sum()), 1, 0)
 
-print("\nthe Poisson ratio (3.1, Supplementary Table S1)")
+print("\nthe Poisson ratio (2.2, Supplementary Table S1)")
 _pois = json.loads((DATA / "poisson_sensitivity.json").read_text())
 _shift = {r["class"]: r["shift_pct"] for r in _pois["per_class"]}
 for cls, printed in (("flax", 0.00), ("matrix", -9.49),
@@ -1494,7 +1502,7 @@ report("basalt-longitudinal measurement above the phase-specific estimate, %",
                      _pois["laminate_estimate_GPa"]["phase_specific"]), 3.0,
        ROUNDED)
 
-print("\nthe threshold grid, deviation columns (3.4, Supplementary Table S2)")
+print("\nthe threshold grid, deviation columns (2.3, Supplementary Table S2)")
 published_S2_delta = {
     (10, 60): (0.34, 1.84), (10, 65): (0.29, 1.59), (10, 70): (0.25, 1.33),
     (10, 75): (0.22, 1.18), (10, 80): (0.09, 0.50), (15, 60): (0.03, 0.17),
@@ -1570,7 +1578,7 @@ for where, what, why in [
      "a setting, read from a moving-median profile of the modulus along the long "
      "axis; it is carried as X_ZONE_SPLIT in classify.py and resin_profile() "
      "returns the profile"),
-    ("Table 1", "loading strain rates of about 3 and 0.05 per second, and "
+    ("Table 1", "loading-rate ratios of about 3 and 0.05 per second, and "
      "'about sixty times faster' in 4.4, which is their ratio",
      "acquisition settings of the two methods, not results"),
     ]:

@@ -191,8 +191,8 @@ def paper_config():
     # intrinsic constituent moduli nor the true volume fractions enter it.
     #
     # Of the three, only the Voigt sum is a published number, and only as the
-    # comparison that motivates the section weighting: 21.33 GPa three times in
-    # the manuscript, and 21.3 in the Figure 8 caption. The Hill and Reuss values
+    # comparison that motivates the section weighting: 21.33 GPa in the
+    # manuscript, the Figure 8 caption included. The Hill and Reuss values
     # of the same construction appear nowhere in the paper, so they are held
     # against what rule_of_mixtures.py prints, which is what a worked example has
     # to keep reproducing.

@@ -4,10 +4,10 @@ Panel (a) works inside the depth-resolved strip, which is banded into three
 architectural zones (flax-rich bottom, basalt-rich centre, flax-rich top). For
 each zone the within-zone class fractions and the class median moduli at
 z = 150 nm give Voigt, Hill and Reuss. A fourth bar shows the Hill value with
-the basalt input replaced by the 86 GPa median of the load-controlled map: the
-two acquisitions agree on the same contacts at 80 nm, and the deeper reading
-then falls with depth for a reason the data do not settle (4.4), so the
-load-controlled value is the one taken as the fibre modulus. The
+the basalt input replaced by the 86 GPa median of the load-controlled map: 86 GPa
+lies within what the stiff depth-resolved contacts read between 50 and 100 nm,
+and their reading falls with depth for a reason the data do not settle (4.4), so
+the load-controlled value is the one taken as the fibre modulus. The
 zone-averaged modulus actually measured is marked so the reader can see which
 bound lands closest.
 

@@ -45,6 +45,7 @@ authors:
 # until the record is published on acceptance. It is quoted in the README and
 # in the paper's data availability statement, and the three must agree.
 doi: 10.5281/zenodo.22283997
+version: 1.0.0
 
 preferred-citation:
   type: article

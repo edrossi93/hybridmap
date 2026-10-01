@@ -1,6 +1,6 @@
-"""The areal-mass route to the constituent volume fractions quoted in 3.4.
+"""The areal-mass route to the constituent volume fractions quoted in 3.1.
 
-3.4 reports a second, independent route to the constituent volume fractions: not
+3.1 reports a second, independent route to the constituent volume fractions: not
 the segmented section, but the fabric specification. Sixteen plies of a 360 g/m2
 fabric at a 50/50 mass split, spread through a 4.60 mm laminate, fix the basalt
 and flax volumes from their densities; the matrix follows by difference and so
@@ -10,7 +10,7 @@ it.
 Two things about the imaging it is compared against also live here, because
 the comparison is where they are needed: `imaged()` reads the segmented
 fractions, and `imaged_intervals()` computes the +/- printed beside them in
-Figure 2e and 3.4, so that their recipe is in the deposit.
+Figure 2e and 3.1, so that their recipe is in the deposit.
 
 What the route needs, and where each input comes from:
 
@@ -18,13 +18,13 @@ What the route needs, and where each input comes from:
     360 g/m2 per ply         2.1, the fabric's nominal areal weight
     50 wt % basalt           2.1, "equal mass fractions of flax and basalt"
     4.60 mm laminate         2.5, the bending specimen section, 80 x 15 x 4.6 mm
-    2.70 g/cm3 basalt        3.4, the nominal datasheet density
-    1.50 g/cm3 flax          3.4, the nominal datasheet density
+    2.70 g/cm3 basalt        3.1, the nominal datasheet density
+    1.50 g/cm3 flax          3.1, the nominal datasheet density
 
-The manuscript states the two densities in 3.4, so they are read from the page
+The manuscript states the two densities in 3.1, so they are read from the page
 like the other inputs. They return
 23.2, 41.7 and 35.1 % and a fibre volume fraction of 0.649, which are the four
-figures 3.4 and Figure 8 print, all four from one pair of inputs.
+figures 3.1, 3.4 and Figure 8 print, all four from one pair of inputs.
 
 The same pair also fixes the volume split between the two fibres, which the
 lamination-theory comparison of 3.4, Figure 8 and 4.2 needs: at a 50/50 mass
@@ -50,7 +50,7 @@ AREAL_MASS_PER_PLY_G_PER_M2 = 360.0
 BASALT_MASS_FRACTION = 0.50
 LAMINATE_THICKNESS_MM = 4.60
 
-# The nominal datasheet densities 3.4 states.
+# The nominal datasheet densities 3.1 states.
 RHO_BASALT_G_PER_CM3 = 2.70
 RHO_FLAX_G_PER_CM3 = 1.50
 
@@ -119,7 +119,7 @@ MIN_ZONE_COVERAGE = 0.05
 
 
 def imaged_intervals(min_coverage=MIN_ZONE_COVERAGE):
-    """The +/- on the imaged fibre fractions, Figure 2e and 3.4, in percentage points.
+    """The +/- on the imaged fibre fractions, Figure 2e and 3.1, in percentage points.
 
     The recipe behind the 1.1 and 3.2 printed there, which the summary file
     also carries as recorded values. For each fibre zone: the in-zone fibre fraction of every tile
@@ -158,7 +158,7 @@ def imaged_intervals(min_coverage=MIN_ZONE_COVERAGE):
 def agreement(calculated, measured):
     """Differences in percentage points, phase by phase, and the worst of them.
 
-    The worst of the three is the figure 3.4, the Figure 2e caption, 4.3.3 and
+    The worst of the three is the figure 3.1, the Figure 2e caption, 4.3.3 and
     the Conclusions all quote as the agreement between the two routes.
     """
     diffs = {phase: 100.0 * (calculated[phase] - measured[phase])
@@ -198,7 +198,7 @@ def main():
     print("  imaging excludes voids from its denominator instead")
 
     report(RHO_BASALT_G_PER_CM3, RHO_FLAX_G_PER_CM3,
-           "the nominal datasheet densities stated in 3.4")
+           "the nominal datasheet densities stated in 3.1")
 
     vb = basalt_share_of_fibre_volume()
     print(f"\n  basalt share of the fibre volume at that pair: {vb:.4f}, so a "

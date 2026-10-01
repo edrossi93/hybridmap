@@ -84,12 +84,12 @@ clustering:
   merge_lowest: 2
 
 macro:
-  # The two bending configurations as the paper reports them: ASTM D790 chord
-  # moduli after toe compensation, five basalt-longitudinal specimens and four
+  # The two bending configurations as the paper reports them: chord moduli
+  # over 0.05 to 0.25 % after D790 Annex A1.1 toe compensation, five basalt-longitudinal specimens and four
   # flax-longitudinal, the fifth flax curve having been a duplicate. The values
   # are recomputed from the curves in examples/paper_shallow.yaml; here they are
   # typed in, which is the form to use when all you have is a value and its
   # uncertainty.
   measured:
-    - {label: basalt face in tension, value: 18.85, sd: 0.54, n: 5}
-    - {label: flax face in tension,   value: 19.76, sd: 0.50, n: 4}
+    - {label: basalt-longitudinal, value: 18.85, sd: 0.54, n: 5}
+    - {label: flax-longitudinal,   value: 19.76, sd: 0.50, n: 4}

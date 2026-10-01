@@ -59,7 +59,7 @@ from hybridmap.config import Band, Phase, QC, Zones            # noqa: E402
 
 # Where the embedding resin ends, in the long-axis coordinate of the shallow
 # map. Not assumed: the epoxy gives a uniform indentation modulus near
-# 5.5 GPa out to x = 300 um, and the median rises steeply between 300 and
+# 5.4 GPa out to x = 300 um, and the median rises steeply between 300 and
 # 330 um on entering the laminate. The cut is placed 50 to 80 um beyond that
 # transition so that indents disturbed by the resin/laminate edge are
 # discarded along with the resin itself.
@@ -80,16 +80,15 @@ def resin_profile(raw):
     """
     return raw.groupby("x_um").E_GPa.median()
 
-# Compliant/stiff split. Sits in the bimodal gap of the basalt-zone modulus
-# histogram (Supplementary Figure S3a), so it separates polymer-dominated
-# contacts from fibre-bearing ones without cutting through a population.
+# Compliant/stiff split. Sits in the shallow dip between the compliant and the
+# fibre-bearing mode of the basalt-zone modulus histogram (Supplementary Figure
+# S3a); it is a weak feature rather than a clean gap.
 E_LOWER = 15.0
 
 # Above this, a contact is taken as pure axial basalt. The two maps need
 # different values because the stiff contacts read differently at the two
 # depths: the contacts that read above 70 GPa at 80 nm in the depth-resolved
-# map, where the two acquisitions agree, have fallen to a median of 44 GPa by
-# 300 nm (Supplementary Figure S7), for a reason the data do not settle, so a
+# map have fallen to a median of 46.3 GPa by 300 nm (Supplementary Figure S7), for a reason the data do not settle, so a
 # 70 GPa cut at 150 nm would reject almost every genuine basalt contact.
 E_UPPER_SHALLOW = 70.0
 E_UPPER_DEPTH = 40.0

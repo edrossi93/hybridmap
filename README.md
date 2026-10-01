@@ -2,7 +2,7 @@
 
 Data and code behind *Estimating the flexural modulus of a hybrid flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a rule of mixtures*.
 
-Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed statements this deposit cannot reproduce and what each of them would need. There are three: the dark-feature figures of §3.1, which are measured on the raw tile images; the zone boundary at x = 730 µm, which is a setting of the analysis; and the loading strain rates of Table 1, which are acquisition settings.
+Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed statements this deposit cannot reproduce and what each of them would need. There are three: the dark-feature figures of §3.1, which are measured on the raw tile images; the zone boundary at x = 730 µm, which is a setting of the analysis; and the loading-rate ratios of Table 1, which are acquisition settings.
 
 ---
 
@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `588 of 588 values reproduce`. The line above it reports fifty-five internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
+Expected last line: `583 of 583 values reproduce`. The line above it reports sixty internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
 
 Needs Python 3.8 or newer, and the seven packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -77,7 +77,7 @@ is the physically meaningful statement; only the column naming differs.
 `depth_resolved_indents.csv` carries `x_um` and `y_um` on the same convention
 as `classified_depth_resolved.csv`, which is derived from it. In the
 backscattered-electron mosaic of Figure 2 the thickness direction is vertical,
-rotated ninety degrees relative to the property maps of Figures 3 to 5.
+rotated ninety degrees relative to the property maps of Figures 3 and 4.
 
 ### Class names
 
@@ -93,14 +93,14 @@ The class fractions in the paper are **indent-class fractions**: the number of i
 
 All nine curves are here, every one of them, not a representative curve per configuration. So the statistics the paper quotes can be recomputed rather than taken on trust:
 
-| configuration | specimens | ASTM D790, toe-compensated | mean above the 0.28 % crossover |
+| configuration (`configuration` value) | specimens | chord modulus, 0.05 to 0.25 %, toe-compensated | mean above the 0.28 % crossover |
 |---|---|---|---|
-| basalt face in tension | 5 | 18.85 ± 0.54 GPa | 19.91 GPa |
-| flax face in tension | 4 | 19.76 ± 0.50 GPa | 18.52 GPa |
+| basalt-longitudinal (`basalt_face`) | 5 | 18.85 ± 0.54 GPa | 19.91 GPa |
+| flax-longitudinal (`flax_face`) | 4 | 19.76 ± 0.50 GPa | 18.52 GPa |
 
 Five basalt-longitudinal and four flax-longitudinal specimens. The data dictionary, under `flexural_curves.csv`, says why the flax configuration has four. Every statistic on this page and in `flexural_comparisons.json` is computed at those counts.
 
-The ranking reverses across the crossover, which is why both windows are reported. `reproduce_paper_values.py` checks these together with the Welch statistic, Hedges *g*, the peak tangent modulus, the strength, the softening and the Holm correction under each of the three families in `flexural_comparisons.json`.
+The ranking reverses across the crossover, which is why both windows are deposited. `reproduce_paper_values.py` checks these together with the Welch statistic, Hedges *g*, the peak tangent modulus, the strength, the softening and the Holm correction under each of the three families in `flexural_comparisons.json`.
 
 The standard deviations survive the rounding this file applies: 0.50 is what the stored two-decimal moduli give for the flax configuration and 0.4971 is what the unrounded per-specimen values give, which rounds to the same figure. See the note on precision below.
 
@@ -114,7 +114,7 @@ Thirty-four files, in three groups, plus the `hybridmap/` package and the exampl
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 588 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 583 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
 
 **Analysis.**
 
@@ -124,7 +124,7 @@ Thirty-four files, in three groups, plus the `hybridmap/` package and the exampl
 | `rule_of_mixtures.py` | The single-map construction, which is what the command-line tool computes on one map: Voigt, Reuss and Hill values with the zones weighted by indent count, the cut sweep and the input substitutions on that sum. Every line it prints is labelled as such; the paper's estimate weights the zones by the imaged section and lives in `zone_share.py`. |
 | `clustering_check.py` | k-means and Gaussian-mixture cross-check, ARI against the rule, and ARI* with the two compliant classes merged on both sides. |
 | `input_decomposition.py` | Separates the effect of the constituent moduli from that of the volume fractions in the comparison between the tabulated and the measured construction. |
-| `areal_mass_fractions.py` | The second route to the constituent volume fractions of §3.4: sixteen plies of a 360 g/m² fabric at a 50/50 mass split through a 4.60 mm laminate, at the nominal datasheet densities §3.4 states. Also the basalt share of the fibre volume that the lamination-theory comparison needs, and the field-to-field intervals on the imaged fibre fractions of Figure 2e. |
+| `areal_mass_fractions.py` | The second route to the constituent volume fractions of §3.1: sixteen plies of a 360 g/m² fabric at a 50/50 mass split through a 4.60 mm laminate, at the nominal datasheet densities §3.1 states. Also the basalt share of the fibre volume that the lamination-theory comparison needs, and the field-to-field intervals on the imaged fibre fractions of Figure 2e. |
 | `flexural_corrections.py` | The numbers around the bending test that follow from the specimen geometry and the standard rather than from a table: the two ASTM D790 departures of §2.5, the bound the rate departure puts on the reported modulus, and the Timoshenko shear correction of §4.3.5 with the shear modulus that paragraph assumes. |
 | `uncertainty_budget.py` | The uncertainty on the laminate estimate, term by term: the spatial block bootstrap over the indents, the tile bootstrap over the zone share, and the three bounded analysis choices, the classification thresholds, the Poisson ratio and the fifty-nine runaway contacts left in the flax class. Writes `data/uncertainty_budget.json`. |
 | `phase_angle_sensitivity.py` | Supplementary Table S3: sweeps the phase-angle quality limit at 10, 15 and 20 degrees and reports the rejected count, the depth-resolved basalt median and the estimate built on it. Writes `data/phase_angle_sensitivity.json`. |
@@ -159,8 +159,7 @@ Thirty-four files, in three groups, plus the `hybridmap/` package and the exampl
 | `depth_slices_animation.py` | The supplementary animation, `depth_slices_animation.gif`: the depth-resolved map stepped from z = 80 to 290 nm on the 5 nm grid of the traces |
 | `figS2_map_coverage.py` | Supplementary Figure S2: the bending specimen, the polished face against the sixteen plies with the three measurement windows drawn to scale, and the bending stress through the thickness. `coverage()` returns the plies each window spans, the mosaic's bounding box and its width in yarn spacings and twill repeats |
 
-Every figure listed above is identical to the picture in the paper, which is
-checked rather than asserted, by decoding both and comparing pixels.
+Every figure listed above is drawn by its script from the deposited data only.
 
 **What the deposit does not draw, and why.** Five pictures in the two documents
 come from no script here.
@@ -213,7 +212,7 @@ So the reproduction boundary of this deposit is the exported per-indent table. B
 
 **Where the map could have sat (Section 2.4).** `zone_share.py` slides a window of each map's footprint over the mosaic, long axis through the thickness as §2.2 places it, and rebuilds the estimate at the zone share each placement sees, with the class medians held fixed. For the load-controlled map's full 1086 × 98 µm footprint, 29 880 placements give a basalt-rich share of 0.369 ± 0.070 and a Voigt sum of 18.65 ± 1.46 GPa; for the 704 × 98 µm of laminate its retained indents actually cover, 52 290 placements give 0.360 ± 0.141 and 18.47 ± 2.96 GPa, and the 0.497 the mapped window saw is at or above 85 % of them. The depth-resolved footprint, 297 × 57 µm, gives 0.365 ± 0.242 and 18.57 ± 5.08 GPa over 76 456 placements.
 
-**The volume fractions from the fabric (Section 3.4).** `areal_mass_fractions.py`. Sixteen plies of a 360 g/m² fabric at a 50/50 mass split, spread through a 4.60 mm laminate, at the nominal datasheet densities §3.4 states, 2.70 g/cm³ for basalt and 1.50 for flax, give 23.2 % basalt, 41.7 % flax and 35.1 % matrix by difference, and a fibre volume fraction of 0.649. The imaging of the same section gives 24.4, 39.5 and 36.1 %, so the worst of the three differences is 2.2 percentage points, which is the agreement §3.4, the Figure 2e caption, §4.3.3 and the Conclusions all quote.
+**The volume fractions from the fabric (Section 3.1).** `areal_mass_fractions.py`. Sixteen plies of a 360 g/m² fabric at a 50/50 mass split, spread through a 4.60 mm laminate, at the nominal datasheet densities §3.1 states, 2.70 g/cm³ for basalt and 1.50 for flax, give 23.2 % basalt, 41.7 % flax and 35.1 % matrix by difference, and a fibre volume fraction of 0.649. The imaging of the same section gives 24.4, 39.5 and 36.1 %, so the worst of the three differences is 2.2 percentage points, which is the agreement §3.4, the Figure 2e caption, §4.3.3 and the Conclusions all quote.
 
 The ± 1.1 and ± 3.2 percentage points on the two imaged fibre fractions are `imaged_intervals()` in the same script: for each fibre zone, the tiles that zone covers by at least 5 % of their pixels, 72 for basalt and 88 for flax; the standard deviation of the in-zone fibre fraction over them, one value per tile; 1.96 standard errors of the mean; times the zone's share of the marked mosaic from the stitched mask. Both recorded values reproduce to the last digit.
 
@@ -336,7 +335,7 @@ macro:
   from_curves:
     path: your_curves.csv
     columns: {specimen: id, group: configuration, strain: strain_pct, stress: stress_MPa}
-    chord: [0.05, 0.25]       # per cent strain, ASTM D790
+    chord: [0.05, 0.25]       # per cent strain, the ISO 178 / ISO 14125 interval
     toe_window: 0.15
 ```
 
@@ -527,7 +526,7 @@ How the tile statistics were produced:
    solid labels only, so every marked pixel is called fibre or matrix and
    `basaltzone_fib + basaltzone_mat` is 1 on every tile; voids and cracks are
    located separately by the dark-feature threshold and reported as the
-   threshold sweep of §3.4. The three-class model with a void label exists only
+   threshold sweep of §3.1. The three-class model with a void label exists only
    in the leave-one-field-out validation of `bse_validation_metrics.json`, so
    that its confusion with the two solid phases can be reported
    (Supplementary Table S6).
@@ -539,16 +538,17 @@ scatter rather than as point values. The recipe for that interval is
 `imaged_intervals()` in `areal_mass_fractions.py`, described under
 *Reproducing specific things*.
 
-`bse_segmentation_summary.json` is one aggregation step above the tile file and
-**is** reproducible: it renormalises the zone areas over the marked zones only
-and multiplies each by its pooled in-zone fibre fraction.
+`bse_segmentation_summary.json` is one aggregation step above the tile file: it
+renormalises the zone areas of the stitched mosaic mask over the marked zones
+only and multiplies each by its pooled in-zone fibre fraction. The mask step is
+not repeated by any script here, so the file is held as a primary input.
 
 ### `bse_validation_metrics.json`
 
 The leave-one-field-out validation of that segmentation against the operator's
 own labels, field by field: the confusion matrix, and precision and recall per
 class, per zone. It is behind Supplementary Table S6 and behind the per-class
-figures quoted in Section 3.4.
+figures quoted in Section 3.1.
 
 It is a **primary input** for the same reason as the tile file: recomputing it
 needs the tile images and the hand-painted fields, which are several gigabytes
@@ -564,6 +564,7 @@ both figures.
 
 ### `flexural_moduli.csv`
 
-Derived from `flexural_curves.csv` by the ASTM D790 chord fit with Annex A1.1
-toe compensation. See `make_flexural_moduli.py` for the exact convention,
+Derived from `flexural_curves.csv` as the chord modulus over 0.05 to 0.25 %
+strain, the ISO 178 and ISO 14125 interval, after the toe compensation of ASTM
+D790 Annex A1.1. See `make_flexural_moduli.py` for the exact convention,
 including which linear region is taken as the steepest.

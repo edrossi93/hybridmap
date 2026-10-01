@@ -3,14 +3,14 @@
 Stepping through the depth slices, the positions that sit at the top of the colour scale at about 80 nm fade as the
 contact deepens, and if the *same individual positions* soften rather than only
 the class median, that establishes that the depth-resolved basalt median is not
-a second estimate of the fibre modulus: the two acquisitions agree on the same
-contacts at 80 nm, and the deeper reading of those contacts then falls.
+a second estimate of the fibre modulus: 86 GPa lies within what these contacts
+read between 50 and 100 nm, and their reading falls with depth.
 
 They do. What the fall is caused by, the data do not settle. The basalt yarns
 are cut end-on, so there is fibre beneath each of these contacts for
 micrometres and matrix only around it; the softening does not follow distance
-to a fibre edge (4.4), and matrix beneath the fibre or substrate compliance is
-not offered as its cause. The figure shows the fall and claims no mechanism for
+to a fibre edge (4.4); a compliance in series with the contact, at a weakly
+bonded interface or in the mount, is stated in 4.4 as an untested hypothesis. The figure shows the fall and claims no mechanism for
 it. The panel on the left follows every indent in the basalt-centre zone
 that reads above the shallow map's own 70 GPa cut at 80 nm, one line each, from
 50 to 300 nm. The panel on the right is the same population as a median with an

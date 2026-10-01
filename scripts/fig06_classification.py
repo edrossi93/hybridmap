@@ -10,7 +10,7 @@ Figure 3 each map is 5.103 x 1.470 in on a 7.20 in page, embedded in the
 manuscript at 6.00 in, so it prints at 4.253 x 1.225 in. In Figure 4 each strip
 is 5.370 x 1.075 in on an 8.27 in page, embedded at 5.50 in, so it prints at
 3.571 x 0.715 in. Note that Figure 3 is not drawn at the data aspect: the map
-spans 703 x 97 um, an aspect of 7.2, but is drawn at 3.47, so it is stretched
+spans 704 x 98 um, an aspect of 7.2, but is drawn at 3.47, so it is stretched
 vertically by a factor of two. Equal-aspect axes could never match it, and the
 axes here are therefore placed at explicit sizes with aspect="auto".
 

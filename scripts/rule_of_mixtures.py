@@ -112,7 +112,7 @@ def substitute(table, cls, new_modulus):
 # quoted from earlier work in its introduction, not its measurement, so it is
 # not used. The table, §4.3.4 and this list all carry the measurement. The
 # column printed by
-# the block at the foot of this file still reads lower than Table S8 for every
+# the block at the foot of this file differs from Table S8 for every
 # input, because it is built on the whole-map class fractions and the table is
 # built on the two-level construction; that difference is in the heading it is
 # printed under, and the table's own cells are checked in

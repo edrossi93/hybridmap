@@ -143,7 +143,7 @@ class Deposit:
         # The dash class accepts an em-dash so that a heading written with one
         # is still read and still has its row count checked, rather than being
         # skipped as unrecognised while the house-style check reports it.
-        for m in re.finditer(r"^##\s+`([\w.]+\.csv)`\s*[-—]\s*([\d,]+)\s*rows",  # house-style: em-dash literal
+        for m in re.finditer(r"^##\s+`([\w.]+\.csv)`\s*[-\u2014]\s*([\d,]+)\s*rows",
                              self.text(self.dictionary), re.M):
             name, claimed = m.group(1), int(m.group(2).replace(",", ""))
             actual = self.rows_of(name)
@@ -252,7 +252,7 @@ class Deposit:
         m = re.search(r"([\w-]+) files, in three groups", text)
         self.checks += 1
         if m is None:
-            self.fail("the README no longer says how many script files there "
+            self.fail("the README does not say how many script files there "
                       "are, so nothing holds that count to scripts/")
         elif NUMBER_WORDS.get(m.group(1)) is None:
             self.fail(f"README says '{m.group(1)} files' and I cannot read "
@@ -305,7 +305,7 @@ class Deposit:
         m = re.search(r"^([\w-]+) files:", self.text(self.dictionary), re.M)
         self.checks += 1
         if m is None:
-            self.fail("the data dictionary no longer opens with a count of the "
+            self.fail("the data dictionary does not open with a count of the "
                       "files it documents, so nothing holds that count to data/")
         elif m.group(1) not in NUMBER_WORDS:
             self.fail(f"dictionary opens with '{m.group(1)} files', a "
@@ -501,7 +501,7 @@ class Deposit:
                 # Tested once and held in a name, so that this check needs the
                 # literal on one line only and the exempt set stays as small as
                 # it can be.
-                dashed = "—" in line  # house-style: em-dash literal
+                dashed = "\u2014" in line
                 marked = self.marks_em_dash(line)
                 if dashed and not marked:
                     self.fail(f"{path.relative_to(self.root)}:{i} uses an "
