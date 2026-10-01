@@ -1,14 +1,8 @@
 """
-The per-class confidence intervals of Table 3, recomputed from the deposited
-tables.
-
-Despite the file name, the table it reproduces is Table 3, the one carrying the
-per-class medians, counts and intervals.
+The per-class confidence intervals of Table 3, from the deposited tables.
 
 Table 3's caption declares the construction: "95 % bootstrap confidence
-intervals on the medians (10^4 resamplings, seed 42)". That is a complete
-recipe, so it should be runnable, and this script runs it, so that the column
-is produced by deposited code. The medians beside it come from
+intervals on the medians (10^4 resamplings, seed 42)", and this script runs it. The medians beside it come from
 `rule_of_mixtures.class_table`; the intervals come from here.
 
 The recipe is followed exactly as the caption states it: resample the indents
@@ -16,7 +10,7 @@ within a class with replacement, take the median of each resample, and report
 the 2.5th and 97.5th percentiles of the ten thousand medians, drawn from a
 generator seeded with 42.
 
-    python table2_intervals.py [--out table2_intervals.csv]
+    python class_intervals.py [--out class_intervals.csv]
 
 The bootstrap is over indents within a class, so the interval says how well that
 class median is pinned down by the indents that landed on it. It says nothing

@@ -1,7 +1,6 @@
-"""Figure 6 - the mechanical classes in property space at z = 150 nm.
+"""Figure 7 - the mechanical classes in property space at z = 150 nm.
 
-Rebuilt from the deposited per-indent table, matching the submitted figure
-element for element:
+Built from the deposited per-indent table:
 
   (a) elastic modulus against hardness, one point per indent, coloured by class,
       with the QC/invalid population shown in grey so the reader can see what
@@ -122,7 +121,7 @@ def _draw_panels(lab, ax_a, ax_b, ax_c, ax_d):
     ax_a.set_ylabel(fs.AXIS["E"])
     ax_a.set_xlim(*LIMS["H_150"])
     ax_a.set_ylim(*SCATTER_E)
-    ax_a.set_xticks([0, 2, 4, 6, 8])          # as submitted; the default
+    ax_a.set_xticks([0, 2, 4, 6, 8])          # fixed ticks; the default
     ax_a.set_yticks([0, 30, 60, 90, 120, 150])  # every kept indent in range
     leg = ax_a.legend(loc="upper left", fontsize=5.2, frameon=False,
                       handletextpad=0.25, borderpad=0.15, labelspacing=0.28,

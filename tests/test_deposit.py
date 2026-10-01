@@ -3,12 +3,10 @@ Check this deposit's prose against this deposit's files.
 
     python tests/test_deposit.py
 
-Run it after any change. It exists because prose drifts: a README can go on
-saying that files are missing when they are present, give the boundaries of a
-partition the analysis does not use, list only some of the scripts, or name the
-wrong number of reproduced values, each of them true when it was written. Prose
-does not fail a test suite, so it rots quietly while the code around it is kept
-honest.
+Run it after any change. Prose drifts: a README can say that files are missing
+when they are present, list only some of the scripts, or name the wrong number
+of reproduced values. Prose does not fail a test suite unless one is written
+for it.
 
 So this is the test suite for the prose. It reads the claims out of the two
 documents and puts each one against the file it describes:
@@ -26,9 +24,8 @@ documents and puts each one against the file it describes:
                    reproduce_paper_values.py prints, which means running it;
                    this is why the suite takes half a minute rather than a second
 
-The last one is the check that would have caught the real failure: five figure
-scripts imported a plotting toolkit that was never in the deposit and only
-resolved because the author's machine had it on sys.path.
+The imports check catches a script that runs only because a package happens to
+be installed on one machine.
 """
 
 import ast
@@ -302,14 +299,9 @@ class Deposit:
 
         # And the count the dictionary opens with.
         #
-        # `[\w-]+`, not `\w+`. The dictionary opens "Twenty-one files:" and \w
-        # does not match a hyphen, so this pattern found nothing, `if m:` then
-        # skipped the check without a word, and the stated count had never once
-        # been compared against data/. Two failures compounding: a pattern that
-        # could not read the number words this suite is built around, and a skip
-        # that made the silence look like a pass. The sibling check in
-        # check_scripts had the character class right, which is what made the
-        # difference visible.
+        # `[\w-]+`, not `\w+`, so that hyphenated number words such as
+        # "Twenty-four" are read, and a missing count fails rather than being
+        # skipped.
         m = re.search(r"^([\w-]+) files:", self.text(self.dictionary), re.M)
         self.checks += 1
         if m is None:
@@ -498,10 +490,9 @@ class Deposit:
         """
         No em-dashes, anywhere that ships.
 
-        A house rule rather than a matter of correctness, which is exactly why
-        it needs a check: nobody notices one arriving, and twenty of them had
-        accumulated in the data dictionary before anything looked. A comma, a
-        colon or a full stop says the same thing.
+        A house rule rather than a matter of correctness, which is why it needs
+        a check: nobody notices one arriving. A comma, a colon or a full stop
+        says the same thing.
         """
         for path in self.shipped_files({".py", ".md", ".txt", ".yaml", ".yml",
                                         ".json"}):

@@ -4,12 +4,9 @@ The record and the product are kept apart. `depth_resolved_indents.csv` holds
 the primary quantities, the indent coordinates and the strain-rate index among
 them, and is declared as a measurement input. `classified_depth_resolved.csv`
 carries the zone labels, the quality mask, the constituent class and the
-cluster index, which are all decisions taken about those measurements. A file
-written once and then only read could not be regenerated, could let its slice
-values drift away from `depth_resolved_slices.csv`, and could hide a quality
-mask that matches no stated rule. This script therefore derives every decision
-column from the measurement input, so every column below can be rebuilt and
-checked:
+cluster index, which are all decisions taken about those measurements. This
+script derives every decision column from the measurement input, so every
+column below can be rebuilt and checked:
 
     zone          which architectural band the indent sits in, from y
     qc_keep       the phase-angle quality decision
@@ -58,8 +55,7 @@ def main():
     # and is rejected rather than passed by default.
     pa = d[["PA_100", "PA_150", "PA_200"]]
     rejected = ((pa.abs() > C.PA_QC).any(axis=1)) | pa.isna().any(axis=1)
-    # Kept under its old name so that nothing downstream has to be renamed;
-    # what changed is that it is now computed here rather than inherited.
+    # The phase-angle rule of 2.2, applied here and stored as a flag.
     d["qc_flag_strict"] = rejected.astype(int)
 
     band = d.zone.astype(str)

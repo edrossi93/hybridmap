@@ -62,7 +62,7 @@ def build(outdir):
                  color=fs.PAPER["basalt"], zorder=2)
     ax1.plot(z, wide.loc[stiff].median().to_numpy(), lw=2.4, color="k",
              zorder=4, label=f"median of {len(stiff)} indents")
-    ax1.set_xlabel("Displacement, z (nm)")
+    ax1.set_xlabel("Depth, z (nm)")
     ax1.set_ylabel(fs.AXIS["E"])
     ax1.set_title(f"Reading above {SELECT_ABOVE_GPA:.0f} GPa at "
                   f"{SELECT_AT_NM:.0f} nm", fontsize=8.5)
@@ -80,7 +80,7 @@ def build(outdir):
         ax2.fill_between(z, lo, hi, color=colour, alpha=0.22, lw=0, zorder=2)
         ax2.plot(z, med, lw=2.0, color=colour, zorder=3,
                  label=f"{name} (n = {len(block)})")
-    ax2.set_xlabel("Displacement, z (nm)")
+    ax2.set_xlabel("Depth, z (nm)")
     ax2.set_ylabel(fs.AXIS["E"])
     ax2.set_title("Median and interquartile range", fontsize=8.5)
     ax2.legend(loc="upper right", fontsize=7.5, frameon=False)

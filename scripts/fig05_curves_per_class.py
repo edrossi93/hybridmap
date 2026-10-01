@@ -1,7 +1,6 @@
-"""Figure 7 - loading curves and depth signatures, per mechanical class.
+"""Figure 5 - loading curves and depth signatures, per mechanical class.
 
-Rebuilt from the deposited curve file, matching the submitted figure element for
-element:
+Built from the deposited curve file:
 
   row (a) one panel per class. Thin coloured lines are individual load-depth
       records, a fixed random subsample so the panel stays readable; the heavy
@@ -87,8 +86,8 @@ def build(outdir):
         ax.set_xlim(50, 350)
         ax.set_ylim(0, 2.0)
         ax.set_xlabel(fs.AXIS["depth"])
-        # every panel keeps its own y tick labels, as in the submitted figure;
-        # only the axis label is carried by the first
+        # every panel keeps its own y tick labels; only the axis label is
+        # carried by the first
         if i == 0:
             ax.set_ylabel(fs.AXIS["load"])
         # the flax and matrix curves stay low, so the top left is clear there;

@@ -1,6 +1,6 @@
 # Data dictionary
 
-Twenty-three files: eight CSVs and fifteen JSON summaries. Every column, its unit, its
+Twenty-four files: eight CSVs and sixteen JSON summaries. Every column, its unit, its
 range, and what a blank cell means.
 
 Two conventions hold throughout unless a column says otherwise:
@@ -72,7 +72,7 @@ from 50 to 300 nm, roughly 51 points each.
 | column | unit | range | notes |
 |---|---|---|---|
 | `indent_id` | - | 1–2000 | |
-| `depth_nm` | nm | 50–300 | the resampled grid of indenter displacement z, the instrument's depth channel after frame-compliance and drift correction; the contact depth is z − 0.75 P/S |
+| `depth_nm` | nm | 50–300 | the resampled grid of indentation depth z, the instrument's depth channel after frame-compliance and drift correction; the contact depth is z − 0.75 P/S |
 | `load_mN` | mN | 0–14.4 | |
 | `stiffness_N_per_m` | N m⁻¹ | −1198 to 137900 | the exported stiffness channel; 30 blanks; negatives are fit failures near the surface. See the note on the two stiffness records below |
 | `E_GPa`, `H_GPa` | GPa | −236 to 290, −0.01 to 28 | E is the sample modulus at ν = 0.30 from the reduced modulus, with E_i = 1140 GPa and ν_i = 0.07; unfiltered, so early-depth artefacts are present and negative values occur |
@@ -137,7 +137,7 @@ the file the paper's depth-resolved numbers come from.**
 | `qc_flag_strict` | 0 or 1 | | 1 marks the **304** indents rejected by the phase-angle criterion: the corrected phase angle exceeds 15° in magnitude at one of the three depths, or that depth has no valid window |
 | `zone` | `basalt-centre`, `flax-bottom`, `flax-top` | | the three architectural bands along y |
 | `constituent` | as above | | |
-| `kmeans_k4` | −1 to 3 | | unsupervised cluster index from the k = 4 run of `clustering_check.py`, ordered by median modulus so that 0 is the most compliant cluster; **−1 on the 304 indents the phase-angle criterion rejects**, and nowhere else. Rebuilt by `clustering_check.py` on the regenerated classification: the submitted column held three labels under a name that promises four, and a quality mask that matched neither `qc_flag_strict` nor the paper |
+| `kmeans_k4` | −1 to 3 | | unsupervised cluster index from the k = 4 run of `clustering_check.py`, ordered by median modulus so that 0 is the most compliant cluster; **−1 on the 304 indents the phase-angle criterion rejects**, and nowhere else |
 
 ### `SRS`
 
@@ -165,14 +165,11 @@ The flax and matrix figures are the two §4.3.2 prints, and they are checked by
 Three-point bending, five basalt-longitudinal specimens and four
 flax-longitudinal.
 
-Four and not five in the flax configuration. The source workbook carried one of
-its flax-longitudinal curves twice: two of its five flax-longitudinal records
-were identical point for point over all 750 points of the shorter one, which was
-a single final point short of the longer, so they were one specimen under two
-names. The shorter copy, `16Hybr_Flax_Long_4`, is
-not in this file and takes no part in any statistic computed from it. The
-specimen numbering that remains is the workbook's, so the flax specimens are 1,
-2, 3 and 5. The basalt configuration carries no such repeat and is five.
+The source workbook held one flax-longitudinal record twice under two names:
+`16Hybr_Flax_Long_4` repeats another record point for point over all its 750
+points. It is one specimen, so the copy is not in this file. The specimens keep
+the workbook numbering, so the flax specimens are 1, 2, 3 and 5. This is the one
+statement of that record; the other files point here.
 
 | column | unit | notes |
 |---|---|---|
@@ -237,7 +234,7 @@ by `uncertainty_budget.py`, and the source of Supplementary Table S5.
 | `type_a_combined_sd_GPa` | the same three together in one resampling, 1.4189, which is smaller than their sum because they are correlated |
 | `type_b_sd_GPa` | the three bounded analysis choices as rectangular distributions: `classification_thresholds` 0.2427, `poisson_ratio` 0.0556 and `runaway_contacts` 0.0367, the last being the fifty-nine flax-zone contacts below 1 GPa that the Supplementary Figure S3 caption argues are failed contacts and the map keeps |
 | `type_b_ranges` | the ranges those three are taken over: the threshold grid, 17.998 to 18.839 GPa, the phase-specific Poisson estimate, 18.3051 GPa, and the estimate with the runaway contacts in and out, 18.4979 and 18.6251 GPa |
-| `combined_sd_GPa` | the Type A terms and the three Type B terms in quadrature, 1.4410; it was 1.4406 before the third Type B term was added, and prints 1.441 either way |
+| `combined_sd_GPa` | the Type A terms and the three Type B terms in quadrature, 1.4410 |
 | `share_of_variance_pct` | each term squared over the combined value squared, which is the last column of Supplementary Table S5: 56.2, 5.7 and 18.0 for the three frozen sampling terms, 96.9 for their joint value, 2.8, 0.15 and 0.06 for the three bounded choices. One term at a time, so they do not sum to 100 |
 | `percentile_95_interval_GPa` | 15.776 to 21.341, from the draws rather than from a coverage factor |
 | `block_size_sensitivity_sd_GPa` | the joint sampling term alone, Type A, at 2, 4 and 8 grid columns, 1.21, 1.38 and 1.68 GPa, from 1000 draws at each width rather than the 6000 of the budget, so the block width can be seen rather than trusted. With the three Type B terms in quadrature those read 1.23, 1.41 and 1.70 GPa, as they did with two; the script prints both forms |
@@ -261,10 +258,9 @@ section cannot bound.
 
 ## The JSON summaries
 
-The twelve files below were added when the analysis they record was added. Each
-is written by one script and read by the manuscript or the supplement, except
-`zone_mask_rle.json` and `bse_validation_metrics.json`, which are measurements
-nothing here produces. None of the twelve is edited by hand.
+Each JSON file below is written by one script, except `zone_mask_rle.json`,
+`bse_validation_metrics.json` and `bse_segmentation_summary.json`, which are
+measurements nothing here produces. None is edited by hand.
 
 ## `PROVENANCE.json`
 
@@ -278,16 +274,17 @@ of the bytes.
 
 | key | meaning |
 |---|---|
-| `primary` | file name to SHA-256, for the ten measurements |
-| `derived` | file name to SHA-256, for the thirteen products |
+| `derived` | file name to SHA-256, for the fifteen products |
+| `primary` | file name to SHA-256, for the eight measurements |
+| `documentation` | file name to SHA-256, for this dictionary and the licence |
 
 Which script writes which product is declared in `provenance_check.py` rather
 than repeated in the manifest, so the two cannot disagree about it.
 
 Run `provenance_check.py` to compare the manifest against what is on disk. It
 fails if a file has changed without the manifest being re-recorded, which is the
-point: a derived table that no longer matches its script is the failure mode
-this deposit had.
+point: a derived table that does not match its script is what the check is
+for.
 
 ## `zone_mask_rle.json`
 
@@ -310,9 +307,9 @@ file is truncated.
 ## `zone_share_sensitivity.json`
 
 How much of the section each zone occupies, and how that answer depends on where
-you look. This is the term the published construction left out: it weighted the
-zones by how many indents landed in each, which describes the window that was
-mapped rather than the section.
+you look. Eq. (1) weights the two zones by the share each occupies on the
+section; weighting them by how many indents landed in each would describe the
+window that was mapped rather than the section.
 
 | key | meaning |
 |---|---|
@@ -322,8 +319,8 @@ mapped rather than the section.
 | `w_basalt_depth_resolved_strip` | the basalt-centre band's share of the depth-resolved strip by indent count, 0.300, which is where that window is placed on its own distribution |
 | `windows` | three windows, each slid over the mosaic at an 8 px stride with its long axis through the thickness: the load-controlled map's full footprint, the 704 µm of laminate its retained indents cover, and the depth-resolved footprint. Per window: `footprint_um_along_thickness_by_in_plane`, `n_placements`, the mean and standard deviation of the basalt share and of the Voigt sum over the placements, the 5, 25, 50, 75 and 95 % points of the Voigt sum, `mapped_window_share` (the share the real window saw), and the percentage of placements at or below and at or above it |
 
-The gap between the first two numbers is why the estimate moved from 21.33 to
-18.50 GPa. What the windows give: over the full load-controlled footprint,
+The gap between the first two numbers is the gap between the estimate weighted
+by indent counts, 21.33 GPa, and the one Eq. (1) gives, 18.50 GPa. What the windows give: over the full load-controlled footprint,
 29 880 placements, a share of 0.369 ± 0.070 and a sum of 18.65 ± 1.46 GPa;
 over the retained 704 µm span, 52 290 placements, 0.360 ± 0.141 and
 18.47 ± 2.96 GPa, with the mapped window's 0.497 at or above 85 % of them.
@@ -340,11 +337,10 @@ acquisitions, so that the choice of cut can be seen rather than argued.
 | `reading_depth` | two entries: the basalt input read from the selected basalt-centre contacts of `depth_softening.json` at 80 nm, 84.67 GPa, and at 50 nm, 97.93 GPa, each substituted into the two-level construction with everything else held, as Supplementary Table S4 substitutes the depth-resolved class median: the estimate, 18.43 and 19.14 GPa, and its relative gap to each measured flexural modulus on the table's convention |
 | `note`, `reading_depth_note` | what each sweep shows, in one sentence |
 
-This is the evidence behind a withdrawal. The shallow class is the tail above
-the cut, so its median follows the cut, from 76.70 GPa at 60 to 93.07 at 80,
-and the published range for bare basalt fibre, 70 to 95 GPa, contains all of
-them. Agreement with that range was therefore built in and is no longer offered
-as evidence. The `reading_depth` block reads the input at a different depth
+The shallow class is the tail above the cut, so its median follows the cut,
+from 76.70 GPa at 60 to 93.07 at 80, and the published range for bare basalt
+fibre, 70 to 95 GPa, contains all of them. Agreement with that range is
+therefore built in and is not evidence. The `reading_depth` block reads the input at a different depth
 rather than above a different cut, on the population Supplementary Figure S7
 follows, so that Table S4 can carry the reading depth as a sensitivity beside
 the cut.
@@ -453,11 +449,9 @@ than between the two solid phases: in the flax zone, matrix is called void on
 The flexural moduli are stored rounded to two decimals. Recomputing the
 flax-longitudinal standard deviation from this file gives 0.4994 and from the
 unrounded values 0.4971, and both round to the 0.50 the paper reports, so the
-deposit and the page agree whichever route a reader takes. That was not true
-while the duplicate flax curve was in the file, where the two routes gave 0.49
-and 0.48; the agreement is a property of these nine specimens and not a
-guarantee, and recomputing from the stored file remains the route the printed
-figures follow.
+deposit and the page agree whichever route a reader takes. The agreement is a
+property of these nine specimens and not a guarantee; recomputing from the
+stored file is the route the printed figures follow.
 
 ## `phase_angle_sensitivity.json`
 
@@ -510,10 +504,10 @@ Written by `scripts/contact_geometry.py`, and the source of the contact sizes
 |---|---|
 | `radius_factor` | √(24.5/π), the equivalent contact radius of a Berkovich contact per unit contact depth |
 | `load_controlled` | per class: median contact depth, equivalent radius and median maximum depth at 0.53 mN |
-| `depth_resolved_by_displacement` | per class at z = 80, 150 and 300 nm: median contact depth h_c = z − 0.75 P/S, the gap z − h_c, and the equivalent radius |
-| `basalt_centre_reread` | the classified contacts of the basalt-centre band re-read at displacements from 50 to 300 nm with the 15 and 40 GPa cuts: the mixed-volume, matrix and basalt shares and the median contact depth of the stiff contacts |
+| `depth_resolved_by_depth` | per class at z = 80, 150 and 300 nm: median contact depth h_c = z − 0.75 P/S, the gap z − h_c, and the equivalent radius |
+| `basalt_centre_reread` | the classified contacts of the basalt-centre band re-read at depths from 50 to 300 nm with the 15 and 40 GPa cuts: the mixed-volume, matrix and basalt shares and the median contact depth of the stiff contacts |
 | `load_controlled_basalt_zone` | the mixed-volume share of the load-controlled basalt-rich zone on the 40 and on the 70 GPa upper cut, and the median contact depth of its stiff contacts |
-| `stiff_contacts_matched` | the contacts selected above 70 GPa at 80 nm, read at the displacement where their contact depth is closest to the load-controlled contact depth on basalt: that displacement, the contact depth, the median modulus and load there, and their equivalent radius at 300 nm |
+| `stiff_contacts_matched` | the contacts selected above 70 GPa at 80 nm, read at the depth where their contact depth is closest to the load-controlled contact depth on basalt: that depth z, the contact depth, the median modulus and load there, and their equivalent radius at 300 nm |
 | `mixed_volume_fall_vs_distance` | E(300)/E(100) of the band's mixed-volume contacts against the distance to the nearest contact below 15 GPa at 80 nm: the medians within and beyond one pitch, and a Spearman correlation |
 
 ## `mixed_class_deconvolution.json`
@@ -530,13 +524,13 @@ this is that calculation.
 | `independent_comparison` | the basalt packing inside the same zone from backscattered-electron imaging, which shares no input with the indentation |
 
 Every indent in the zone is inverted, not only those the rule called
-mixed-volume, so no classification threshold enters the result. That is what
-makes it a test of the objection rather than a restatement of it.
+mixed-volume, so no classification threshold enters the result and the
+inversion is independent of the classification it is compared with.
 
 ## `spatial_localisation.json`
 
 Written by `scripts/figs_supplementary.py`, and the source of every spatial
-number in §4.1 and of Supplementary Figure S4.
+number in §4.1 and of Supplementary Figure S6.
 
 | key | meaning |
 |---|---|
@@ -547,7 +541,18 @@ number in §4.1 and of Supplementary Figure S4.
 | `edge_band_um`, `p_excluding_edge_bands`, `n_after_edge_exclusion` | the same test with a band excluded at each end of the zone, so that no indent counted can have neighbours outside it |
 | `p_load_controlled_map`, `n_load_controlled_zone` | the same test on the other acquisition, the load-controlled map |
 
-The pool matters and is the reason this file exists: counting only the
-classified indents changes p at k = 8. The published value is the one that
-includes the rejected indents, which is the right choice, because a rejected
-indent still occupies its place on the grid.
+The pool matters: counting only the classified indents changes p at k = 8. The
+published value includes the rejected indents, because a rejected indent still
+occupies its place on the grid.
+
+## `clustering_diagnostics.json`
+
+Written by `scripts/figs_supplementary.py` (`cluster_diagnostics`), and the
+source of Supplementary Figure S4 and of the k-means diagnostics in §3.3.
+
+| key | meaning |
+|---|---|
+| `n_indents`, `features` | the 1696 quality-controlled indents and the nine z-scored features the partition uses |
+| `k` | the cluster counts scanned, 2 to 8 |
+| `inertia`, `silhouette`, `bic` | per k: the k-means sum of squares, the silhouette score, and the BIC of a full-covariance Gaussian mixture on the same features |
+| `silhouette_max_at_k`, `bic_min_at_k` | where the silhouette is largest, 2, and where the BIC is smallest, 7 |

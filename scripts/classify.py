@@ -65,10 +65,20 @@ from hybridmap.config import Band, Phase, QC, Zones            # noqa: E402
 # discarded along with the resin itself.
 X_RESIN = 380.0
 
-# Boundary between the basalt-rich and flax-rich halves, taken as the midpoint
+# Boundary between the basalt-rich and flax-rich halves, placed at the midpoint
 # between the two plateaus of a 30-indent moving median of E along the long
-# axis.
+# axis. The boundary is a setting of the analysis and is carried here as a
+# constant; the profile it was read from is drawn by `resin_profile` below.
 X_ZONE_SPLIT = 730.0
+
+
+def resin_profile(raw):
+    """Median modulus of each grid row along the long axis of the map.
+
+    Returns a Series indexed by x in micrometres. The embedding resin is the
+    flat stretch at the start; the laminate begins where the median rises.
+    """
+    return raw.groupby("x_um").E_GPa.median()
 
 # Compliant/stiff split. Sits in the bimodal gap of the basalt-zone modulus
 # histogram (Supplementary Figure S3a), so it separates polymer-dominated

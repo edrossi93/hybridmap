@@ -2,7 +2,7 @@
 
 Data and code behind *Estimating the flexural modulus of a hybrid flax/basalt/PA-11 laminate from high-speed nanoindentation mapping and a rule of mixtures*.
 
-Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed values this deposit cannot reproduce and what each of them would need. There are two of those, the two ends of the dark-feature range across the threshold sweep of §3.1, which is computed on the raw tile images, and the script names them rather than leaving them to be noticed.
+Nearly everything the paper reports can be recomputed from what is in here. Start with `scripts/reproduce_paper_values.py`; it prints each published number next to the recomputed one, tells you if anything has drifted, and then names the printed statements this deposit cannot reproduce and what each of them would need. There are three: the dark-feature figures of §3.1, which are measured on the raw tile images; the zone boundary at x = 730 µm, which is a setting of the analysis; and the loading strain rates of Table 1, which are acquisition settings.
 
 ---
 
@@ -14,7 +14,7 @@ cd scripts
 python reproduce_paper_values.py
 ```
 
-Expected last line: `498 of 498 values reproduce`. The line above it reports forty-seven internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
+Expected last line: `587 of 587 values reproduce`. The line above it reports fifty-five internal consistency checks, counted separately because they hold the deposit against itself rather than against the page; among them are quantities that stand behind a printed sentence without being printed themselves, such as the range of E(300)/E(80) behind "100 % softening", and each such line says so on its right-hand side. The block above that names the printed values this deposit cannot reproduce.
 
 Needs Python 3.8 or newer, and the seven packages in `requirements.txt`, which says what each one is for. Tested on Python 3.10 and 3.12. Nothing here needs a GPU or more than a couple of GB of RAM.
 
@@ -32,7 +32,7 @@ Needs Python 3.8 or newer, and the seven packages in `requirements.txt`, which s
 
 ## What is in `data/`
 
-Eight CSVs and fourteen JSON summaries. The first three are the exported per-indent arrays and are primary inputs to this deposit, the next two carry the classification used in the paper, two cover the mechanical testing, and three hold the backscattered-electron segmentation behind Figure 2 and its validation. The rest are the summaries the later analyses write; `data/DATA_DICTIONARY.md` documents every key of every one.
+Eight CSVs and sixteen JSON files, one of them the provenance manifest. The first three are the exported per-indent arrays and are primary inputs to this deposit, the next two carry the classification used in the paper, two cover the mechanical testing, and three hold the backscattered-electron segmentation behind Figure 2 and its validation. The rest are the summaries the later analyses write; `data/DATA_DICTIONARY.md` documents every key of every one.
 
 | file | rows | what it is |
 |---|---|---|
@@ -98,7 +98,7 @@ All nine curves are here, every one of them, not a representative curve per conf
 | basalt face in tension | 5 | 18.85 ± 0.54 GPa | 19.91 GPa |
 | flax face in tension | 4 | 19.76 ± 0.50 GPa | 18.52 GPa |
 
-Nine and not ten, and four in one configuration and five in the other. The source workbook held one of the flax-longitudinal curves twice: two of its five flax-longitudinal records were identical point for point over all 750 points of the shorter one, which was a single final point short of the longer. They were one specimen under two names, so the shorter copy, `16Hybr_Flax_Long_4`, is not in this deposit and the flax-longitudinal configuration is reported at four specimens. The basalt-longitudinal configuration carries no such repeat and is five. Every statistic on this page and in `flexural_comparisons.json` is computed at those counts.
+Five basalt-longitudinal and four flax-longitudinal specimens. The data dictionary, under `flexural_curves.csv`, says why the flax configuration has four. Every statistic on this page and in `flexural_comparisons.json` is computed at those counts.
 
 The ranking reverses across the crossover, which is why both windows are reported. `reproduce_paper_values.py` checks these together with the Welch statistic, Hedges *g*, the peak tangent modulus, the strength, the softening and the Holm correction under each of the three families in `flexural_comparisons.json`.
 
@@ -108,13 +108,13 @@ The standard deviations survive the rounding this file applies: 0.50 is what the
 
 ## What is in `scripts/`
 
-Thirty-five files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib, Pillow and PyYAML, and on nothing else. PyYAML is needed for the tool rather than for the reproduction, and Pillow only for the animation.
+Thirty-four files, in three groups, plus the `hybridmap/` package and the example configs described under *Running this on your own map*. They depend on numpy, pandas, scipy, scikit-learn, matplotlib, Pillow and PyYAML, and on nothing else. PyYAML is needed for the tool rather than for the reproduction, and Pillow only for the animation.
 
 **Start here.**
 
 | file | what it does |
 |---|---|
-| `reproduce_paper_values.py` | Runs the analysis and prints all 498 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
+| `reproduce_paper_values.py` | Runs the analysis and prints all 587 published values next to the recomputed ones, then the internal consistency checks and the printed values it cannot reproduce. This is the one to run first. |
 
 **Analysis.**
 
@@ -129,14 +129,14 @@ Thirty-five files, in three groups, plus the `hybridmap/` package and the exampl
 | `uncertainty_budget.py` | The uncertainty on the laminate estimate, term by term: the spatial block bootstrap over the indents, the tile bootstrap over the zone share, and the three bounded analysis choices, the classification thresholds, the Poisson ratio and the fifty-nine runaway contacts left in the flax class. Writes `data/uncertainty_budget.json`. |
 | `phase_angle_sensitivity.py` | Supplementary Table S3: sweeps the phase-angle quality limit at 10, 15 and 20 degrees and reports the rejected count, the depth-resolved basalt median and the estimate built on it. Writes `data/phase_angle_sensitivity.json`. |
 | `spacing_compliance.py` | The maximum depth of every classified indent of the load-controlled map against the Phani–Oliver criterion, a pitch of at least ten maximum depths, along both axes of the grid, and the depth-resolved grid against the same criterion. Writes `data/spacing_compliance.json`. |
-| `contact_geometry.py` | Contact depth, h_c = z − 0.75 P/S, and equivalent contact radius by class in both acquisitions; the basalt-centre band re-read at several displacements with the same cuts; the selected stiff contacts read where their contact depth equals the load-controlled contact depth on basalt. Writes `data/contact_geometry.json`. |
+| `contact_geometry.py` | Contact depth, h_c = z − 0.75 P/S, and equivalent contact radius by class in both acquisitions; the basalt-centre band re-read at several depths with the same cuts; the selected stiff contacts read where their contact depth equals the load-controlled contact depth on basalt. Writes `data/contact_geometry.json`. |
 | `border_effect.py` | Whether the spacing shortfall leaves a trace: indents on the outer row of the short axis against the interior indents of the same class in the same zone, with a Holm correction over the five comparisons. |
 | `border_rejection.py` | Whether the quality rejections of the depth-resolved map are an edge artefact: the rejected fraction on the two outer rows of the short axis against the fraction inside them, with the counts, and the same split by architectural band. |
 | `make_flexural_moduli.py` | Chord moduli from the bending curves. Reproduces `data/flexural_moduli.csv` exactly. |
-| `table2_intervals.py` | The per-class confidence intervals of Table 3, by the construction its caption declares. |
+| `class_intervals.py` | The per-class confidence intervals of Table 3, by the construction its caption declares. |
 | `poisson_sensitivity.py` | Supplementary Table S1: each class median under the uniform Poisson ratio and under a phase-specific one, by inverting the Oliver-Pharr relation on the deposited reduced modulus. Writes `data/poisson_sensitivity.json`. |
 | `mixed_class_deconvolution.py` | Inverts every indent in the basalt-rich zone onto the basalt/matrix tie line, under parallel and series mixing, and compares the two acquisitions with each other and with the imaging. Writes `data/mixed_class_deconvolution.json`. |
-| `make_classified_depth.py` | Derives `classified_depth_resolved.csv` from `depth_resolved_indents.csv`: the zone bands, the modulus rule, the phase-angle quality flag and the cluster index. Before it existed, that file was both a record and a product, which is why nothing could regenerate it. |
+| `make_classified_depth.py` | Derives `classified_depth_resolved.csv` from `depth_resolved_indents.csv`: the zone bands, the modulus rule, the phase-angle quality flag and the cluster index. |
 | `zone_share.py` | The share of the section each zone occupies, from the mosaic, the two-level construction built on it, the sliding-window sweep of §2.4, and the classification-threshold grid of Supplementary Table S2. Writes `data/zone_share_sensitivity.json`. |
 | `basalt_input_sweep.py` | The basalt input under every classification cut in the swept range, and the estimate with the input read at 80 and at 50 nm from the stiff contacts of Supplementary Figure S7 in place of the class median. Writes `data/basalt_input_sweep.json`. |
 | `depth_softening.py` | Everything §4.4 and the Supplementary Figure S7 caption print about the stiff contacts of the basalt-centre band: the contacts selected above 70 GPa at 80 nm, their moduli by depth, the E(300)/E(80) ratios and their gradient across the whole band, the tests against distance to a compliant contact and against the eight-neighbour basalt fraction, and the hardness, S²/P and contact stiffness of the same contacts. Writes `data/depth_softening.json`. |
@@ -152,17 +152,17 @@ Thirty-five files, in three groups, plus the `hybridmap/` package and the exampl
 | `fig05_curves_per_class.py` | Figure 5, per-class loading curves and depth signatures |
 | `fig06_classification.py` | Figure 6, classification panels |
 | `fig07_property_relationships.py` | Figure 7, relationships between the measured properties |
-| `fig08_rom.py` | Figure 8, the rule-of-mixtures construction. Also holds `lamination_theory`, the one lamination-theory route in the deposit: the Halpin-Tsai baseline of §3.4 and the panel, and the normalisation of §4.2, both come from it |
+| `fig08_rom.py` | Figure 8, the rule-of-mixtures construction. Also holds `lamination_theory`, the one lamination-theory route in the deposit: the Halpin-Tsai baseline of §3.4 and the panel, and `prior_laminate_table()`, the normalised comparison of §4.2 against the prior laminates, both come from it |
 | `fig09_flexural.py` | Figure 9, three-point bending |
-| `figs_supplementary.py` | Supplementary Figures S3, S4, S5 and S6, and the spatial statistics of §4.1. Writes `data/spatial_localisation.json`. |
+| `figs_supplementary.py` | Supplementary Figures S3, S4, S5 and S6, the k-means diagnostics of §3.3 and the spatial statistics of §4.1. Writes `data/clustering_diagnostics.json` and `data/spatial_localisation.json`. |
 | `figS7_basalt_depth.py` | Supplementary Figure S7: the stiff contacts of the basalt-centre zone followed from 50 to 300 nm, selected at 80 nm so the behaviour below is read and not chosen. |
 | `depth_slices_animation.py` | The supplementary animation, `depth_slices_animation.gif`: the depth-resolved map stepped from z = 80 to 290 nm on the 5 nm grid of the traces |
-| `fig_map_coverage.py`, `reply_figures.py` | Figures supporting the response to reviewers rather than the paper. `reply_figures.r2_table()` is also where the §4.2 comparison against the prior laminates is built, on the route in `fig08_rom.py` |
+| `figS2_map_coverage.py` | Supplementary Figure S2: the bending specimen, the polished face against the sixteen plies with the three measurement windows drawn to scale, and the bending stress through the thickness. `coverage()` returns the plies each window spans, the mosaic's bounding box and its width in yarn spacings and twill repeats |
 
 Every figure listed above is identical to the picture in the paper, which is
 checked rather than asserted, by decoding both and comparing pixels.
 
-**What the deposit does not draw, and why.** Six pictures in the two documents
+**What the deposit does not draw, and why.** Five pictures in the two documents
 come from no script here.
 
 | picture | why |
@@ -171,7 +171,6 @@ come from no script here.
 | Figure 2 | the backscattered-electron mosaic: a micrograph, drawn from the tile images rather than from any deposited table |
 | Figure 3 | the load-controlled map, laid out against the micrograph by hand. Every value it shows is a column of `classified_shallow.csv` |
 | Supplementary Figure S1 | secondary-electron micrographs of the constituents |
-| Supplementary Figure S2 | where the two maps sit in the laminate: a schematic |
 | the graphical abstract | the uncaptioned picture at the front of the article: a montage of schematics, micrographs, map panels and a stress-strain plot, laid out by hand |
 
 For the micrographs, what the deposit carries is the measurement rather than the
@@ -200,7 +199,7 @@ python figs_supplementary.py         # Supplementary Figures S3, S4, S5, S6 and 
 
 `shallow_map.csv`, `depth_resolved_curves.csv` and `depth_resolved_indents.csv` are **primary inputs to this deposit**. They are the per-indent arrays exported from the two nanoindentation acquisitions, and everything else here is computed from them by the scripts in `scripts/`.
 
-The instrument files they were exported from are not part of this deposit and are not distributed. The acquisition and the proprietary export that produces these arrays are the instrument's, not the analysis's, and almost nothing in the paper depends on them: every reported number but eight is recomputed from the tables above by `reproduce_paper_values.py`, and that script names those eight and says what each of them would need. The three files are complete, in the sense that no indent has been removed from them: `shallow_map.csv` still carries the ~3000 indents that landed on the embedding resin, and `depth_resolved_curves.csv` is unfiltered, artefacts and all.
+The instrument files they were exported from are not part of this deposit and are not distributed. The acquisition and the proprietary export that produces these arrays are the instrument's, not the analysis's, and almost nothing in the paper depends on them: every reported number is recomputed from the tables above by `reproduce_paper_values.py`, except the few statements that script names at the end, with what each of them would need. The three files are complete, in the sense that no indent has been removed from them: `shallow_map.csv` still carries the ~3000 indents that landed on the embedding resin, and `depth_resolved_curves.csv` is unfiltered, artefacts and all.
 
 So the reproduction boundary of this deposit is the exported per-indent table. Below that line is the instrument. Above it, everything is here.
 
@@ -218,7 +217,7 @@ So the reproduction boundary of this deposit is the exported per-indent table. B
 
 The ± 1.1 and ± 3.2 percentage points on the two imaged fibre fractions are `imaged_intervals()` in the same script: for each fibre zone, the tiles that zone covers by at least 5 % of their pixels, 72 for basalt and 88 for flax; the standard deviation of the in-zone fibre fraction over them, one value per tile; 1.96 standard errors of the mean; times the zone's share of the marked mosaic from the stitched mask. Both recorded values reproduce to the last digit.
 
-**The lamination-theory comparison (Sections 3.4 and 4.2, Figure 8).** One route, `lamination_theory()` in `fig08_rom.py`: a balanced 0/90 average of the iso-strain longitudinal modulus and the Halpin-Tsai transverse one, with the two tabulated fibre moduli, 80 and 60 GPa, combined by volume at the stated densities, which puts basalt at 0.357 of the fibre volume and the fibre modulus at 67.1 GPa. At this panel's fibre volume fraction of 0.649 and a matrix of 1.5 GPa it gives 26.3 GPa, the baseline drawn in Figure 8b. `reply_figures.r2_table()` normalises the prior laminates and this panel by the same function: the prior laminates realise 0.37 to 0.58 of their prediction, this panel 0.72 and 0.75, and against the prior hybrids it is stiffer by 2.07, of which 1.44 is the fibre volume fraction and 1.41 the share realised, product within 2 % of the measured ratio.
+**The lamination-theory comparison (Sections 3.4 and 4.2, Figure 8).** One route, `lamination_theory()` in `fig08_rom.py`: a balanced 0/90 average of the iso-strain longitudinal modulus and the Halpin-Tsai transverse one, with the two tabulated fibre moduli, 80 and 60 GPa, combined by volume at the stated densities, which puts basalt at 0.357 of the fibre volume and the fibre modulus at 67.1 GPa. At this panel's fibre volume fraction of 0.649 and a matrix of 1.5 GPa it gives 26.3 GPa, the baseline drawn in Figure 8b. `prior_laminate_table()` in the same file normalises the prior laminates and this panel by the same function: the prior laminates realise 0.37 to 0.58 of their prediction, this panel 0.72 and 0.75, and against the prior hybrids it is stiffer by 2.07, of which 1.44 is the fibre volume fraction and 1.41 the share realised, product within 2 % of the measured ratio.
 
 **The fibre fraction inside a mixed-volume contact (Section 4.1).** `hill_fraction()` in `mixed_class_deconvolution.py`: the class median placed on the Hill average, half Voigt plus half Reuss, of the two shallow end members, 86.0 and 4.66 GPa, and solved for the basalt fraction. The depth-resolved median of 29.1 GPa gives 0.54 and the load-controlled median of 35.8 GPa gives 0.67. The same medians give 0.31 and 0.38 on the linear form and 0.89 and 0.92 on the compliance form, so the pair holds under the Hill convention alone.
 
@@ -240,7 +239,7 @@ One thing to be clear about: the clustering does **not** independently select fo
 
 Slice values at 100, 150 and 200 nm are the mean of the CSM response over a 20 nm window centred on the target depth, requiring at least three valid points inside the window, as Supplementary Note S1 states. `depth_resolved_indents.csv` carries them, `classified_depth_resolved.csv` repeats them value for value, and they are the numbers the paper reports.
 
-The elastic modulus in both depth-resolved tables is the sample modulus at ν = 0.30, computed from the instrument's reduced modulus with the diamond indenter constants, E_i = 1140 GPa and ν_i = 0.07, as for the load-controlled map. The depth axis is the indenter displacement z, the instrument's depth channel after frame-compliance and drift correction, and not the contact depth.
+The elastic modulus in both depth-resolved tables is the sample modulus at ν = 0.30, computed from the instrument's reduced modulus with the diamond indenter constants, E_i = 1140 GPa and ν_i = 0.07, as for the load-controlled map. The depth axis is the indentation depth z, the instrument's depth channel after frame-compliance and drift correction, and not the contact depth.
 
 The deposited slice values are not exactly regenerable from `depth_resolved_curves.csv`. Recomputing the 140 to 160 nm window mean over the resampled 5 nm grid, five points per indent, reproduces `E_150` to a median of 0.013 GPa, at a correlation of 0.99996, but not exactly: 304 of the 1985 indents that have a value differ by more than 0.1 GPa and the largest difference is 2.5 GPa. The deposited means are taken over the trace points as recorded, and the curves file holds the trace after resampling; the per-indent file is a measurement input of this deposit, held by its hash in `PROVENANCE.json`, and not a product of the curves. On the class medians at 150 nm the recomputation gives 4.11, 5.54, 29.19 and 54.44 GPa against the deposited 4.10, 5.50, 29.12 and 54.67.
 
@@ -452,8 +451,6 @@ python tests/test_tool.py
 
 The second dataset is generated, not measured. `make_synthetic_map.py` draws three populations from fixed distributions with a stated seed. `test_tool.py` writes it to a temporary directory that does not outlive the test, so no synthetic file is ever left sitting in the deposit; run the generator by hand and it writes to `tests/_generated/` instead, which is not committed. It has different column names, three phases and one zone, so it fails if anything in the tool has this laminate baked into it. Because the populations are planted, `test_tool.py` can check that the tool recovers what was put in: it labels 99.8 % of the points with the phase they were drawn from, the rest being the tails that genuinely cross a cut.
 
-The first thing this test found, on the first run, was that a single-zone configuration crashed.
-
 ---
 
 ## Citation
@@ -484,15 +481,16 @@ The rounded and the unrounded values differ in the third decimal. Recomputing
 the flax-longitudinal standard deviation from this file gives 0.4994 GPa and
 from the unrounded values 0.4971, and both round to the 0.50 the paper reports.
 On the nine specimens deposited here the two routes therefore agree at the
-printed precision, which they did not while the duplicate flax curve was in the
-file: there they gave 0.49 and 0.48. The agreement is a property of these data
-and not a guarantee, and a reader recomputing by hand should still know why the
-last digit can move.
+printed precision. The agreement is a property of these data and not a
+guarantee, and a reader recomputing by hand should still know why the last
+digit can move.
 
 ## Files provided as primary inputs
 
-Most of what is here can be rebuilt from something else in the folder. Six files
-cannot, and it is better to say so than to leave a reader hunting for a script
+Most of what is here can be rebuilt from something else in the folder. Eight files
+cannot: the three per-indent tables, the bending records in `flexural_curves.csv`,
+and the four files of the backscattered-electron segmentation, `zone_mask_rle.json`
+among them. It is better to say so than to leave a reader hunting for a script
 that is not there. `data/PROVENANCE.json` says which is which for every file, and
 `provenance_check.py` holds the products to their scripts.
 
@@ -505,10 +503,8 @@ The three are close relatives but not derivable from one another.
 `depth_resolved_indents.csv` holds the 20 nm window mean of Supplementary Note
 S1 at each target depth; `depth_resolved_curves.csv` holds the traces resampled
 onto a common 5 nm grid, which is what makes them one tidy table. Recomputing
-the window mean from the resampled grid reproduces the deposited values to a
-median of 0.012 GPa at 150 nm and not exactly, the largest difference being
-2.3 GPa and the basalt class median landing 0.8 % low; *Slice extraction* above
-gives the comparison in full. The paper uses the deposited ones.
+the window mean from the resampled grid reproduces the deposited values closely
+but not exactly; *Slice extraction* above gives the comparison in full. The paper uses the deposited ones.
 
 ### `bse_segmentation_tiles.csv` and `bse_segmentation_summary.json`
 

@@ -1,7 +1,8 @@
 """The planned flexural comparisons, their effect sizes, and three corrections.
 
-Supplementary Table S7 reports four comparisons under one Holm correction.
-Two alternative families are computed beside it, so that the dependence of the
+Supplementary Table S7 reports four comparisons under one Holm correction:
+chord modulus, peak tangent modulus, flexural strength and softening. Two
+alternative families are computed beside it, so that the dependence of the
 conclusion on the choice of family is shown by computing rather than by
 argument.
 
@@ -9,17 +10,15 @@ Stiffness as one comparison: the chord modulus and the peak tangent modulus are
 two measures of the same property on the same specimens, so putting both in one
 family is conservative, and because Holm enforces monotonicity the corrected
 value for the chord follows from the tangent rather than from its own evidence.
-This family treats the two stiffness measures as one comparison.
+This family counts the two stiffness measures as one comparison.
 
-The three-measure family, labelled "the original family" in the output: the
-chord modulus, flexural strength and strain at break.
+Strain at break in place of softening: chord modulus, flexural strength and
+strain at break. This family supplies the corrected p for strain at break.
 
-Both are reported below, beside the family of Table S7. The answer is stated
-plainly in the paper: under either of the other two families the stiffness
-difference corrects to p = 0.0357 rather than 0.0675, on the nine specimens
-deposited. The paper therefore rests nothing on a non-significant test. It
-reports that a difference of about 5 % cannot be excluded and that it lies
-below what the construction itself can resolve.
+Under either alternative family the stiffness difference corrects to
+p = 0.0357 rather than 0.0675, on the nine specimens deposited. The paper rests
+nothing on that test: it reports that a difference of about 5 % cannot be
+excluded and that it lies below what the construction itself can resolve.
 
 Every quantity is defined here rather than inherited, so that each one has a
 script behind it:
@@ -136,13 +135,13 @@ def main():
         stats_by[name]["flax_sd"] = float(f[col].std(ddof=1))
 
     families = {
-        "as reported: four comparisons":
+        "four comparisons, Table S7":
             ["chord modulus (GPa)", "peak tangent modulus (GPa)",
              "flexural strength (MPa)", "softening to 0.55 % strain (%)"],
         "stiffness as one comparison: three":
             ["chord modulus (GPa)", "flexural strength (MPa)",
              "softening to 0.55 % strain (%)"],
-        "the original family: three":
+        "strain at break in place of softening: three":
             ["chord modulus (GPa)", "flexural strength (MPa)",
              "strain at break (%)"],
     }

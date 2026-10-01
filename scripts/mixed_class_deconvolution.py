@@ -45,7 +45,7 @@ imaging, which is 0.665 and shares no input with the indentation.
 
 One more inversion lives here and is not part of the product this script
 writes. 4.1 says the mixed-volume median "matches a Voigt-Reuss-Hill mixture of
-basalt and PA-11" at a basalt fraction of 0.55 in the depth-resolved contacts and
+basalt and PA-11" at a basalt fraction of 0.54 in the depth-resolved contacts and
 0.67 in the shallower ones. Those two figures come from `hill_fraction`: the
 class median is placed on the Hill curve, the arithmetic mean of the Voigt and
 Reuss curves, between the two shallow end members, 86.0 and 4.66 GPa, and the
@@ -54,7 +54,7 @@ shallow end members, the depth-resolved one included, because the question 4.1
 asks is how much fibre a contact of that modulus holds, and the fibre modulus
 the paper uses is the shallow one. On the linear and compliance forms above the
 same medians give 0.31 and 0.38, and 0.89 and 0.92, so the printed pair holds
-under the Hill convention only, and 4.1 has to say which convention it is.
+under the Hill convention only, which is the one 4.1 states.
 `reproduce_paper_values.py` checks both figures through this function.
 """
 

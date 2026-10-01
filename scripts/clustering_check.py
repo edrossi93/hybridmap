@@ -5,8 +5,10 @@ The method is in `hybridmap.cluster`. What is here is our feature set, our k,
 and our seed.
 
 The point of this is not to select the number of populations. The silhouette
-score peaks at k = 2 and the Gaussian-mixture BIC keeps falling, so the
-unsupervised analysis on its own does not pick four. What it does is tell us
+score peaks at k = 2, with a secondary plateau at k = 4-5, and the
+Gaussian-mixture BIC falls to k = 7 and turns up at k = 8, so the unsupervised
+analysis on its own does not pick four (`figs_supplementary.cluster_diagnostics`,
+Supplementary Figure S4). What it does is tell us
 whether a partition built without any architectural knowledge lands on
 something compatible with the rule.
 
@@ -27,9 +29,8 @@ as ARI* in the paper.
 
 The merge is applied on both sides, as §2.3 describes: the two compliant
 clusters are collapsed, and so are the rule's flax and matrix labels. There is
-no Hungarian
-or other matching step here and there never needed to be one: ARI is invariant
-to how either partition numbers its classes.
+no Hungarian or other matching step, because ARI is invariant to how either
+partition numbers its classes.
 """
 
 import sys

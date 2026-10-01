@@ -1,11 +1,11 @@
-"""Figure 5 - per-indent constituent classification of the two acquisitions.
+"""Figure 6 - per-indent constituent classification of the two acquisitions.
 
 Each classification map is drawn at the same physical size, on the same axis
 ranges and in the same orientation as the corresponding property map, so panel
 (a) can be laid over the Figure 3 maps and panel (b) over the Figure 4 strips
 and they coincide.
 
-The sizes were measured from the submitted figures rather than assumed. In
+The sizes are those of the printed figures. In
 Figure 3 each map is 5.103 x 1.470 in on a 7.20 in page, embedded in the
 manuscript at 6.00 in, so it prints at 4.253 x 1.225 in. In Figure 4 each strip
 is 5.370 x 1.075 in on an 8.27 in page, embedded at 5.50 in, so it prints at
@@ -71,8 +71,8 @@ def build(outdir):
 
     fs.set_style("bold", font_scale=0.78)
 
-    # Printed size of the corresponding maps, in inches, measured from the
-    # submitted Figures 3 and 4 (see the module docstring).
+    # Printed size of the corresponding maps, in inches, from Figures 3 and 4
+    # as they print (see the module docstring).
     A_W, A_H = 4.253, 1.225          # a Figure 3 map, as it prints
     B_W, B_H = 3.571, 0.715          # a Figure 4 strip, as it prints
 

@@ -155,7 +155,7 @@
     }
   },
   "families": {
-    "as reported: four comparisons": {
+    "four comparisons, Table S7": {
       "chord modulus (GPa)": 0.0674749566449232,
       "peak tangent modulus (GPa)": 0.0674749566449232,
       "flexural strength (MPa)": 1.264810392341496e-05,
@@ -166,7 +166,7 @@
       "flexural strength (MPa)": 9.486077942561219e-06,
       "softening to 0.55 % strain (%)": 0.0005805822636635937
     },
-    "the original family: three": {
+    "strain at break in place of softening: three": {
       "chord modulus (GPa)": 0.03567271953285046,
       "flexural strength (MPa)": 9.486077942561219e-06,
       "strain at break (%)": 1.6473708633505113e-05

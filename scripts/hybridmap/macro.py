@@ -191,9 +191,7 @@ def measurements(macro, curves_table=None, scale=1.0,
     Everything to compare the prediction against.
 
     The values a config states outright, plus one per group reduced from the
-    curves when they are given. Before this, a user who configured curves had
-    to run a second command and type the answers back into the config, in a
-    unit the tool never told them about.
+    curves when they are given.
     """
     if macro is None:
         return []

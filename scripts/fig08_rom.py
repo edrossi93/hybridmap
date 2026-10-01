@@ -88,7 +88,7 @@ def lamination_theory(v_fibre, e_fibre, e_matrix=HT_E_MATRIX, xi=HT_XI):
     is the Halpin-Tsai estimate, and the average of the two is what a balanced
     fabric of the same constituents would give. This is the one lamination-theory
     route in the deposit: the Figure 8 baseline, the §3.4 sentence and the §4.2
-    comparison against the prior laminates (`reply_figures.py`) all call it.
+    comparison against the prior laminates (`prior_laminate_table`) all call it.
 
     Returns the longitudinal, transverse and averaged moduli in GPa.
     """
@@ -140,6 +140,64 @@ def report_halpin_tsai(e_basalt=HT_E_BASALT, e_flax=HT_E_FLAX,
           f"balanced 0/90 average {balanced:.2f} GPa, which is the "
           f"{balanced:.1f} GPa of §3.4")
     return longitudinal, transverse, balanced
+
+
+# ---------------------------------------------------------------------------
+# The comparison of §4.2 against the prior laminates. Fibre volume fractions and
+# measured flexural moduli are those of Sergi et al.; the moduli were measured
+# independently of the volume fractions, which is what makes the comparison
+# meaningful. Each laminate is normalised by `lamination_theory` above, with the
+# two fibre moduli combined by volume for the hybrids, so §3.4, Figure 8 and
+# §4.2 print one prediction for the panel, by one route.
+# ---------------------------------------------------------------------------
+PRIOR = [
+    ("PA11 flax, [0]",             0.377, 5.13, "flax"),
+    ("PA11 hybrid [0/0], basalt",  0.424, 9.82, "hybrid"),
+    ("PA11 hybrid [0/0], flax",    0.424, 8.34, "hybrid"),
+    ("PA11 hybrid [0/90], basalt", 0.479, 9.40, "hybrid"),
+    ("PA11 hybrid [0/90], flax",   0.479, 9.79, "hybrid"),
+]
+
+
+def prior_laminate_table():
+    """One row per laminate: name, fibre volume fraction, lamination-theory
+    prediction, measured flexural modulus, their ratio, and whether the row is
+    this work. The flax-only laminate enters with the flax modulus, the hybrids
+    with the two fibres combined by volume at the stated densities.
+    """
+    moduli = (pd.read_csv(DATA / "flexural_moduli.csv")
+              .groupby("configuration")["E_D790_toe_compensated_GPa"].mean())
+    ours = [("this work, basalt-long", HT_V_FIBRE, moduli["basalt_face"], "hybrid"),
+            ("this work, flax-long", HT_V_FIBRE, moduli["flax_face"], "hybrid")]
+    rows = []
+    for name, vf, meas, kind in PRIOR + ours:
+        ef = HT_E_FLAX if kind == "flax" else fibre_modulus_by_volume()
+        pred = lamination_theory(vf, ef, HT_E_MATRIX)[2]
+        rows.append((name, vf, pred, meas, meas / pred, name.startswith("this work")))
+    return rows
+
+
+def consolidation_decomposition(rows):
+    """Split the modulus ratio against the prior hybrids into two factors.
+
+    The comparison is hybrid against hybrid; the flax-only laminate is left out.
+    The panel carries more fibre, and it realises more of its own prediction.
+    The product of the two factors should recover the measured ratio, and how
+    closely it does is the test of whether anything else is going on.
+    """
+    prior = [r for r in rows if not r[5] and "hybrid" in r[0]]
+    ours = [r for r in rows if r[5]]
+
+    def mean(rs, i):
+        return sum(r[i] for r in rs) / len(rs)
+
+    observed = mean(ours, 3) / mean(prior, 3)
+    by_fraction = mean(ours, 1) / mean(prior, 1)
+    by_share = mean(ours, 4) / mean(prior, 4)
+    product = by_fraction * by_share
+    return {"observed": observed, "fibre_volume_fraction": by_fraction,
+            "consolidation_quality": by_share, "product": product,
+            "residual_pct": 100 * abs(product - observed) / observed}
 
 
 def zone_table(depth, modulus_col="E_150"):

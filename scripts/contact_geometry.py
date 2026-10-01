@@ -1,6 +1,6 @@
 """Contact size in the two acquisitions, and what the mixed-volume share follows.
 
-The depth axis of the depth-resolved traces is the indenter displacement z, the
+The depth axis of the depth-resolved traces is the indentation depth z, the
 instrument's depth channel after frame-compliance and drift correction. The
 contact depth is smaller:
 
@@ -16,13 +16,13 @@ This script writes, for §3.3, §4.1, §4.3.6 and §4.4:
     contact-depth channel) and in the depth-resolved map at z = 80, 150 and
     300 nm (from the trace, class medians);
   * the classification of the basalt-centre band re-read at several
-    displacements with the same 15 and 40 GPa cuts, so the mixed-volume,
+    depths with the same 15 and 40 GPa cuts, so the mixed-volume,
     matrix and basalt shares can be followed with depth, and the depth at
     which the contact depth of the stiff contacts matches that of the
     load-controlled stiff contacts;
   * the mixed-volume share of the load-controlled basalt-rich zone on the
     same 40 GPa upper cut;
-  * the reading of the §4.4 stiff contacts at the displacement where their
+  * the reading of the §4.4 stiff contacts at the depth where their
     contact depth equals the load-controlled contact depth on basalt, and
     their phase angle between 50 and 80 nm, against the 15 degree limit;
   * whether the fall of the mixed-volume contacts between 100 and 300 nm
@@ -62,7 +62,7 @@ def contact_depth(curves):
 
 
 def reread(E):
-    """The rule of §2.3 inside the basalt-centre band, at any displacement."""
+    """The rule of §2.3 inside the basalt-centre band, at any depth."""
     return np.where(E < E_LOWER, "matrix",
                     np.where(E < E_UPPER_DEPTH, "mixed-volume", "basalt"))
 
@@ -85,7 +85,7 @@ def main():
                  "h_max_nm": float(s.max_depth_nm.median())}
     out["load_controlled"] = lc
 
-    # ---- depth-resolved contacts at fixed displacement --------------------
+    # ---- depth-resolved contacts at fixed depth ---------------------------
     dr = {}
     cv = curves[curves.indent_id.isin(lab.index)].copy()
     cv["cls"] = cv.indent_id.map(lab)
@@ -95,7 +95,7 @@ def main():
                            "z_minus_h_c_nm": float((z - at[at.cls == c].h_c_nm).median()),
                            "a_um": RADIUS_FACTOR * float(at[at.cls == c].h_c_nm.median()) / 1e3}
                        for c in CLASSES}
-    out["depth_resolved_by_displacement"] = dr
+    out["depth_resolved_by_depth"] = dr
 
     # ---- the band re-read with depth --------------------------------------
     band_ids = kept.loc[kept.zone == BAND, "indent_id"]

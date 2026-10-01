@@ -198,9 +198,8 @@ def cmd_report(args):
             print(f"  {label:<48} Voigt {v:.2f}")
 
     if cfg.macro:
-        # Reduced here. Before this the user was told to go and run a second
-        # command, then type its answers back into the config, in a unit
-        # nothing had mentioned.
+        # The curves are reduced here, so the comparison needs no second
+        # command.
         reduced = _reduce_curves(cfg)
         scale = cfg.macro.curves.modulus_scale if reduced is not None else 1.0
         measured = macro.measurements(cfg.macro, reduced, scale)

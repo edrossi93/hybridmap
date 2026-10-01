@@ -122,8 +122,7 @@ def imaged_intervals(min_coverage=MIN_ZONE_COVERAGE):
     """The +/- on the imaged fibre fractions, Figure 2e and 3.4, in percentage points.
 
     The recipe behind the 1.1 and 3.2 printed there, which the summary file
-    carries as recorded values and which nothing in the deposit computed until
-    this function. For each fibre zone: the in-zone fibre fraction of every tile
+    also carries as recorded values. For each fibre zone: the in-zone fibre fraction of every tile
     the zone covers by at least `min_coverage` of its pixels, one value per
     tile, unweighted; its standard deviation (n - 1) over the square root of the
     tile count is the standard error of the mean; 1.96 of those is the 95 %

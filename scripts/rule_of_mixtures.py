@@ -64,9 +64,8 @@ def check_zone_weighting(df, classes=CLASSES):
 def threshold_sweep(raw_shallow, lowers=(10, 15, 20), uppers=(60, 65, 70, 75, 80)):
     """
     Redo the classification and the Voigt bound for a grid of thresholds. This
-    is Supplementary Table S2. Note that the table in the first submission was
-    generated from an earlier classification pass and did not match the main
-    text; this function regenerates it from the deposited data.
+    is the single-map form of the sweep of Supplementary Table S2, which
+    `zone_share.threshold_grid` computes on the two-level construction.
     """
     from classify import PHASES, X_RESIN, E_LOWER, E_UPPER_SHALLOW, assign_zone
 

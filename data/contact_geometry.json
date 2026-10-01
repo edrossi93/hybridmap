@@ -26,7 +26,7 @@
       "h_max_nm": 366.10465
     }
   },
-  "depth_resolved_by_displacement": {
+  "depth_resolved_by_depth": {
     "80": {
       "basalt": {
         "h_c_nm": 65.40029414410108,

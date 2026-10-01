@@ -1,16 +1,17 @@
-"""Supplementary Figures S1, S2 and S4, rebuilt from the deposited tables.
+"""Supplementary Figures S3, S4, S5 and S6, from the deposited tables.
 
 Their labels follow the paper's terminology: the class is called mixed-volume
 and the load-controlled map is called the load-controlled map, in the
 manuscript, the supplement and the figures alike. Because the labels live inside
 a raster, only a rebuild from the deposit can guarantee that.
 
-Building them from the deposit rather than as fixed artwork also puts them
-under the same reproducibility as the paper's own figures, so that every figure
-in the package is produced by a script.
+Every figure in the paper and the supplement is produced by a script; these
+four are produced here.
 
 Every number the captions and the Discussion quote is recomputed here and
-printed, so a disagreement shows up rather than being drawn.
+printed. The k-means diagnostics of Figure S4 are written to
+`data/clustering_diagnostics.json` and the spatial statistics of Figure S6 to
+`data/spatial_localisation.json`.
 """
 
 import sys
@@ -39,7 +40,7 @@ def depth_resolved():
     return d
 
 
-def s1(outdir):
+def fig_s5(outdir):
     """The rule against the unsupervised partition, on the same indents."""
     d = depth_resolved()
     fs.apply()
@@ -80,11 +81,11 @@ def s1(outdir):
     fs.save(fig, "FigS5_rule_vs_kmeans", outdir)
     # ARI* merges the compliant pair on both sides, the two lowest clusters and
     # flax with matrix.
-    print(f"  S1: ARI {ari:.3f}, ARI* after merging the compliant pair on "
+    print(f"  S5: ARI {ari:.3f}, ARI* after merging the compliant pair on "
           f"both sides {ari_star:.3f}")
 
 
-def s2(outdir):
+def fig_s3(outdir):
     """Where the thresholds sit in the modulus distribution of each zone."""
     d = pd.read_csv(DATA / "classified_shallow.csv")
     zones = [("basalt", "Basalt-rich zone", True),
@@ -121,18 +122,15 @@ def s2(outdir):
     fs.save(fig, "FigS3_threshold_histograms", outdir)
     for zone, *_ in zones:
         sub = d[d.zone == zone]
-        print(f"  S2: {zone}-rich zone n = {len(sub)}, "
+        print(f"  S3: {zone}-rich zone n = {len(sub)}, "
               f"{int((sub.E_GPa < 1).sum())} below 1 GPa, "
               f"{int((sub.E_GPa > 15).sum())} above 15 GPa")
 
 
-def s3(outdir):
-    """Why k = 4 is a choice and not a diagnosis.
-
-    The same three curves the manuscript describes: the sum of squares, the
-    silhouette and the Gaussian-mixture BIC, over k = 2 to 8, on the same nine
-    features and the same quality-controlled indents as everything else, built
-    here so that this supplementary figure too is produced by a script.
+def cluster_diagnostics():
+    """The sum of squares, the silhouette and the Gaussian-mixture BIC over
+    k = 2 to 8, on the nine features and the quality-controlled indents that
+    the k-means partition uses. Written to `data/clustering_diagnostics.json`.
     """
     from sklearn.cluster import KMeans
     from sklearn.metrics import silhouette_score
@@ -148,19 +146,32 @@ def s3(outdir):
     for k in ks:
         km = KMeans(n_clusters=k, n_init=cc.N_INIT,
                     random_state=cc.SEED).fit(X)
-        inertia.append(km.inertia_)
-        sil.append(silhouette_score(X, km.labels_))
-        bic.append(GaussianMixture(n_components=k, covariance_type="full",
-                                   n_init=10, random_state=cc.SEED)
-                   .fit(X).bic(X))
+        inertia.append(float(km.inertia_))
+        sil.append(float(silhouette_score(X, km.labels_)))
+        bic.append(float(GaussianMixture(n_components=k, covariance_type="full",
+                                         n_init=10, random_state=cc.SEED)
+                         .fit(X).bic(X)))
+    out = {"n_indents": int(keep.sum()), "features": cc.FEATURES, "k": ks,
+           "inertia": inertia, "silhouette": sil, "bic": bic,
+           "silhouette_max_at_k": ks[int(np.argmax(sil))],
+           "bic_min_at_k": ks[int(np.argmin(bic))]}
+    (DATA / "clustering_diagnostics.json").write_text(
+        json.dumps(out, indent=2) + "\n", encoding="utf8", newline="\n")
+    return out
+
+
+def fig_s4(outdir):
+    """Why k = 4 is a choice and not a diagnosis: the three diagnostics."""
+    diag = cluster_diagnostics()
+    ks = diag["k"]
 
     fs.apply()
     fig, axes = plt.subplots(1, 3, figsize=(fs.DOUBLE, 0.40 * fs.DOUBLE),
                              layout="constrained")
     for ax, y, label, title in (
-            (axes[0], inertia, "Inertia", "k-means sum of squares"),
-            (axes[1], sil, "Silhouette", "Silhouette score"),
-            (axes[2], bic, "BIC", "Gaussian-mixture BIC")):
+            (axes[0], diag["inertia"], "Inertia", "k-means sum of squares"),
+            (axes[1], diag["silhouette"], "Silhouette", "Silhouette score"),
+            (axes[2], diag["bic"], "BIC", "Gaussian-mixture BIC")):
         ax.plot(ks, y, "o-", color=fs.WONG["orange"], ms=5, mfc="white",
                 mew=1.4)
         ax.axvline(4, color="0.55", lw=0.9, ls=(0, (2, 3)))
@@ -172,8 +183,8 @@ def s3(outdir):
     for ax, letter in zip(axes, "abc"):
         fs.panel_label(ax, letter, dx=-0.30, dy=1.16)
     fs.save(fig, "FigS4_cluster_diagnostics", outdir)
-    print(f"  S3: silhouette peaks at k = {ks[int(np.argmax(sil))]}, "
-          f"BIC falls monotonically: {all(np.diff(bic) < 0)}")
+    print(f"  S4: silhouette largest at k = {diag['silhouette_max_at_k']}, "
+          f"BIC smallest at k = {diag['bic_min_at_k']}")
 
 
 def neighbour_fraction(sub, pool, k):
@@ -195,7 +206,7 @@ def neighbour_fraction(sub, pool, k):
     return is_basalt[idx].mean(axis=1)
 
 
-def s4(outdir):
+def fig_s6(outdir):
     """Are mixed-volume contacts where the two phases meet?"""
     d = depth_resolved()
     zone = d[d.zone == "basalt-centre"]
@@ -258,21 +269,19 @@ def s4(outdir):
     for ax, letter, dx in ((ax1, "a", -0.14), (ax2, "b", -0.30), (ax3, "c", -0.24)):
         fs.panel_label(ax, letter, dx=dx, dy=1.14)
     fs.save(fig, "FigS6_mixed_volume_localisation", outdir)
-    print(f"  S4: counts basalt {int((sub.constituent=='basalt').sum())}, "
+    print(f"  S6: counts basalt {int((sub.constituent=='basalt').sum())}, "
           f"mixed-volume {int((sub.constituent=='mixed-volume').sum())}, "
           f"matrix {int((sub.constituent=='matrix').sum())}, QC {len(qc)}")
-    print(f"  S4: p at k = {KNN} is {p8:.2e}; largest p over k = 3 to 20 is "
-          f"{max(ps):.1e}  (the paper says 2.3e-12 and all below 1e-9)")
+    print(f"  S6: p at k = {KNN} is {p8:.2e}; largest p over k = 3 to 20 is "
+          f"{max(ps):.1e}")
 
 
 def spatial_statistics(d, sub, zone, f8, ps, ks):
     """Every spatial claim §4.1 makes, computed once and written down.
 
-    The manuscript quotes four of these and none of them could be reproduced
-    from the deposit before: the p at k = 8, the stability across k, the p after
-    excluding a band at each edge of the zone, and the p on the load-controlled map.
-    The definitions are here so that the numbers mean something a reader can
-    check, rather than being reported and taken on trust.
+    The p at k = 8, the stability across k, the p after excluding a band at
+    each edge of the zone, and the p on the load-controlled map, with the
+    definitions that give them their meaning.
     """
     rng = np.random.default_rng(42)
     c = sub.constituent.to_numpy()
@@ -315,9 +324,9 @@ def spatial_statistics(d, sub, zone, f8, ps, ks):
         "n_load_controlled_zone": int(len(szone)),
     }
     (DATA / "spatial_localisation.json").write_text(json.dumps(out, indent=2) + "\n")
-    print(f"  S4: medians {out['median_basalt_neighbour_fraction']}, "
+    print(f"  S6: medians {out['median_basalt_neighbour_fraction']}, "
           f"CI {out['median_difference_ci95']}")
-    print(f"  S4: p after excluding {EDGE_UM} µm at each end "
+    print(f"  S6: p after excluding {EDGE_UM} µm at each end "
           f"{p_edge:.2e} (n = {len(inner)}); on the load-controlled map "
           f"{p_shallow:.2e} (n = {len(szone)})")
     return out
@@ -325,10 +334,10 @@ def spatial_statistics(d, sub, zone, f8, ps, ks):
 
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else "."
-    s1(out)
-    s2(out)
-    s3(out)
-    s4(out)
+    fig_s3(out)
+    fig_s4(out)
+    fig_s5(out)
+    fig_s6(out)
     return 0
 
 

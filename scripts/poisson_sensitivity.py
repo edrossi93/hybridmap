@@ -2,11 +2,7 @@
 
 Table S1 reports each class median twice, once under the uniform nu = 0.30 the
 paper adopts and once under a value chosen for the phase, and then reports what
-the laminate estimate does. Nothing in the deposit produced those numbers. The
-censusing of every printed number against everything the deposit can compute
-found 89.05 GPa, the basalt median under nu = 0.24, with no route to it.
-
-There is a route, and it is short. The instrument measures a reduced modulus,
+the laminate estimate does. This script computes them. The instrument measures a reduced modulus,
 which does not depend on the Poisson ratio assumed for the specimen; the
 specimen modulus does. `Er_GPa` is deposited per indent, so both columns of
 Table S1 follow from the same measurement under two conventions:

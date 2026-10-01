@@ -200,12 +200,7 @@ def main():
           f"{PRINTED_BRACKET_PCT[1]:.0f} %  "
           f"{gap_pct(means[small], estimate, PRINTED_BRACKET_PCT[0]):5.2f} % and "
           f"{gap_pct(means[large], estimate, PRINTED_BRACKET_PCT[1]):5.2f} %")
-    print("  4.3.5 prints 5 and 14 %, which is the last line rounded. The exact "
-          "bracket now")
-    print("  rounds to the same pair, so the two chains no longer disagree on "
-          "the page,")
-    print("  but they still differ by half a point at the upper end and both "
-          "are printed.")
+    print("  4.3.5 prints 5 and 14 %; both chains round to that pair.")
     return 0
 
 

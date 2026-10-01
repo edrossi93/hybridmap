@@ -2,7 +2,7 @@
 
 The Methods report that the indents the phase-angle criterion rejects are spread
 across the mapped area and are no more frequent at its border than inside it.
-Nothing in the deposit computed that comparison, so this script does.
+This script makes that comparison.
 
 The border is the outer row at each end of the short axis, which is how
 `border_effect.py` defines it for the load-controlled map, and for the same

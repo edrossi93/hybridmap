@@ -1,15 +1,10 @@
 # Code and documentation are stored and checked out with LF, whatever the
-# platform. The repository grew up mixed: files written by an editor on Windows
-# came out CRLF, files written by a script came out LF, and the two were
-# interleaved across the same directories.
+# platform.
 * text=auto eol=lf
 
-# data/ is exempt, and that is the point rather than an oversight. These files
-# are cited, and two of them were deposited with CRLF. Normalising would rewrite
-# them for no gain, and leaving them to git's end-of-line machinery would let a
-# checkout on another platform hand a reader different bytes than the ones the
-# paper points at. Marked binary in this one sense: git stores and returns them
-# exactly as committed.
+# data/ is exempt: these files are cited by their hashes, and two of them use
+# CRLF line endings. git stores and returns them exactly as committed, so a
+# checkout on any platform gives the bytes the hashes record.
 data/** -text
 
 # The dictionary is the exception to the exception: it is prose we maintain and

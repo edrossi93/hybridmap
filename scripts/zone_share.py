@@ -162,8 +162,8 @@ def depth_resolved_share():
 def tile_share():
     """The basalt-zone share of the section, from the tile counts.
 
-    This is the authoritative one, and it is the one `uncertainty_budget.py`
-    uses, so the two scripts now answer with the same number.
+    This is the share Eq. (1) uses, and `uncertainty_budget.py` uses the same
+    one.
     """
     t = pd.read_csv(DATA / "bse_segmentation_tiles.csv")
     b, f = float(t.n_basaltzone.sum()), float(t.n_flaxzone.sum())

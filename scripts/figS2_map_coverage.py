@@ -1,4 +1,4 @@
-"""Schematic: where the measurements sit, and in what geometry.
+"""Supplementary Figure S2: where the measurements sit, and in what geometry.
 
 A schematic showing where both mapped windows sit within the full stack, and
 the geometry that relates the indentation to the bending test. It draws the
@@ -47,6 +47,8 @@ X_RESIN = 380.0                        # end of the embedding resin, in µm
 
 # Mosaic footprint, from the imaged area reported with the segmentation.
 MOSAIC_W_MM, MOSAIC_H_MM = 4.39, 1.601
+THREADS_PER_CM = 3.6                   # thread density of the fabric (§2.1)
+TWILL_REPEAT_THREADS = 4               # a 2/2 twill repeats every four threads
 
 
 def windows():
@@ -71,6 +73,25 @@ def windows():
              fs.PAPER["basalt"]),
             ("Load-controlled map", s_t, s_p, fs.PAPER["mixed-volume"]),
             ("Depth-resolved map", d_t, d_p, fs.PAPER["matrix"])]
+
+
+def coverage():
+    """What the three windows cover, in plies and in the fabric repeat.
+
+    Returns the ply thickness, each window's through-thickness and in-plane
+    extent with the number of plies it spans, the mosaic's bounding box, and the
+    mosaic width in yarn spacings and in 2/2 twill repeats.
+    """
+    ply = THICKNESS_MM / N_PLIES
+    out = {"ply_mm": ply, "windows": {}}
+    for name, t_ext, p_ext, _ in windows():
+        out["windows"][name] = {"through_thickness_mm": t_ext,
+                                "in_plane_mm": p_ext, "plies": t_ext / ply}
+    yarns = MOSAIC_W_MM * THREADS_PER_CM / 10.0
+    out["mosaic_bounding_box_mm2"] = MOSAIC_W_MM * MOSAIC_H_MM
+    out["mosaic_yarn_spacings"] = yarns
+    out["mosaic_twill_repeats"] = yarns / TWILL_REPEAT_THREADS
+    return out
 
 
 def build(outdir):
@@ -173,7 +194,7 @@ def build(outdir):
     fs.panel_label(ax_a, "a", dx=-0.055, dy=1.30)
     fs.panel_label(ax_b, "b", dx=-0.205, dy=1.045)
     fs.panel_label(ax_c, "c", dx=-0.230, dy=1.045)
-    fs.save(fig, "Reply_R4_map_coverage", outdir)
+    fs.save(fig, "FigS2_map_coverage", outdir)
     for name, t_ext, p_ext, _ in wins:
         print(f"  {name:34s} {t_ext:.3f} x {p_ext:.3f} mm  "
               f"= {t_ext / ply:.2f} plies through thickness")

@@ -19,17 +19,18 @@ numbers rather than as arguments. It does not check the acquisition either: the
 per-indent tables are where this deposit starts.
 
 What the count means. Every line marked as published compares a value printed
-in the manuscript, the supplement or the reply with the value recomputed here, at
-the precision it is printed. Lines marked as internal hold the deposit against
+in the paper or its supplement with the value recomputed here, at the precision
+it is printed. Lines marked as internal hold the deposit against
 itself: a stored product against the live computation of the same quantity, or
 an invariant of printed numbers. A check against a value no document carries is
 not kept, because it would report success on nothing.
 
-Two printed values cannot be recomputed from what is deposited, the two ends of
-the dark-feature area across the threshold sweep of §3.1, which is computed on
-the raw tile images. It is named at the end of the run rather than passed over, so that a
-reader does not have to find the boundary of the deposit by looking for a check
-that is not there.
+A few printed statements cannot be recomputed from what is deposited: the
+dark-feature figures of §3.1, which are measured on the raw tile images; the
+zone boundary at x = 730 µm, a setting read from a moving-median profile; and
+the loading strain rates of Table 1, which are acquisition settings. They are
+named at the end of the run, so that a reader does not have to find the
+boundary of the deposit by looking for a check that is not there.
 """
 
 import json
@@ -46,7 +47,7 @@ DATA = HERE.parent / "data"
 from classify import classify_shallow                      # noqa: E402
 from rule_of_mixtures import class_table                   # noqa: E402
 from clustering_check import run as cluster_run            # noqa: E402
-from table2_intervals import intervals as _intervals       # noqa: E402
+from class_intervals import intervals as _intervals       # noqa: E402
 import zone_share as zs                                    # noqa: E402
 import phase_angle_sensitivity as _pas                     # noqa: E402
 import border_rejection as _border                         # noqa: E402
@@ -58,7 +59,7 @@ import spacing_compliance as _spacing                      # noqa: E402
 
 # Two lists, because they answer two different questions and only the first is
 # what this deposit promises. `PUBLISHED` holds one entry per value printed in the
-# manuscript, the supplement, the reply or the letters. `INTERNAL` holds checks
+# paper or its supplement. `INTERNAL` holds checks
 # that hold the deposit against itself: a stored product against the live
 # computation of the same quantity, or an invariant of numbers that are printed.
 # An internal check earns its place by catching a stale file, but none of them is
@@ -80,11 +81,11 @@ ROUNDED = 0.051
 
 
 def report(label, got, printed, tol):
-    """A recomputation against a value printed in one of the seven documents.
+    """A recomputation against a value printed in the paper or its supplement.
 
     `printed` is a literal read off the page, at the precision the page carries.
     Nothing else belongs in this function: a comparison against a quantity the
-    documents do not carry is not a check on the paper, whatever else it is.
+    paper does not print is not a check on the paper, whatever else it is.
     """
     ok = abs(got - printed) <= tol
     PUBLISHED.append(ok)
@@ -120,6 +121,13 @@ def report_below(label, got, limit):
     PUBLISHED.append(got < limit)
     print(f"  [{'ok ' if got < limit else 'DIFF'}] {label:<52} {got:>9.2e}   "
           f"paper < {limit}")
+
+
+def report_above(label, got, limit):
+    """For a value the paper prints as a lower bound, "over N"."""
+    PUBLISHED.append(got > limit)
+    print(f"  [{'ok ' if got > limit else 'DIFF'}] {label:<52} {got:>9.3f}   "
+          f"paper over {limit}")
 
 
 def report_sci(label, got, mantissa, exponent):
@@ -274,9 +282,6 @@ for zone, above, of in (("flax-top", 19, 731), ("flax-bottom", 1, 431)):
     g = _bands[_bands.zone == zone]
     report(f"classified contacts in the {zone} band", len(g), of, 0)
     report(f"of them above 40 GPa at 150 nm", int((g.E_150 > 40).sum()), above, 0)
-_flax_bands = _bands[_bands.zone != "basalt-centre"]
-report("the two flax-rich bands above 40 GPa, about, per cent",
-       100 * float((_flax_bands.E_150 > 40).mean()), 2, 0.5)
 
 # Supplementary Table S1 has a script behind it, so every figure it prints,
 # 89.05 GPa included, has a route from the data.
@@ -300,26 +305,47 @@ for cls, depth, hmax, hardness in (("basalt", 41, 56, 6.98),
            float(g.max_depth_nm.median()), hmax, 0.51)
     report(f"median hardness, {cls}, GPa", float(g.H_GPa.median()), hardness,
            0.0051)
-for cls, short, long_ in (("flax", 84, 19), ("matrix", 82, 16),
-                          ("mixed-volume", 2, 0), ("basalt", 0, 0)):
+for cls, short, long_ in (("flax", 84, 19), ("matrix", 82, 16)):
     report(f"{cls} indents breaching the criterion, short axis, per cent",
            _spacing.breaching_pct(sh[sh.constituent == cls], cls, "short"),
            short, 0.5)
     report(f"{cls} indents breaching the criterion, long axis, per cent",
            _spacing.breaching_pct(sh[sh.constituent == cls], cls, "long"),
            long_, 0.5)
+# The two stiff classes are printed as meeting the rule: every basalt contact
+# and 98 % of mixed-volume contacts on the short axis, every one of both on the
+# long axis.
+for cls, short in (("basalt", 100), ("mixed-volume", 98)):
+    report(f"{cls} indents meeting the criterion, short axis, per cent",
+           100 - _spacing.breaching_pct(sh[sh.constituent == cls], cls, "short"),
+           short, 0.5 if short < 100 else 0)
+    report(f"{cls} indents meeting the criterion, long axis, per cent",
+           100 - _spacing.breaching_pct(sh[sh.constituent == cls], cls, "long"),
+           100, 0)
+report("short-axis pitch of the load-controlled map, um",
+       _sp["load_controlled_pitch_nm"]["short"] / 1000, 2.48, 0.005)
+report("long-axis pitch, um", _sp["load_controlled_pitch_nm"]["long"] / 1000,
+       5.10, 0.005)
+report("pitch the flax median maximum depth calls for, um",
+       _sp_rows["flax"]["median_max_depth_nm"] * 10 / 1000, 3.5, ROUNDED)
+report("pitch the matrix median maximum depth calls for, um",
+       _sp_rows["matrix"]["median_max_depth_nm"] * 10 / 1000, 3.7, ROUNDED)
 report_same("spacing product, flax short-axis share against the live count",
             _sp_rows["flax"]["breaching_short_axis_pct"],
             round(_spacing.breaching_pct(sh[sh.constituent == "flax"], "flax",
                                          "short"), 1))
-report("depth-resolved map, pitch over maximum depth",
-       _sp["depth_resolved"]["pitch_over_max_depth"], 10, 0)
+report_internal("depth-resolved map, pitch over maximum depth",
+                _sp["depth_resolved"]["pitch_over_max_depth"], 10, 0,
+                "behind 'sits exactly at the rule'")
 
 print("\nwhere the rejected indents fall (2.2)")
 _edge = _border.rejection_rates(_dr_all, "x_um")
 report("rejected on the two outer rows of the short axis",
        _edge["border"]["pct"], 15.5, ROUNDED)
 report("rejected inside them", _edge["interior"]["pct"], 15.2, ROUNDED)
+report("indents on the two outer rows of the short axis", _edge["border"]["n"],
+       200, 0)
+report("indents inside them", _edge["interior"]["n"], 1800, 0)
 for zone, published in (("basalt-centre", 11.0), ("flax-bottom", 20.2),
                         ("flax-top", 15.0)):
     g = _dr_all[_dr_all.zone == zone]
@@ -401,7 +427,7 @@ report("compliant contribution, labels interchanged", compliant_swapped,
 report("what interchanging the two labels moves",
        compliant - compliant_swapped, 0.018, 0.001)
 
-# The exclusion test in the Supplementary Figure S3 caption, which had no check.
+# The exclusion test in the Supplementary Figure S3 caption.
 # Fifty-nine contacts in the flax-rich zone read below 1 GPa; the caption argues
 # they are runaway indents rather than soft material, and reports what removing
 # them would do. The whole caption is checked here, the evidence for the argument
@@ -457,7 +483,7 @@ report("u, Poisson ratio", budget["type_b_sd_GPa"]["poisson_ratio"], 0.056,
 # Supplementary Figure S3 caption, as a rectangular term over the estimate with
 # them in and with them out. The range is held to the two estimates computed
 # live above, so the budget cannot carry a stale pair; the standard uncertainty
-# and its share are held to what Table S5 will print, 0.037 GPa and 0.1 %. The
+# and its share are held to what Table S5 prints, 0.037 GPa and 0.1 %. The
 # combined value does not move at three decimals, which the line below it
 # confirms rather than assumes.
 _run_lo, _run_hi = budget["type_b_ranges"]["runaway_contacts_in_and_out_GPa"]
@@ -490,11 +516,9 @@ report("95 % interval from the draws, low",
 report("95 % interval from the draws, high",
        budget["percentile_95_interval_GPa"][1], 21.34, 0.005)
 # The block sweep is 1000 draws per width and its values are the joint sampling
-# term alone; the Table S5 caption quoted 1.21 and 1.68 as "the combined value",
-# which they are not. The combined form is the sweep value in quadrature with the
-# Type B terms, three of them since the runaway term was added; the third moves
-# none of the three combined figures at two decimals. Both forms are checked, so
-# that the caption can print either correctly named.
+# term alone. The combined form is the sweep value in quadrature with the three
+# Type B terms. Both forms are checked, so that either can be printed correctly
+# named.
 _type_b_sq = sum(v ** 2 for v in budget["type_b_sd_GPa"].values())
 for cols, um, alone, combined in (("2", 10, 1.21, 1.23), ("4", 20, 1.38, 1.41),
                                   ("8", 41, 1.68, 1.70)):
@@ -541,8 +565,6 @@ report("basalt-rich share over those placements, SD", span["share_sd"], 0.141,
        0.0005)
 report("estimate over those placements, mean", span["voigt_mean"], 18.47, 0.005)
 report("estimate over those placements, SD", span["voigt_sd"], 2.96, 0.005)
-report("placements at or above the mapped window's share, per cent",
-       span["placements_at_or_above_mapped_share_pct"], 15, 0.5)
 report_same("the share those placements are ranked against",
             span["mapped_window_share"], w_indents)
 
@@ -643,8 +665,8 @@ report("estimate with the matrix at 1.0 GPa", with_input("matrix", 1.0), 18.07,
 # where the two acquisitions agree, and at 50 nm, the shallowest deposited
 # point, each substituted as the depth-resolved median is above. The medians
 # are held to the live computation in `depth_softening.py`, and the two rows
-# to the estimates Table S4 will print for them, 18.31 and 19.16 GPa, with
-# their gaps on the table's convention.
+# to the estimates Table S4 prints for them, 18.43 and 19.14 GPa, with their
+# gaps on the table's convention.
 print("\nthe basalt input read at 80 and at 50 nm (Supplementary Table S4)")
 import depth_softening as _soft                                     # noqa: E402
 _readings = _soft.basalt_readings()["median_GPa"]
@@ -724,11 +746,11 @@ report("Halpin-Tsai lamina, balanced 0/90 average", _ht()[2], 26.3, ROUNDED)
 
 # 4.2: each laminate normalised by its own lamination-theory prediction, and
 # the decomposition of the ratio against the prior hybrids. All six figures are
-# checked here, and `reply_figures.r2_table` calls the same lamination-theory
-# route as the line above, so there is one prediction behind them.
+# checked here, and `fig08_rom.prior_laminate_table` calls the same
+# lamination-theory route as the line above, so there is one prediction behind them.
 print("\nthe normalised comparison against the prior laminates (4.2)")
-import reply_figures as _reply                                  # noqa: E402
-_rows, _ = _reply.r2_table()
+from fig08_rom import prior_laminate_table, consolidation_decomposition  # noqa: E402
+_rows = prior_laminate_table()
 _prior = [r[4] for r in _rows if not r[5]]
 report("prior laminates, lowest share of their own prediction", min(_prior),
        0.37, 0.005)
@@ -738,7 +760,7 @@ for r in _rows:
         report(f"{r[0]}, share of its own prediction", r[4],
                {"this work, basalt-long": 0.72, "this work, flax-long": 0.75}[r[0]],
                0.005)
-_d = _reply.consolidation_decomposition(_rows)
+_d = consolidation_decomposition(_rows)
 report("stiffer than the prior hybrids by a factor of", _d["observed"], 2.07,
        0.005)
 report("of which, from the fibre volume fraction", _d["fibre_volume_fraction"],
@@ -1008,10 +1030,8 @@ report("stability over twenty 90 % subsamples, mean ARI", _stab_mean, 0.979,
 report("stability over twenty 90 % subsamples, SD", _stab_sd, 0.016, 0.0005)
 
 print("\nthree-point bending (3.4, Supplementary Table S7)")
-# Read the replicates rather than restating summary statistics. An earlier
-# version of this block hard-coded 20.1 +/- 0.8 and 18.5 +/- 0.7, the
-# single-specimen values from the first submission, and then compared the
-# resulting t, p and g against those same values. That check could not fail.
+# Read the replicates rather than restating summary statistics, so that the t,
+# p and g below are computed from the nine specimens.
 #
 # The five quantities come from flexural_comparisons.py, which defines each one
 # and is the only place any of them is defined. The two moduli of Table S7 and
@@ -1075,18 +1095,18 @@ quantities = {"chord modulus (GPa)": "chord_GPa",
 raw_p = {name: _fx.compare(a_all[col], f_all[col])["p"]
          for name, col in quantities.items()}
 families = {
-    "as reported: four comparisons":
+    "four comparisons, Table S7":
         ["chord modulus (GPa)", "peak tangent modulus (GPa)",
          "flexural strength (MPa)", "softening to 0.55 % strain (%)"],
     "stiffness as one comparison: three":
         ["chord modulus (GPa)", "flexural strength (MPa)",
          "softening to 0.55 % strain (%)"],
-    "the original family: three":
+    "strain at break in place of softening: three":
         ["chord modulus (GPa)", "flexural strength (MPa)",
          "strain at break (%)"]}
-published_holm = {"as reported: four comparisons": 0.0675,
+published_holm = {"four comparisons, Table S7": 0.0675,
                   "stiffness as one comparison: three": 0.0357,
-                  "the original family: three": 0.0357}
+                  "strain at break in place of softening: three": 0.0357}
 for label, members in families.items():
     corrected = dict(zip(members,
                          _fx.holm(np.array([raw_p[n] for n in members]))))
@@ -1105,14 +1125,14 @@ for label, members in families.items():
         report_below("Holm p on the softening, same family",
                      corrected["softening to 0.55 % strain (%)"], 0.001)
 
-# The mean modulus over the window above the tangent-modulus crossover in each
-# configuration is deliberately not checked here. It is in none of the seven
-# documents, and neither is the crossover: the paper does not report that the
-# ranking reverses above it. The window itself is deposited as
-# `E_window_0p28_0p43_GPa` and the data dictionary and `make_flexural_moduli.py`
-# both document what it is, so a reader who wants the comparison has it. It is
-# not a published value and is not reported as one; a matching number found by
-# searching the documents, for an unrelated quantity, would not make it one.
+# The crossover strain is printed and checked further down. Above it the
+# basalt-longitudinal configuration is the stiffer, which the mean modulus over
+# the window above the crossover shows; the window means themselves are not
+# printed, so the ranking is held as an internal check.
+_win_means = (pd.read_csv(DATA / "flexural_moduli.csv")
+              .groupby("configuration")["E_window_0p28_0p43_GPa"].mean())
+report_same("above the crossover the basalt-longitudinal one is the stiffer",
+            bool(_win_means["basalt_face"] > _win_means["flax_face"]), True)
 
 print("\nASTM D790 departures and the bound that follows (2.5)")
 # All four follow from the specimen geometry and the standard, and all four are
@@ -1226,7 +1246,7 @@ report("Mann-Whitney p between the two", _n8["mann_whitney_two_sided_p"], 0.95,
 _h = _soften["H300_over_H80"]
 report("H(300)/H(80), median", _h["median"], 0.71, 0.0051)
 report("contacts whose hardness is lower at 300 nm", _h["lower_at_300"], 71, 0)
-# Held to the values the documents will print, as the ARI* lines above are.
+# Held to the printed values, as the ARI* lines above are.
 _s2p = _soften["S2_over_P"]
 report("S^2/P, median at 50 nm, GPa", _s2p["median_GPa_at_50_nm"], 2372, 0.51)
 report("S^2/P, median at 300 nm, GPa", _s2p["median_GPa_at_300_nm"], 747, 0.51)
@@ -1268,20 +1288,15 @@ _share = _soften["cut_free_shares"]
 report_internal("share above 70 GPa at 80 nm, basalt-centre, per cent",
                 _share["depth_resolved_above_70_GPa_at_80_nm"]["pct"], 16, 0.5,
                 "not printed")
-report_internal("basalt class of the load-controlled basalt-rich zone, per cent",
-                _share["load_controlled_basalt_class"]["pct"], 12, 0.5,
-                "not printed")
+report("basalt class of the load-controlled basalt-rich zone, per cent",
+       _share["load_controlled_basalt_class"]["pct"], 12, 0.5)
 report_same("that share's numerator, against the count above",
             _share["load_controlled_basalt_class"]["n"],
             int(cross.loc["basalt", "basalt"]))
 
-# Printed, and not reproducible from what is deposited. Named here rather than
-# left out, because the absence of a check is invisible and this deposit's whole
-# claim is that a reader does not have to take anything on trust. Each line says
-# what is missing and where the missing thing is.
 # Contact size in the two acquisitions (3.3, 4.1, 4.4), from
 # `contact_geometry.py`: contact depths and equivalent radii by class, the
-# basalt-centre band re-read at a displacement where its stiff contacts have
+# basalt-centre band re-read at a depth where its stiff contacts have
 # the contact depth of the load-controlled ones, and the selected stiff
 # contacts read at the load-controlled contact depth on basalt.
 print("\ncontact size in the two acquisitions (3.3, 4.1, 4.4)")
@@ -1291,7 +1306,7 @@ for cls, a in (("basalt", 0.12), ("mixed-volume", 0.22), ("flax", 0.86),
                ("matrix", 0.91)):
     report(f"equivalent contact radius, load-controlled, {cls}, um",
            _lc[cls]["a_um"], a, 0.0051)
-_d150 = _cg["depth_resolved_by_displacement"]["150"]
+_d150 = _cg["depth_resolved_by_depth"]["150"]
 for cls, hc, a in (("basalt", 121, 0.34), ("mixed-volume", 126, 0.35),
                    ("flax", 129, 0.36), ("matrix", 130, 0.36)):
     report(f"contact depth at z = 150 nm, {cls}, nm", _d150[cls]["h_c_nm"], hc,
@@ -1377,12 +1392,186 @@ report("phase angle of the selected contacts at 50 to 80 nm, median, deg",
 report("of them, readings above the 15 degree limit at 50 to 80 nm",
        _m["phase_angle_above_15_deg_50_to_80"], 0, 0)
 
-print("\nprinted values this deposit cannot reproduce: two of them")
+# ---------------------------------------------------------------------------
+# Geometry, coverage and the remaining printed figures.
+# ---------------------------------------------------------------------------
+print("\nwhat the windows cover (2.6, 3.1, 4.5, Supplementary Figure S2)")
+import figS2_map_coverage as _cov                                 # noqa: E402
+_c = _cov.coverage()
+_win = _c["windows"]
+report("plies the backscattered-electron mosaic spans",
+       _win["Backscattered-electron mosaic"]["plies"], 5.6, ROUNDED)
+report("mosaic, through the thickness, mm",
+       _win["Backscattered-electron mosaic"]["through_thickness_mm"], 1.60, 0.005)
+report("plies the retained load-controlled indents span",
+       _win["Load-controlled map"]["plies"], 2.4, ROUNDED)
+report("load-controlled window, through the thickness, mm",
+       _win["Load-controlled map"]["through_thickness_mm"], 0.70, 0.005)
+report("mosaic bounding box, mm2", _c["mosaic_bounding_box_mm2"], 7.03, 0.005)
+_lc = _win["Load-controlled map"]
+report_above("mosaic area over the load-controlled footprint",
+             seg["area_mm2"] / (_lc["through_thickness_mm"] * _lc["in_plane_mm"]),
+             60)
+report("mosaic width in yarn spacings", _c["mosaic_yarn_spacings"], 1.58, 0.005)
+report("mosaic width in 2/2 twill repeats", _c["mosaic_twill_repeats"], 0.4,
+       ROUNDED)
+
+_val = json.loads((DATA / "bse_validation_metrics.json").read_text())
+report("painted fields, basalt-rich zone", _val["basalt zone"]["n_fields"], 16, 0)
+report("painted fields, flax-rich zone", _val["flax zone"]["n_fields"], 21, 0)
+report("painted fields in all",
+       _val["basalt zone"]["n_fields"] + _val["flax zone"]["n_fields"], 37, 0)
+
+print("\nthe resin edge and the depth-resolved bands (2.2, 2.3)")
+from classify import resin_profile as _resin, X_RESIN as _x_resin    # noqa: E402
+_prof = _resin(raw)
+report("median modulus of the resin rows, x below 300 um, GPa",
+       float(_prof[_prof.index < 300].median()), 5.5, 0.15)
+_rise = float(_prof[(_prof.index >= 300) & (_prof > 15)].index.min())
+report_internal("first row above 15 GPa past the resin, um", _rise, 315, 15,
+                "inside the printed 300 to 330 um")
+report("resin cut, um", _x_resin, 380, 0)
+for zone, lo, hi in (("flax-bottom", 0, 78), ("basalt-centre", 81, 168),
+                     ("flax-top", 171, 297)):
+    g = _dr_all[_dr_all.zone == zone]
+    report(f"{zone} band, lowest y, um", float(g.y_um.min()), lo, 0.5)
+    report(f"{zone} band, highest y, um", float(g.y_um.max()), hi, 0.5)
+
+print("\nfurther values of 3.3, 4.3 and the supplement")
+report("modulus range of the class medians, stiffest over most compliant",
+       float(tab.E_median_GPa.max() / tab.E_median_GPa.min()), 18.5, ROUNDED)
+report("flax-rich zone, stiffest indent, GPa",
+       float(sh.loc[sh.zone == "flax", "E_GPa"].max()), 135, 0.5)
+for cls, pct in (("matrix", 32), ("mixed-volume", 55)):
+    report(f"{cls}, per cent of the load-controlled basalt-rich zone",
+           100 * int(cross.loc["basalt", cls]) / int((lab.zone == "basalt").sum()),
+           pct, 0.5)
+_lc_classified = int(sum(counts.get(c, 0) for c in zs.CLASSES))
+_dr_classified = _dr_all[_dr_all.constituent != "QC/invalid"]
+report("depth-resolved indents classified", len(_dr_classified), 1696, 0)
+for cls, lc_pct, dr_pct in (("flax", 41.4, 65.9), ("matrix", 16.1, 6.8),
+                            ("mixed-volume", 35.6, 13.0),
+                            ("basalt", 6.8, 14.3)):
+    report(f"Table 3, {cls}, per cent of the classified load-controlled indents",
+           100 * int(counts.get(cls, 0)) / _lc_classified, lc_pct, ROUNDED)
+    report(f"Table 3, {cls}, per cent of the classified depth-resolved indents",
+           100 * float((_dr_classified.constituent == cls).mean()), dr_pct,
+           ROUNDED)
+report("flax and matrix medians of the load-controlled map differ by, GPa",
+       float(medians["flax"] - medians["matrix"]), 0.04, 0.005)
+report("their strain-rate sensitivities differ by, per cent (about a fifth)",
+       100 * (_srs["flax"] / _srs["matrix"] - 1), 20, 5)
+_bias = float(zs.at_share(per_zone, {**medians,
+                                     "flax": 1.1 * medians["flax"],
+                                     "matrix": 1.1 * medians["matrix"]},
+                          w_tiles)[1][0])
+report("a 10 % bias on both compliant medians moves the estimate by, GPa",
+       _bias - voigt, 0.30, 0.005)
+report_sci("largest p over k = 3 to 20, at the supplement's precision",
+           _spatial["p_max_over_k_3_to_20"], 9.4, -13)
+_ids = _soften["selection"]["indent_ids"]
+_cv = pd.read_csv(DATA / "depth_resolved_curves.csv")
+_first = (_cv[_cv.indent_id.isin(_ids)].dropna(subset=["E_GPa"])
+          .groupby("indent_id").depth_nm.min())
+report("selected traces starting at 55 nm", int((_first == 55.0).sum()), 1, 0)
+
+print("\nthe Poisson ratio (3.1, Supplementary Table S1)")
+_pois = json.loads((DATA / "poisson_sensitivity.json").read_text())
+_shift = {r["class"]: r["shift_pct"] for r in _pois["per_class"]}
+for cls, printed in (("flax", 0.00), ("matrix", -9.49),
+                     ("mixed-volume", -2.81), ("basalt", 3.56)):
+    report(f"shift of the {cls} median, per cent", _shift[cls], printed, 0.0051)
+report("largest shift of a class median, per cent",
+       max(abs(v) for v in _shift.values()), 9.5, ROUNDED)
+report("change of the laminate estimate, per cent",
+       abs(_pois["laminate_estimate_GPa"]["shift_pct"]), 1.0, ROUNDED)
+_vrh = _pois["mixed_volume_nu"]["averages_by_basalt_fraction"]
+for frac in ("0.54", "0.67"):
+    report(f"Hill average of the two ratios at basalt fraction {frac}",
+           _vrh[frac]["hill"], 0.30, 0.015)
+report("basalt-longitudinal measurement above the phase-specific estimate, %",
+       _flex.gap_pct(_means["basalt_face"],
+                     _pois["laminate_estimate_GPa"]["phase_specific"]), 3.0,
+       ROUNDED)
+
+print("\nthe threshold grid, deviation columns (3.4, Supplementary Table S2)")
+published_S2_delta = {
+    (10, 60): (0.34, 1.84), (10, 65): (0.29, 1.59), (10, 70): (0.25, 1.33),
+    (10, 75): (0.22, 1.18), (10, 80): (0.09, 0.50), (15, 60): (0.03, 0.17),
+    (15, 65): (-0.08, -0.42), (15, 70): (0.00, 0.00), (15, 75): (-0.02, -0.12),
+    (15, 80): (-0.09, -0.50), (20, 60): (-0.26, -1.41), (20, 65): (-0.26, -1.39),
+    (20, 70): (-0.29, -1.58), (20, 75): (-0.38, -2.06), (20, 80): (-0.50, -2.70)}
+for (lower, upper), (d_gpa, d_pct) in published_S2_delta.items():
+    row = grid[(grid.lower_GPa == lower) & (grid.upper_GPa == upper)]
+    delta = float(row.estimate_GPa.iloc[0]) - reference
+    report(f"deviation at lo = {lower}, hi = {upper}, GPa", delta, d_gpa, 0.0051)
+    report(f"deviation at lo = {lower}, hi = {upper}, per cent",
+           100 * delta / reference, d_pct, 0.0051)
+report("largest deviation, per cent of the reference",
+       100 * float((grid.estimate_GPa - reference).abs().max()) / reference, 2.7,
+       ROUNDED)
+_up = grid[grid.lower_GPa == 15]
+report("upper threshold over 60 to 80 GPa, largest change, GPa",
+       float((_up.estimate_GPa - reference).abs().max()), 0.09, 0.005)
+_lo = grid[grid.upper_GPa == 70]
+report("lower threshold over 10 to 20 GPa, largest change, GPa",
+       float((_lo.estimate_GPa - reference).abs().max()), 0.29, 0.005)
+
+print("\nthe flexural comparisons, remaining cells (2.5, Supplementary Table S7)")
+report_below("raw p, flexural strength", raw_p["flexural strength (MPa)"], 0.0001)
+report_below("raw p, softening", raw_p["softening to 0.55 % strain (%)"], 0.001)
+_sab = dict(zip(families["strain at break in place of softening: three"],
+                _fx.holm(np.array([raw_p[n] for n in
+                         families["strain at break in place of softening: three"]]))))
+report_below("Holm p on the strain at break, its family",
+             _sab["strain at break (%)"], 0.0001)
+from scipy.stats import mannwhitneyu as _mwu                    # noqa: E402
+report("smallest two-sided rank-test p at five and four specimens",
+       _mwu([1, 2, 3, 4, 5], [6, 7, 8, 9], alternative="two-sided",
+            method="exact").pvalue, 0.0159, 0.00005)
+
+print("\nthe Timoshenko correction against the interval (4.2, 4.3.5)")
+_u = 1.44
+_need = {cfg: 100 * ((voigt + _u) / e - 1) for cfg, e in _means.items()}
+report_internal("correction that takes basalt-longitudinal outside, per cent",
+                _need["basalt_face"], 5.8, 0.05,
+                "behind 'only towards 7 %'; not printed")
+report_same("flax-longitudinal is outside already at the low end of 3 to 7 %",
+            bool(_means["flax_face"] * 1.03 > voigt + _u), True)
+
+print("\nk-means internal validity (3.3, Supplementary Figure S4)")
+_diag = json.loads((DATA / "clustering_diagnostics.json").read_text())
+_ks, _sil, _bic = _diag["k"], _diag["silhouette"], _diag["bic"]
+report("silhouette largest at k", _diag["silhouette_max_at_k"], 2, 0)
+report_same("silhouette at k = 4 and 5 within 0.005 of each other",
+            bool(abs(_sil[_ks.index(4)] - _sil[_ks.index(5)]) < 0.005), True)
+report_same("the k = 4-5 plateau stands above k = 3 and k = 6",
+            bool(min(_sil[_ks.index(4)], _sil[_ks.index(5)])
+                 > max(_sil[_ks.index(3)], _sil[_ks.index(6)])), True)
+report("mixture BIC smallest at k", _diag["bic_min_at_k"], 7, 0)
+report_same("BIC turns up at k = 8", bool(_bic[_ks.index(8)] > _bic[_ks.index(7)]),
+            True)
+report_same("indents in the diagnostics, against the classified count",
+            _diag["n_indents"], len(_dr_classified))
+
+# Printed, and not reproducible from what is deposited. Named rather than left
+# out, because the absence of a check is invisible. Each line says what is
+# missing and where the missing thing is.
+print("\nprinted statements this deposit cannot reproduce")
 for where, what, why in [
-    ("3.1", "dark-feature area from 12.9 % to 2.7 % across the threshold range",
-     "computed on the backscattered-electron pixels, which are several gigabytes "
-     "of tile images and are not deposited; the deposit carries the segmentation "
-     "at the threshold used, not the sweep"),
+    ("3.1", "dark-feature area from 12.9 % to 2.7 % across the threshold range; "
+     "about 2-3 % at the strict threshold, mostly debonds 1-2 um wide, "
+     "macroporosity above 5 um rare",
+     "measured on the backscattered-electron pixels, which are several "
+     "gigabytes of tile images and are not deposited; the deposit carries the "
+     "segmentation at the threshold used, not the sweep"),
+    ("2.3", "zone boundary at x = 730 um",
+     "a setting, read from a moving-median profile of the modulus along the long "
+     "axis; it is carried as X_ZONE_SPLIT in classify.py and resin_profile() "
+     "returns the profile"),
+    ("Table 1", "loading strain rates of about 3 and 0.05 per second, and "
+     "'about sixty times faster' in 4.4, which is their ratio",
+     "acquisition settings of the two methods, not results"),
     ]:
     print(f"  [--  ] {where}: {what}")
     print(f"         {why}")
@@ -1396,5 +1585,5 @@ print("an invariant of numbers that are printed, and none of them is a published
       "value.")
 print(f"{sum(PUBLISHED)} of {len(PUBLISHED)} values reproduce")
 if not (all(PUBLISHED) and all(INTERNAL)):
-    print("Values marked DIFF need looking at before the deposit is released.")
+    print("Values marked DIFF disagree with the paper.")
     sys.exit(1)

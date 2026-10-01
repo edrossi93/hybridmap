@@ -14,8 +14,7 @@ import matplotlib.pyplot as plt
 # Column widths used by Composites Part A, in inches.
 SINGLE, ONE_HALF, DOUBLE = 3.50, 5.35, 7.20
 
-# The palette of the submitted figures, kept so that the regenerated figures sit
-# beside the untouched ones without a visible change of language.
+# The palette shared by every figure of the paper and the supplement.
 PAPER = {
     "flax":         "#E8B33C",   # gold
     "matrix":       "#E0701B",   # orange
@@ -52,9 +51,8 @@ CONFIG = {
     "flax_face":   PAPER["flax"],
 }
 
-# Canonical axis labels. The nomenclature is the one set by the untouched
-# Figures 3 and 4 of the submission, "Quantity, symbol (unit)", and every
-# regenerated figure draws from here so the wording cannot drift apart again.
+# Canonical axis labels, "Quantity, symbol (unit)", as in Figures 3 and 4.
+# Every figure script draws from here so the wording stays the same.
 # The measurement depth is deliberately absent: it belongs in the caption, not
 # repeated on four axes.
 AXIS = {
@@ -406,9 +404,9 @@ def layout_report(fig, tolerance_px=1.5, min_overlap_frac=0.12):
 def save(fig, stem, outdir="."):
     """Write a figure as PDF and PNG under one stem.
 
-    The paper figures each call savefig twice with the same 400 dpi and the
-    same pair of extensions. This helper does exactly what the paper scripts do
-    inline, for the scripts that call it, `reply_figures.py` among them.
+    The figure scripts each call savefig twice with the same 400 dpi and the
+    same pair of extensions; this helper does the same for the scripts that
+    call it.
     """
     out = Path(outdir)
     out.mkdir(parents=True, exist_ok=True)

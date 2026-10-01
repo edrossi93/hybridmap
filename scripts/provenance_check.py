@@ -1,4 +1,4 @@
-"""Every deposited file is either a measurement or a product of one. Nothing else.
+"""Every deposited file is a measurement, a product of one, or documentation.
 
 It guards against a specific failure. A file written once by code that is not
 kept, and then read by everything downstream, cannot be regenerated, so defects
@@ -13,8 +13,11 @@ exactly one of:
              deposit, and it says where it came from.
   DERIVED    a product. It names the script that writes it, and re-running that
              script has to leave the file byte-identical.
+  DOCUMENTATION
+             the data dictionary and the licence. Held to their hashes like a
+             measurement, and counted apart from the measurements.
 
-A file that is in neither list fails the gate, so a new file cannot be added
+A file that is in none of the three lists fails the gate, so a new file cannot be added
 quietly. A derived file that changes when its own script is re-run fails too,
 which catches a stale product before a reader does.
 
@@ -75,8 +78,11 @@ PRIMARY = {
         "operator labels: confusion matrix, precision and recall per class. "
         "Computed outside the deposit because it needs the tile images, which "
         "are several gigabytes and stay with the corresponding author",
-    "DATA_DICTIONARY.md": "documentation",
-    "LICENSE": "licence",
+}
+
+DOCUMENTATION = {
+    "DATA_DICTIONARY.md": "the meaning, unit and range of every column and key",
+    "LICENSE": "the licence of the data",
 }
 
 DERIVED = {
@@ -94,7 +100,14 @@ DERIVED = {
     "basalt_input_sweep.json": "basalt_input_sweep.py",
     "depth_softening.json": "depth_softening.py",
     "contact_geometry.json": "contact_geometry.py",
+    "clustering_diagnostics.json": "figs_supplementary.py",
 }
+
+# The three kinds, in manifest order.
+KINDS = (("derived", DERIVED), ("primary", PRIMARY),
+         ("documentation", DOCUMENTATION))
+NOUN = {"derived": "product", "primary": "measurement",
+        "documentation": "document"}
 
 
 MANIFEST = DATA / "PROVENANCE.json"
@@ -118,10 +131,9 @@ def digest(path):
 def held():
     """The hashes the manifest carries at this moment, empty if there is none."""
     if not MANIFEST.exists():
-        return {"derived": {}, "primary": {}}
+        return {kind: {} for kind, _ in KINDS}
     manifest = json.loads(MANIFEST.read_text())
-    return {kind: dict(manifest.get(kind, {})) for kind in
-            ("derived", "primary")}
+    return {kind: dict(manifest.get(kind, {})) for kind, _ in KINDS}
 
 
 def write_manifest(hashes):
@@ -131,10 +143,8 @@ def write_manifest(hashes):
     published file has and a reordering would read as a change to every file in
     it for anyone diffing this deposit against the copy they already have.
     """
-    manifest = {"derived": {n: hashes["derived"][n] for n in DERIVED
-                            if n in hashes["derived"]},
-                "primary": {n: hashes["primary"][n] for n in PRIMARY
-                            if n in hashes["primary"]}}
+    manifest = {kind: {n: hashes[kind][n] for n in names if n in hashes[kind]}
+                for kind, names in KINDS}
     MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", newline="\n")
     return manifest
 
@@ -162,10 +172,11 @@ def record(accept):
         return 1
 
     hashes = {kind: {n: digest(DATA / n) for n in names if (DATA / n).exists()}
-              for kind, names in (("derived", DERIVED), ("primary", PRIMARY))}
+              for kind, names in KINDS}
     manifest = write_manifest(hashes)
-    print(f"  recorded {len(manifest['derived'])} products and "
-          f"{len(manifest['primary'])} measurements")
+    print(f"  recorded {len(manifest['derived'])} products, "
+          f"{len(manifest['primary'])} measurements and "
+          f"{len(manifest['documentation'])} documents")
     print(f"  no script was run: every hash above is unproved and recorded "
           f"because {ACCEPT} was given")
     return 0
@@ -179,8 +190,8 @@ def rebuild(accept):
     changes; the fast check then holds the result to account.
 
     The before-and-after comparison here is the only place the deposit's central
-    promise is tested. See the module docstring for the shape of the defect this
-    replaces.
+    promise is tested. See the module docstring for the failure it guards
+    against.
 
     One rule governs what reaches the manifest. A hash is written without the
     acceptance flag only when the script reproduced the file byte for byte and
@@ -196,7 +207,7 @@ def rebuild(accept):
     just as red as the first, because the drifted bytes on disk are still not
     the bytes the record names.
     """
-    hashes = {"derived": {}, "primary": {}}
+    hashes = {kind: {} for kind, _ in KINDS}
     problems = {}
     unproved = {}
     # Read before anything is written. With no manifest at all there is no
@@ -266,33 +277,36 @@ def rebuild(accept):
     # and the only thing to hold it to is the hash the manifest already carries.
     # Rewriting that hash unasked would launder a changed measurement, and a
     # measurement is the one kind of file in here that nothing can reconstruct.
-    for name in PRIMARY:
-        path = DATA / name
-        if not path.exists():
-            continue
-        now = digest(path)
-        recorded = was["primary"].get(name)
-        if bootstrap or recorded == now:
-            hashes["primary"][name] = now
-        elif recorded is None:
-            keep("primary", name,
-                 f"{name} is a measurement and the manifest has never held a "
-                 f"hash for it, so there is nothing to check its bytes against",
-                 f"UNHELD  {name}: no recorded hash to check it against")
-        else:
-            keep("primary", name,
-                 f"{name} is a measurement and its bytes no longer match the "
-                 f"manifest: {recorded[:12]} is now {now[:12]}",
-                 f"CHANGED {name}: {recorded[:12]} is now {now[:12]}")
+    for kind, names in KINDS[1:]:
+        for name in names:
+            path = DATA / name
+            if not path.exists():
+                continue
+            now = digest(path)
+            recorded = was[kind].get(name)
+            if bootstrap or recorded == now:
+                hashes[kind][name] = now
+            elif recorded is None:
+                keep(kind, name,
+                     f"{name} is a {NOUN[kind]} and the manifest has never held "
+                     f"a hash for it, so there is nothing to check its bytes "
+                     f"against",
+                     f"UNHELD  {name}: no recorded hash to check it against")
+            else:
+                keep(kind, name,
+                     f"{name} is a {NOUN[kind]} and its bytes do not match the "
+                     f"manifest: {recorded[:12]} is now {now[:12]}",
+                     f"CHANGED {name}: {recorded[:12]} is now {now[:12]}")
 
     if accept:
         for name in unproved:
-            kind = "derived" if name in DERIVED else "primary"
+            kind = next(k for k, names in KINDS if name in names)
             hashes[kind][name] = digest(DATA / name)
 
     manifest = write_manifest(hashes)
-    print(f"\n  manifest written for {len(manifest['derived'])} products and "
-          f"{len(manifest['primary'])} measurements")
+    print(f"\n  manifest written for {len(manifest['derived'])} products, "
+          f"{len(manifest['primary'])} measurements and "
+          f"{len(manifest['documentation'])} documents")
     landed = (f"recorded because {ACCEPT} was given" if accept
               else "not recorded")
     for name in sorted(unproved):
@@ -327,11 +341,11 @@ def main():
 
     problems = []
     present = {p.name for p in DATA.iterdir() if p.is_file()}
-    declared = set(PRIMARY) | set(DERIVED) | {MANIFEST.name}
+    declared = set(PRIMARY) | set(DERIVED) | set(DOCUMENTATION) | {MANIFEST.name}
 
     for name in sorted(present - declared):
         problems.append(f"{name} is in data/ and is declared neither a "
-                        f"measurement nor a product")
+                        f"measurement, a product nor documentation")
     for name in sorted(declared - present - {MANIFEST.name}):
         problems.append(f"{name} is declared but is not in data/")
 
@@ -346,8 +360,8 @@ def main():
     # needs reporting, was not checked at all: it was silently not in the loop.
     # A file declared, present, and unrecorded is therefore a failure here.
     manifest = held()
-    for kind, declarations in (("derived", DERIVED), ("primary", PRIMARY)):
-        noun = "product" if kind == "derived" else "measurement"
+    for kind, declarations in KINDS:
+        noun = NOUN[kind]
         for name in sorted(declarations):
             path = DATA / name
             if not path.exists():
@@ -359,25 +373,25 @@ def main():
                                 f"being published unchecked. Run --rebuild")
             elif digest(path) != recorded:
                 who = (f"{DERIVED[name]} is the only thing that may write it"
-                       if kind == "derived" else "it is a measurement record")
+                       if kind == "derived" else f"it is a {noun}")
                 problems.append(f"{name} has changed since it was recorded; "
                                 f"{who}")
 
     # A hash for something no longer declared, or recorded under the wrong kind.
-    for kind, declarations in (("derived", DERIVED), ("primary", PRIMARY)):
-        noun = "product" if kind == "derived" else "measurement"
+    for kind, declarations in KINDS:
         for name in sorted(set(manifest[kind]) - set(declarations)):
-            problems.append(f"the manifest records {name} as a {noun}, which is "
-                            f"no longer declared as one")
+            problems.append(f"the manifest records {name} as a {NOUN[kind]}, "
+                            f"which is not declared as one")
 
-    n = len(manifest["derived"]) + len(manifest["primary"])
-    print(f"  {n} files, {len(manifest['primary'])} measurements and "
-          f"{len(manifest['derived'])} products")
+    n = sum(len(manifest[kind]) for kind, _ in KINDS)
+    print(f"  {n} files: {len(manifest['primary'])} measurements, "
+          f"{len(manifest['derived'])} products and "
+          f"{len(manifest['documentation'])} documents")
     if problems:
         print("\n".join("  " + p for p in problems))
         return 1
-    print("  every file in data/ is a declared measurement or a recorded "
-          "product, unchanged since it was built")
+    print("  every file in data/ is declared and unchanged since it was "
+          "recorded")
     return 0
 
 
