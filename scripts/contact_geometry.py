@@ -143,7 +143,7 @@ def main():
         "E_GPa": float(per_z.loc[zm, "E"]), "load_mN": float(per_z.loc[zm, "P"]),
         "n_with_reading": int(per_z.loc[zm, "n"]),
         "a_um_at_300": RADIUS_FACTOR * float(per_z.loc[300.0, "h_c"]) / 1e3,
-        # the shallow readings pass the same quality rule as the slices
+        # the shallow readings satisfy the same quality criterion as the slices
         "phase_angle_median_deg_50_to_80": float(
             s[s.depth_nm.between(50, 80)].phase_angle_deg.median()),
         "phase_angle_above_15_deg_50_to_80": int(
