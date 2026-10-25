@@ -456,7 +456,7 @@ The second dataset is generated, not measured. `make_synthetic_map.py` draws thr
 
 If you use this, please cite the paper and this deposit.
 
-Deposit DOI: **10.5281/zenodo.22283997**. The DOI is reserved: it is permanent, and it resolves once the record is published on acceptance of the paper.
+Deposit DOI: **10.5281/zenodo.22283997** (https://doi.org/10.5281/zenodo.22283997). The Zenodo record holds release v1.0.0 of this repository, https://github.com/edrossi93/hybridmap. GitHub's "Cite this repository" button reads `CITATION.cff`.
 
 ---
 
